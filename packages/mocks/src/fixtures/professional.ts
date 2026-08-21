@@ -1,6 +1,7 @@
 import type {
   Connection,
   ContextReport,
+  EmotionalValence,
   Invitation,
   Passkey,
   ProfessionalProfile,
@@ -85,6 +86,101 @@ export const patients: Connection[] = [
  * mostrar. Os números de `active_day_count` variam de propósito: períodos com
  * cobertura regular, um período limitado e um vínculo com pouco histórico.
  */
+const WEEKLY_EMOTIONAL_CONTEXT: Record<
+  number,
+  Array<{
+    title: string;
+    description: string;
+    valence: EmotionalValence;
+    daysFromEnd: number;
+  }>
+> = {
+  6: [
+    {
+      title: "Insegurança com a mudança",
+      description: "Nomeou insegurança ao falar sobre a troca de liderança.",
+      valence: "unpleasant",
+      daysFromEnd: 6,
+    },
+    {
+      title: "Cansaço no fim da semana",
+      description: "Relatou cansaço depois de reorganizar tarefas.",
+      valence: "unpleasant",
+      daysFromEnd: 2,
+    },
+  ],
+  5: [
+    {
+      title: "Dúvida antes da conversa",
+      description: "Descreveu sentimentos mistos antes de conversar com o novo gestor.",
+      valence: "mixed",
+      daysFromEnd: 5,
+    },
+    {
+      title: "Alívio depois do alinhamento",
+      description: "Nomeou alívio após combinar prioridades para a semana.",
+      valence: "pleasant",
+      daysFromEnd: 1,
+    },
+  ],
+  4: [
+    {
+      title: "Semana mais previsível",
+      description: "Descreveu os dias como tranquilos, sem destacar incômodo ou entusiasmo.",
+      valence: "neutral",
+      daysFromEnd: 5,
+    },
+    {
+      title: "Tranquilidade mantida",
+      description: "Voltou a nomear tranquilidade ao encerrar a semana.",
+      valence: "neutral",
+      daysFromEnd: 1,
+    },
+  ],
+  3: [
+    {
+      title: "Irritação com retrabalho",
+      description: "Relatou irritação diante de uma tarefa refeita.",
+      valence: "unpleasant",
+      daysFromEnd: 4,
+    },
+  ],
+  2: [
+    {
+      title: "Entusiasmo com a proposta",
+      description: "Nomeou entusiasmo ao começar uma nova proposta.",
+      valence: "pleasant",
+      daysFromEnd: 6,
+    },
+    {
+      title: "Expectativa e receio",
+      description: "Descreveu expectativa junto de receio antes da apresentação.",
+      valence: "mixed",
+      daysFromEnd: 3,
+    },
+    {
+      title: "Tensão durante a espera",
+      description: "Relatou tensão enquanto aguardava uma resposta.",
+      valence: "unpleasant",
+      daysFromEnd: 1,
+    },
+  ],
+  1: [
+    {
+      title: "Apreensão antes da reunião",
+      description: "Nomeou apreensão ao antecipar a reunião de quarta-feira.",
+      valence: "unpleasant",
+      daysFromEnd: 6,
+    },
+    {
+      title: "Confiança após preparar a fala",
+      description: "Relatou confiança depois de organizar o que gostaria de dizer.",
+      valence: "pleasant",
+      daysFromEnd: 3,
+    },
+  ],
+};
+
 function weeklyReport(
   connectionId: string,
   weeksAgo: number,
@@ -112,13 +208,28 @@ function weeklyReport(
       id: `${connectionId}-w${weeksAgo}-timeline-${index}`,
       occurred_at: ago(weeksAgo * 7 + Math.max(1, 6 - index)),
     })),
-    items: base.items.map((item, index) => ({
-      ...item,
-      id: `${connectionId}-w${weeksAgo}-item-${index}`,
-      occurred_at: item.occurred_at
-        ? ago(weeksAgo * 7 + Math.max(1, 6 - index))
-        : undefined,
-    })),
+    items: [
+      ...base.items
+        .filter((item) => item.kind !== "emotion")
+        .map((item, index) => ({
+          ...item,
+          id: `${connectionId}-w${weeksAgo}-item-${index}`,
+          occurred_at: item.occurred_at
+            ? ago(weeksAgo * 7 + Math.max(1, 6 - index))
+            : undefined,
+        })),
+      ...(WEEKLY_EMOTIONAL_CONTEXT[weeksAgo] ?? []).map((emotion, index) => ({
+        id: `${connectionId}-w${weeksAgo}-emotion-${index}`,
+        kind: "emotion" as const,
+        title: emotion.title,
+        description: emotion.description,
+        evidence_strength: "explicit_once" as const,
+        emotional_valence: emotion.valence,
+        occurred_at: ago(weeksAgo * 7 + emotion.daysFromEnd),
+        limitations: [],
+        included: true,
+      })),
+    ],
     created_at: ago(weeksAgo * 7),
   };
 }
@@ -127,7 +238,7 @@ function weeklyReport(
 export const patientContexts: Record<string, ContextReport[]> = {
   // Conversa regular, com uma semana de silêncio no meio.
   "conn-rui": [
-    ...[6, 4, 5, 1, 6, 5, 4].map((days, index) =>
+    ...[6, 4, 5, 1, 6, 5].map((days, index) =>
       weeklyReport("conn-rui", 6 - index, days),
     ),
     ...contextReports,

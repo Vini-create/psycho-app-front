@@ -185,6 +185,28 @@ export const contextReportRequests: ContextReportRequest[] = [
     requested_at: ago(0, 8),
     sent_at: null,
   },
+  {
+    id: "request-rui-processing",
+    connection_id: "conn-rui",
+    professional_display_name: "Rui Andrade",
+    patient_display_name: "Helena Marques",
+    period_start: ago(30),
+    period_end: ago(23),
+    status: "processing",
+    requested_at: ago(22, 6),
+    sent_at: null,
+  },
+  {
+    id: "request-rui-sent",
+    connection_id: "conn-rui",
+    professional_display_name: "Rui Andrade",
+    patient_display_name: "Helena Marques",
+    period_start: ago(45),
+    period_end: ago(38),
+    status: "sent",
+    requested_at: ago(37, 8),
+    sent_at: ago(37, 2),
+  },
 ];
 
 /** Fixtures de relatórios usadas exclusivamente pelo workspace profissional. */
