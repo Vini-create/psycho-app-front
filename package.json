@@ -1,0 +1,25 @@
+{
+  "name": "sinapsa-front",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:design": "pnpm --parallel --filter \"./apps/*\" dev:design",
+    "dev:patient": "pnpm --filter @sinapsa/patient dev",
+    "dev:professional": "pnpm --filter @sinapsa/professional dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "contrast": "node scripts/check-contrast.mjs",
+    "design:patient": "pnpm --filter @sinapsa/patient dev:design",
+    "design:professional": "pnpm --filter @sinapsa/professional dev:design"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

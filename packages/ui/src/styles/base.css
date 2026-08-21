@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Sinapsa — camada base
+   Aplica as regras globais de design.md que não pertencem a um componente.
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-editorial);
+    font-size: var(--text-body-md);
+    line-height: 1.55;
+    /* Nenhuma tela pode quebrar em 320 CSS px. */
+    min-width: 320px;
+  }
+
+  /* Scrollbars discretas: o trilho desaparece e o thumb preserva área de
+     clique sem parecer uma barra pesada. Firefox usa as propriedades padrão;
+     Chromium e Safari recebem o acabamento WebKit abaixo. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    min-height: 40px;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-color: var(--scrollbar-thumb);
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  /* Foco: borda roxa + anel externo de 3px, sempre visível.
+     design.md §7 — foco nunca some, nem em mouse. */
+  :focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Só removemos o outline nativo de quem já recebe :focus-visible acima. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--surface-brand-strong);
+    color: var(--text-primary);
+  }
+
+  /* Nimbus foi substituída por Archivo Narrow; a função na hierarquia é a mesma:
+     a condensada organiza a função, a serif conduz a leitura. */
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Linha de leitura 45–75 caracteres, alvo 60–68. */
+  p {
+    max-width: 68ch;
+  }
+
+  /* Títulos podem ultrapassar a medida de leitura. */
+  h1, h2, h3, h4, h5, h6 {
+    max-width: none;
+    text-wrap: balance;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* design.md §9 — respeitar prefers-reduced-motion sem exceção. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Overline: Archivo 700, caixa alta, tracking 0.10em.
+     Chamado `type-overline` e não `overline` porque o Tailwind já define
+     uma utility `overline` (text-decoration-line: overline) — as duas
+     aplicavam juntas e desenhavam um risco acima do texto. */
+  .type-overline {
+    font-family: var(--font-utility);
+    font-size: var(--text-label-md);
+    font-weight: 700;
+    line-height: 1.15;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Metadado: Source Code Pro, tracking 0–0.04em. */
+  .metadata {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Alvo de toque mínimo 44×44px sem inflar o visual do controle. */
+  .touch-target {
+    position: relative;
+  }
+  .touch-target::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Medida de leitura explícita, quando o elemento não é <p>. */
+  .measure {
+    max-width: 68ch;
+  }
+
+  /* Navegação flutuante: vidro sem stroke. A transparência deixa a superfície
+     herdar o contexto da página; blur e saturação preservam legibilidade. */
+  .glass-nav {
+    border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+    background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+    -webkit-backdrop-filter: blur(32px) saturate(150%);
+    backdrop-filter: blur(32px) saturate(150%);
+    box-shadow:
+      0 20px 56px -28px rgb(29 25 30 / 0.62),
+      inset 0 1px 0 rgb(255 255 255 / 0.12);
+  }
+}
+
+@layer base {
+  /* design.md §2 — reduzir ou remover textura em alto contraste e
+     prefers-reduced-transparency. */
+  @media (prefers-reduced-transparency: reduce) {
+    [data-texture] {
+      display: none !important;
+    }
+
+    .glass-nav {
+      background: var(--bg-elevated);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    [data-texture] {
+      display: none !important;
+    }
+
+    .glass-nav {
+      background: var(--bg-elevated);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.env
+.env.local
+.env*.local
+coverage/
+.DS_Store
+.vscode/
+.idea/
+brandbook/__pycache__/

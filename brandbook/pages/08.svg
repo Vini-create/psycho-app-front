@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#F1E5CD"/>
+
+  <text x="80" y="74" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" letter-spacing="3" fill="#765292">07 · USO TIPOGRÁFICO</text>
+  <text x="80" y="154" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-weight="400" fill="#1D191E">Qual fonte entra em cada lugar.</text>
+
+  <text x="80" y="205" font-family="STIX Two Text, Noto Serif, serif" font-size="20" fill="#6B626D">Uma família conduz a leitura, outra organiza a função e a terceira registra precisão.</text>
+  <g transform="translate(80 245)">
+    <rect width="450" height="590" rx="26" fill="#1D191E"/>
+    <text x="30" y="48" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="3" fill="#BFA6D2">LEITURA E EXPRESSÃO</text>
+    <text x="30" y="116" font-family="STIX Two Text, Noto Serif, serif" font-size="43" fill="#E7D7B8">STIX Two Text</text>
+    <line x1="30" y1="145" x2="420" y2="145" stroke="#554A58"/>
+    <text x="30" y="190" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#BFA6D2">USAR EM</text>
+    <text x="30" y="232" font-family="STIX Two Text, Noto Serif, serif" font-size="21" fill="#E7D7B8">Marca e hero</text>
+    <text x="30" y="270" font-family="STIX Two Text, Noto Serif, serif" font-size="21" fill="#E7D7B8">Títulos de página e cards</text>
+    <text x="30" y="308" font-family="STIX Two Text, Noto Serif, serif" font-size="21" fill="#E7D7B8">Corpo, conversa e leitura</text>
+    <text x="30" y="346" font-family="STIX Two Text, Noto Serif, serif" font-size="21" font-style="italic" fill="#BFA6D2">Citações e destaques</text>
+    <line x1="30" y1="390" x2="420" y2="390" stroke="#554A58"/>
+    <text x="30" y="430" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#D999A2">NÃO USAR EM</text>
+    <text x="30" y="468" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#D5CAD6">botão · label · filtro</text>
+    <text x="30" y="498" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#D5CAD6">navegação · status</text>
+    <text x="30" y="552" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#BFA6D2">400–600 / 17–72px</text>
+  </g>
+  <g transform="translate(575 245)">
+    <rect width="450" height="590" rx="26" fill="#FAF4E8" stroke="#DCC9A7" stroke-width="2"/>
+    <text x="30" y="48" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="3" fill="#765292">FUNÇÃO E ORIENTAÇÃO</text>
+    <text x="30" y="116" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="40" font-weight="700" fill="#1D191E">NIMBUS SANS</text>
+    <text x="30" y="152" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="40" font-weight="700" fill="#1D191E">NARROW</text>
+    <line x1="30" y1="178" x2="420" y2="178" stroke="#DCC9A7"/>
+    <text x="30" y="220" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#765292">USAR EM</text>
+    <text x="30" y="260" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="23" font-weight="700" fill="#1D191E">OVERLINE E SEÇÃO</text>
+    <text x="30" y="300" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="23" font-weight="700" fill="#1D191E">NAVEGAÇÃO E ABAS</text>
+    <text x="30" y="340" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="23" font-weight="700" fill="#1D191E">BOTÕES E LABELS</text>
+    <text x="30" y="380" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="23" font-weight="700" fill="#1D191E">TAGS E STATUS</text>
+    <line x1="30" y1="420" x2="420" y2="420" stroke="#DCC9A7"/>
+    <text x="30" y="460" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#9B3D47">NÃO USAR EM</text>
+    <text x="30" y="498" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">parágrafo · conversa</text>
+    <text x="30" y="528" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">leitura longa</text>
+    <text x="30" y="566" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#604174">400 / 700 · 12–36px</text>
+  </g>
+  <g transform="translate(1070 245)">
+    <rect width="450" height="590" rx="26" fill="#EDE5F3"/>
+    <text x="30" y="48" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="3" fill="#604174">PRECISÃO E REGISTRO</text>
+    <text x="30" y="108" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="27" font-weight="600" fill="#35223F">Source Code Pro</text>
+    <text x="30" y="142" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="15" fill="#604174">21 AGO · 09:42 · 24px</text>
+    <line x1="30" y1="178" x2="420" y2="178" stroke="#BFA6D2"/>
+    <text x="30" y="220" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#604174">USAR EM</text>
+    <text x="30" y="262" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="17" fill="#35223F">data e horário</text>
+    <text x="30" y="302" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="17" fill="#35223F">tokens e medidas</text>
+    <text x="30" y="342" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="17" fill="#35223F">hex e IDs</text>
+    <text x="30" y="382" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="17" fill="#35223F">proveniência</text>
+    <line x1="30" y1="420" x2="420" y2="420" stroke="#BFA6D2"/>
+    <text x="30" y="460" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" fill="#9B3D47">NÃO USAR EM</text>
+    <text x="30" y="500" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">título · botão · corpo</text>
+    <text x="30" y="530" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">ação principal</text>
+    <text x="30" y="566" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#604174">400–600 · 11–13px</text>
+  </g>
+  <line x1="80" y1="944" x2="1520" y2="944" stroke="#DCC9A7" stroke-width="1"/>
+  <text x="80" y="974" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">SINAPSA. · DESIGN DIRECTION 0.8</text>
+  <text x="1520" y="974" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">08</text>
+</svg>

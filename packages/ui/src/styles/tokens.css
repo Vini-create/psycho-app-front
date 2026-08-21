@@ -1,0 +1,353 @@
+/* ==========================================================================
+   Sinapsa — tokens de design
+   Derivado de design.md v0.12.
+   Regra dura: componentes consomem SOMENTE tokens semânticos.
+   Nunca use um hex nem um primitivo (paper-*, ink-*, purple-*) direto em
+   componente: o primitivo não conhece tema, e o componente precisa conhecer.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Primitivos — a paleta bruta. Não mudam com o tema.
+   -------------------------------------------------------------------------- */
+:root {
+  --paper-0: #fcfbf9;
+  --paper-50: #f6f4f1;
+  --paper-100: #ece9ed;
+  --paper-200: #d8d3da;
+  --paper-300: #b8adb9;
+  --paper-400: #756878;
+
+  --ink-500: #6b626d;
+  --ink-700: #403941;
+  --ink-900: #1d191e;
+
+  --purple-primary: #9b86c4;
+  --purple-strong: #766093;
+  --purple-dark: #5f4b73;
+  --purple-soft: #c5b6dc;
+  --purple-muted: #ddd3e8;
+}
+
+/* --------------------------------------------------------------------------
+   2. Semânticos — light mode. "Papel, não branco."
+   -------------------------------------------------------------------------- */
+:root {
+  --bg-canvas: #f6f4f1;
+  --bg-surface: #fcfbf9;
+  --bg-card: #f1edf4;
+  --bg-subtle: #ece9ed;
+  --bg-elevated: #fcfbf9;
+  --bg-inverse: #1d191e;
+
+  --text-primary: #1d191e;
+  --text-secondary: #6b626d;
+  --text-strong: #403941;
+  --text-brand: #766093;
+  --text-on-inverse: #f6f4f1;
+  --text-on-inverse-muted: #b8adb9;
+
+  --chart-1: #c5b6dc;
+  --chart-2: #9b86c4;
+  --chart-3: #766093;
+  --chart-4: #5f4b73;
+  --chart-track: #d8cdd9;
+  --chart-muted: #b8adb9;
+
+  --border-subtle: #d8cdd9;
+  --border-control: #756878;
+  --border-strong: #a99dab;
+
+  --action-primary: #766093;
+  --action-primary-hover: #5f4b73;
+  --action-primary-pressed: #5f4b73;
+  --action-on-primary: #f6f4f1;
+
+  --surface-brand: #ddd3e8;
+  --surface-brand-strong: #c5b6dc;
+
+  --focus-ring: #766093;
+
+  --success-fg: #2f6b58;
+  --success-bg: #eff7f2;
+  --warning-fg: #744e68;
+  --warning-bg: #f7edf3;
+  --danger-fg: #9b3d47;
+  --danger-bg: #fcf0f1;
+  --info-fg: #365f7a;
+  --info-bg: #f0f6fa;
+
+  /* Sombra existe só em superfície flutuante: menu, drawer, modal. */
+  --overlay-shadow: 0 16px 48px -12px rgb(29 25 30 / 0.28),
+    0 4px 12px -4px rgb(29 25 30 / 0.16);
+
+  /* Granulação máxima do papel: 4%. */
+  --texture-opacity: 0.035;
+  --texture-blend: multiply;
+
+  --scrollbar-thumb: #b8adb9;
+  --scrollbar-thumb-hover: #9b86c4;
+
+  color-scheme: light;
+}
+
+/* --------------------------------------------------------------------------
+   3. Semânticos — dark mode. "Obsidiana, não preto."
+   Elevação vem de superfície, borda e contraste — nunca de sombra escura.
+   -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-canvas: #242527;
+    --bg-subtle: #201c22;
+    --bg-surface: #28222b;
+    --bg-card: #40344a;
+    --bg-elevated: #302833;
+    --bg-inverse: #f6f4f1;
+
+    --text-primary: #f6f4f1;
+    --text-secondary: #c6bcc8;
+    --text-strong: #f6f4f1;
+    --text-brand: #c5b6dc;
+    --text-on-inverse: #1d191e;
+    --text-on-inverse-muted: #6b626d;
+
+    --chart-1: #766093;
+    --chart-2: #9b86c4;
+    --chart-3: #c5b6dc;
+    --chart-4: #ddd3e8;
+    --chart-track: #5f4b73;
+    --chart-muted: #766093;
+
+    --border-subtle: #5f4b73;
+    --border-control: #9b86c4;
+    --border-strong: #9b86c4;
+
+    --action-primary: #9b86c4;
+    --action-primary-hover: #c5b6dc;
+    --action-primary-pressed: #766093;
+    --action-on-primary: #242527;
+
+    --surface-brand: #5f4b73;
+    --surface-brand-strong: #766093;
+
+    --focus-ring: #c5b6dc;
+
+    --success-fg: #8fc8ad;
+    --success-bg: #1d3028;
+    --warning-fg: #d5a8c5;
+    --warning-bg: #34242f;
+    --danger-fg: #e5a0a8;
+    --danger-bg: #382024;
+    --info-fg: #9ec7de;
+    --info-bg: #1d2d36;
+
+    --overlay-shadow: 0 18px 48px -20px rgb(0 0 0 / 0.72),
+      0 18px 52px -24px rgb(118 96 147 / 0.5);
+
+    --texture-opacity: 0.09;
+    --texture-blend: soft-light;
+
+    --scrollbar-thumb: #5f4b73;
+    --scrollbar-thumb-hover: #9b86c4;
+
+    color-scheme: dark;
+  }
+}
+
+/* Override manual vence a preferência do sistema, nos dois sentidos. */
+:root[data-theme="dark"] {
+  --bg-canvas: #242527;
+  --bg-subtle: #201c22;
+  --bg-surface: #28222b;
+  --bg-card: #40344a;
+  --bg-elevated: #302833;
+  --bg-inverse: #f6f4f1;
+
+  --text-primary: #f6f4f1;
+  --text-secondary: #c6bcc8;
+  --text-strong: #f6f4f1;
+  --text-brand: #c5b6dc;
+  --text-on-inverse: #1d191e;
+  --text-on-inverse-muted: #6b626d;
+
+  --chart-1: #766093;
+  --chart-2: #9b86c4;
+  --chart-3: #c5b6dc;
+  --chart-4: #ddd3e8;
+  --chart-track: #5f4b73;
+  --chart-muted: #766093;
+
+  --border-subtle: #5f4b73;
+  --border-control: #9b86c4;
+  --border-strong: #9b86c4;
+
+  --action-primary: #9b86c4;
+  --action-primary-hover: #c5b6dc;
+  --action-primary-pressed: #766093;
+  --action-on-primary: #242527;
+
+  --surface-brand: #5f4b73;
+  --surface-brand-strong: #766093;
+
+  --focus-ring: #c5b6dc;
+
+  --success-fg: #8fc8ad;
+  --success-bg: #1d3028;
+  --warning-fg: #d5a8c5;
+  --warning-bg: #34242f;
+  --danger-fg: #e5a0a8;
+  --danger-bg: #382024;
+  --info-fg: #9ec7de;
+  --info-bg: #1d2d36;
+
+  --overlay-shadow: 0 18px 48px -20px rgb(0 0 0 / 0.72),
+    0 18px 52px -24px rgb(118 96 147 / 0.5);
+
+  --texture-opacity: 0.09;
+  --texture-blend: soft-light;
+
+  --scrollbar-thumb: #5f4b73;
+  --scrollbar-thumb-hover: #9b86c4;
+
+  color-scheme: dark;
+}
+
+/* --------------------------------------------------------------------------
+   4. Registro no Tailwind.
+   `inline` faz a utility emitir var(--bg-canvas) em vez de var(--color-canvas),
+   e é isso que permite a troca de tema em runtime.
+   -------------------------------------------------------------------------- */
+@theme inline {
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-card: var(--bg-card);
+  --color-subtle: var(--bg-subtle);
+  --color-elevated: var(--bg-elevated);
+  --color-inverse: var(--bg-inverse);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-strong: var(--text-strong);
+  --color-brand: var(--text-brand);
+  --color-on-inverse: var(--text-on-inverse);
+  --color-on-inverse-muted: var(--text-on-inverse-muted);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-track: var(--chart-track);
+  --color-chart-muted: var(--chart-muted);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-control: var(--border-control);
+  --color-border-strong: var(--border-strong);
+
+  --color-action: var(--action-primary);
+  --color-action-hover: var(--action-primary-hover);
+  --color-action-pressed: var(--action-primary-pressed);
+  --color-on-action: var(--action-on-primary);
+
+  --color-brand-surface: var(--surface-brand);
+  --color-brand-surface-strong: var(--surface-brand-strong);
+
+  --color-focus: var(--focus-ring);
+
+  --shadow-overlay: var(--overlay-shadow);
+
+  --color-success: var(--success-fg);
+  --color-success-surface: var(--success-bg);
+  --color-warning: var(--warning-fg);
+  --color-warning-surface: var(--warning-bg);
+  --color-danger: var(--danger-fg);
+  --color-danger-surface: var(--danger-bg);
+  --color-info: var(--info-fg);
+  --color-info-surface: var(--info-bg);
+}
+
+@theme {
+  /* Famílias. As três variáveis são preenchidas por next/font em cada app. */
+  --font-editorial: var(--font-stix), "Noto Serif", Georgia, serif;
+  --font-utility: var(--font-archivo), "Arial Narrow", "Noto Sans", sans-serif;
+  --font-mono: var(--font-source-code), "Noto Sans Mono", ui-monospace, monospace;
+
+  /* Escala tipográfica — design.md §3. Fluida entre 480px e ~880px. */
+  --text-display-xl: clamp(3rem, 1.2rem + 6vw, 4.5rem);
+  --text-display-xl--line-height: 0.96;
+  --text-display-xl--font-weight: 400;
+  --text-display-xl--letter-spacing: -0.03em;
+
+  --text-display-lg: clamp(2.5rem, 1.3rem + 4vw, 3.5rem);
+  --text-display-lg--line-height: 1;
+  --text-display-lg--font-weight: 400;
+  --text-display-lg--letter-spacing: -0.03em;
+
+  --text-display-md: clamp(2.125rem, 1.2rem + 3.1vw, 2.75rem);
+  --text-display-md--line-height: 1.05;
+  --text-display-md--font-weight: 400;
+  --text-display-md--letter-spacing: -0.02em;
+
+  --text-heading-xl: clamp(2rem, 1.25rem + 2.5vw, 2.5rem);
+  --text-heading-xl--line-height: 1.08;
+  --text-heading-xl--font-weight: 500;
+  --text-heading-xl--letter-spacing: -0.02em;
+
+  --text-heading-lg: clamp(1.75rem, 1.375rem + 1.25vw, 2rem);
+  --text-heading-lg--line-height: 1.15;
+  --text-heading-lg--font-weight: 500;
+  --text-heading-lg--letter-spacing: -0.01em;
+
+  --text-heading-md: clamp(1.5rem, 1.3125rem + 0.625vw, 1.625rem);
+  --text-heading-md--line-height: 1.2;
+  --text-heading-md--font-weight: 600;
+
+  --text-utility-xl: clamp(1.875rem, 1.3125rem + 1.875vw, 2.25rem);
+  --text-utility-xl--line-height: 1;
+  --text-utility-xl--font-weight: 700;
+
+  --text-utility-lg: clamp(1.375rem, 1.1875rem + 0.625vw, 1.5rem);
+  --text-utility-lg--line-height: 1.1;
+  --text-utility-lg--font-weight: 700;
+
+  --text-body-lg: clamp(1.125rem, 1.03rem + 0.31vw, 1.1875rem);
+  --text-body-lg--line-height: 1.55;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: clamp(1rem, 0.906rem + 0.31vw, 1.0625rem);
+  --text-body-md--line-height: 1.55;
+  --text-body-md--font-weight: 400;
+
+  --text-label-md: 0.875rem;
+  --text-label-md--line-height: 1.15;
+  --text-label-md--font-weight: 700;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 500;
+
+  /* Espaçamento — base 4px, layouts em múltiplos de 8. */
+  --spacing: 0.25rem;
+
+  /* Raios — design.md §7. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Breakpoints — design.md §10. */
+  --breakpoint-xs: 30rem;
+  --breakpoint-sm: 48rem;
+  --breakpoint-md: 64rem;
+  --breakpoint-lg: 80rem;
+  --breakpoint-xl: 96rem;
+
+  /* Larguras máximas — design.md §6. */
+  --container-form: 30rem;
+  --container-conversation: 47.5rem;
+  --container-institutional: 75rem;
+  --container-panel: 90rem;
+
+  /* Movimento — design.md §9. */
+  --ease-sinapsa: cubic-bezier(0.2, 0, 0, 1);
+
+}

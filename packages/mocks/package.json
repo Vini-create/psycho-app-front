@@ -1,0 +1,23 @@
+{
+  "name": "@sinapsa/mocks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "//": "TEMPORÁRIO — modo de desenho. Remover junto com o comando dev:design quando o backend entrar. Ver DESIGN_MODE.md.",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@sinapsa/api-client": "workspace:*",
+    "@sinapsa/config": "workspace:*",
+    "eslint": "9.39.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
+  }
+}

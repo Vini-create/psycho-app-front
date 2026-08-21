@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#E7D7B8"/>
+  <path d="M880,-80 C1150,40 1120,235 1350,250 C1520,260 1620,180 1670,100 L1670,-80Z" fill="#BFA6D2" opacity=".72"/>
+  <path d="M1040,1000 C950,850 1045,690 1210,640 C1380,588 1530,680 1660,590 L1660,1020Z" fill="#604174"/>
+  <path d="M-80,760 C180,610 310,770 500,650 C655,552 690,358 606,212 C540,98 342,72 154,134 C45,170 -30,210 -80,250Z" fill="#EDE5F3"/>
+  <circle cx="185" cy="195" r="62" fill="#765292"/>
+  <text x="80" y="78" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" letter-spacing="4" fill="#765292">DESIGN DIRECTION · 0.8</text>
+  <text x="80" y="492" font-family="STIX Two Text, Noto Serif, serif" font-size="164" letter-spacing="-7" fill="#1D191E">Sinapsa.</text>
+  <text x="590" y="416" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" fill="#604174">™</text>
+  <line x1="88" y1="532" x2="608" y2="532" stroke="#604174" stroke-width="8" stroke-linecap="round"/>
+  <text x="86" y="600" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="27" font-weight="500" fill="#6B626D">editorial · humana · serena</text>
+  <text x="86" y="820" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" letter-spacing="2" fill="#1D191E">SISTEMA VISUAL PROVISÓRIO</text>
+  <text x="86" y="854" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="16" fill="#6B626D">Paleta · tipografia · hierarquia · cards · composição · temas</text>
+  <text x="1516" y="942" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#E7D7B8">AGOSTO 2026 · 01</text>
+</svg>

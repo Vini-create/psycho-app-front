@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@import "@sinapsa/ui/styles/tokens.css";
+@import "@sinapsa/ui/styles/base.css";
+
+/* O Tailwind precisa enxergar as classes usadas dentro do design system. */
+@source "../../../../packages/ui/src";

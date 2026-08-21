@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#F1E5CD"/>
+
+  <text x="80" y="74" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" letter-spacing="3" fill="#765292">13 · LIGHT MODE</text>
+  <text x="80" y="154" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-weight="400" fill="#1D191E">Papel, não branco.</text>
+
+  <text x="80" y="205" font-family="STIX Two Text, Noto Serif, serif" font-size="20" fill="#6B626D">Superfícies quentes preservam a estética editorial sem reduzir contraste.</text>
+  <g transform="translate(80 245)">
+    <text font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#765292">CAMADAS</text>
+    <g transform="translate(0 35)"><rect width="260" height="150" rx="18" fill="#F1E5CD" stroke="#DCC9A7"/><text x="20" y="102" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#1D191E">Canvas</text><text x="20" y="130" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#6B626D">#F1E5CD</text></g>
+    <g transform="translate(285 35)"><rect width="260" height="150" rx="18" fill="#FAF4E8" stroke="#DCC9A7"/><text x="20" y="102" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#1D191E">Surface</text><text x="20" y="130" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#6B626D">#FAF4E8</text></g>
+    <g transform="translate(570 35)"><rect width="260" height="150" rx="18" fill="#E7D7B8"/><text x="20" y="102" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#1D191E">Subtle</text><text x="20" y="130" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#1D191E">#E7D7B8</text></g>
+    <g transform="translate(855 35)"><rect width="260" height="150" rx="18" fill="#1D191E"/><text x="20" y="102" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#E7D7B8">Ink</text><text x="20" y="130" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#BFA6D2">#1D191E</text></g>
+    <g transform="translate(1140 35)"><rect width="300" height="150" rx="18" fill="#604174"/><text x="20" y="102" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="22" font-weight="700" fill="#FAF4E8">Primary</text><text x="20" y="130" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#EDE5F3">#604174</text></g>
+  </g>
+  <g transform="translate(80 490)">
+    <rect width="900" height="310" rx="22" fill="#FAF4E8" stroke="#DCC9A7" stroke-width="2"/>
+    <text x="28" y="44" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#765292">COMPONENTES SOBRE SURFACE</text>
+    <text x="28" y="100" font-family="STIX Two Text, Noto Serif, serif" font-size="30" font-weight="600" fill="#1D191E">Título principal do card</text>
+    <text x="28" y="140" font-family="STIX Two Text, Noto Serif, serif" font-size="18" fill="#1D191E">Texto de leitura usa ink-900. Apoio usa ink-500.</text>
+    <rect x="28" y="176" width="460" height="56" rx="12" fill="#FAF4E8" stroke="#947449" stroke-width="2"/>
+    <text x="46" y="211" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" fill="#6B626D">Campo com borda acessível</text>
+    <rect x="516" y="176" width="210" height="56" rx="12" fill="#604174"/><text x="621" y="211" text-anchor="middle" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="700" fill="#FAF4E8">AÇÃO PRIMÁRIA</text>
+    <rect x="748" y="176" width="120" height="56" rx="12" fill="#FAF4E8" stroke="#604174" stroke-width="3"/><text x="808" y="211" text-anchor="middle" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="700" fill="#604174">FOCO</text>
+    <text x="28" y="272" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="12" fill="#6B626D">border-control #947449 · focus #765292 / 3px · radius 12</text>
+  </g>
+  <g transform="translate(1030 490)">
+    <text font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#765292">CONTRASTE</text>
+    <text y="60" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#1D191E">ink / canvas</text><text x="430" y="60" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#2F6B58">13.91:1</text>
+    <line y1="82" x2="430" y2="82" stroke="#DCC9A7"/>
+    <text y="126" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#1D191E">purple / surface</text><text x="430" y="126" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#2F6B58">7.65:1</text>
+    <line y1="148" x2="430" y2="148" stroke="#DCC9A7"/>
+    <text y="192" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#1D191E">ink-500 / canvas</text><text x="430" y="192" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#2F6B58">4.68:1</text>
+    <line y1="214" x2="430" y2="214" stroke="#DCC9A7"/>
+    <text y="258" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="16" fill="#6B626D">Sem branco puro.</text>
+  </g>
+  <line x1="80" y1="944" x2="1520" y2="944" stroke="#DCC9A7" stroke-width="1"/>
+  <text x="80" y="974" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">SINAPSA. · DESIGN DIRECTION 0.8</text>
+  <text x="1520" y="974" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">14</text>
+</svg>

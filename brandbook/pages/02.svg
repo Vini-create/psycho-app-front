@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#F1E5CD"/>
+
+  <text x="80" y="74" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" letter-spacing="3" fill="#765292">01 · DNA VISUAL</text>
+  <text x="80" y="154" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-weight="400" fill="#1D191E">Leveza com estrutura.</text>
+
+  <text x="82" y="206" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="21" fill="#6B626D">A expressão é editorial. A interação continua simples, direta e legível.</text>
+  <g transform="translate(80 275)">
+    <rect width="450" height="370" rx="28" fill="#EDE5F3"/>
+    <text x="34" y="66" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#604174">01</text>
+    <text x="34" y="142" font-family="STIX Two Text, Noto Serif, serif" font-size="58" fill="#1D191E">Editorial</text>
+    <path d="M35 188 C140 125 230 246 414 164" fill="none" stroke="#765292" stroke-width="7" stroke-linecap="round"/>
+    <text x="34" y="290" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#1D191E">Serifas expressivas</text>
+    <text x="34" y="326" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#1D191E">Escala e espaço negativo</text>
+  </g>
+  <g transform="translate(575 275)">
+    <rect width="450" height="370" rx="28" fill="#1D191E"/>
+    <text x="34" y="66" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#BFA6D2">02</text>
+    <text x="34" y="142" font-family="STIX Two Text, Noto Serif, serif" font-size="58" fill="#E7D7B8">Humana</text>
+    <circle cx="365" cy="105" r="48" fill="#604174"/>
+    <circle cx="325" cy="158" r="48" fill="#BFA6D2" opacity=".88"/>
+    <text x="34" y="290" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#E7D7B8">Calor sem infantilização</text>
+    <text x="34" y="326" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#E7D7B8">Presença sem personificação</text>
+  </g>
+  <g transform="translate(1070 275)">
+    <rect width="450" height="370" rx="28" fill="#FAF4E8" stroke="#DCC9A7" stroke-width="2"/>
+    <text x="34" y="66" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#604174">03</text>
+    <text x="34" y="142" font-family="STIX Two Text, Noto Serif, serif" font-size="58" fill="#1D191E">Serena</text>
+    <path d="M32 194 Q170 126 245 198 T420 184" fill="none" stroke="#BFA6D2" stroke-width="22" stroke-linecap="round"/>
+    <text x="34" y="290" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#1D191E">Tons suaves, contraste real</text>
+    <text x="34" y="326" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" fill="#1D191E">Movimento contínuo e curto</text>
+  </g>
+  <g transform="translate(80 700)">
+    <text x="0" y="42" font-family="STIX Two Text, Noto Serif, serif" font-size="72" fill="#604174">70</text>
+    <text x="105" y="40" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="600" fill="#1D191E">NEUTROS CLAROS</text>
+    <text x="535" y="42" font-family="STIX Two Text, Noto Serif, serif" font-size="72" fill="#1D191E">20</text>
+    <text x="640" y="40" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="600" fill="#1D191E">ESTRUTURA</text>
+    <text x="1040" y="42" font-family="STIX Two Text, Noto Serif, serif" font-size="72" fill="#765292">10</text>
+    <text x="1145" y="40" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="600" fill="#1D191E">COR E PRESENÇA</text>
+  </g>
+  <line x1="80" y1="944" x2="1520" y2="944" stroke="#DCC9A7" stroke-width="1"/>
+  <text x="80" y="974" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">SINAPSA. · DESIGN DIRECTION 0.8</text>
+  <text x="1520" y="974" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">02</text>
+</svg>

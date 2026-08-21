@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#F1E5CD"/>
+
+  <text x="80" y="74" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" font-weight="600" letter-spacing="3" fill="#765292">05 · TIPOGRAFIA</text>
+  <text x="80" y="154" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-weight="400" fill="#1D191E">Três vozes, um só ritmo.</text>
+
+  <g transform="translate(80 225)">
+    <rect width="650" height="580" rx="28" fill="#1D191E"/>
+    <text x="38" y="54" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#BFA6D2">EDITORIAL · STIX TWO TEXT</text>
+    <text x="38" y="158" font-family="STIX Two Text, Noto Serif, serif" font-size="94" letter-spacing="-4" fill="#E7D7B8">Sinapsa.</text>
+    <text x="38" y="260" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-style="italic" fill="#BFA6D2">Leveza que</text>
+    <text x="38" y="328" font-family="STIX Two Text, Noto Serif, serif" font-size="64" font-style="italic" fill="#BFA6D2">acompanha.</text>
+    <line x1="38" y1="376" x2="612" y2="376" stroke="#554A58"/>
+    <text x="38" y="424" font-family="STIX Two Text, Noto Serif, serif" font-size="22" fill="#E7D7B8">Títulos, leitura longa e cards editoriais.</text>
+    <text x="38" y="470" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#BFB5C1">400 / -0.03em / 0.96–1.55</text>
+    <text x="38" y="522" font-family="STIX Two Text, Noto Serif, serif" font-size="17" fill="#D5CAD6">Aa Bb Cc Dd Ee Ff Gg · 0123456789</text>
+  </g>
+  <g transform="translate(770 225)">
+    <rect width="750" height="280" rx="28" fill="#FAF4E8" stroke="#DCC9A7" stroke-width="2"/>
+    <text x="34" y="52" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#765292">UTILITÁRIA · NIMBUS SANS NARROW</text>
+    <text x="34" y="124" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="46" font-weight="700" fill="#1D191E">CLARO, DIRETO, CONDENSADO.</text>
+    <text x="34" y="170" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="28" fill="#1D191E">Navegação · controles · filtros · status</text>
+    <text x="34" y="222" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="18" letter-spacing="2" fill="#6B626D">ABCDEFGHIJKLMNOPQRSTUVWXYZ · 0123456789</text>
+  </g>
+  <g transform="translate(770 530)">
+    <rect width="750" height="275" rx="28" fill="#EDE5F3"/>
+    <text x="34" y="52" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#604174">METADADOS · SOURCE CODE PRO</text>
+    <text x="34" y="118" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="27" font-weight="600" fill="#35223F">12 AGO 2026 · 09:42 · #604174</text>
+    <text x="34" y="168" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="18" fill="#35223F">space-6: 24px  /  radius-card: 16px</text>
+    <line x1="34" y1="200" x2="716" y2="200" stroke="#BFA6D2"/>
+    <text x="34" y="238" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="14" fill="#604174">tokens · datas · medidas · proveniência</text>
+  </g>
+  <text x="80" y="865" font-family="Nimbus Sans Narrow, Arial Narrow, Noto Sans, sans-serif" font-size="17" font-weight="700" fill="#604174">REGRA</text>
+  <text x="158" y="865" font-family="STIX Two Text, Noto Serif, serif" font-size="18" fill="#1D191E">Serif conduz a leitura; sans condensada organiza a função; mono registra precisão.</text>
+  <line x1="80" y1="944" x2="1520" y2="944" stroke="#DCC9A7" stroke-width="1"/>
+  <text x="80" y="974" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">SINAPSA. · DESIGN DIRECTION 0.8</text>
+  <text x="1520" y="974" text-anchor="end" font-family="Source Code Pro, Noto Sans Mono, monospace" font-size="13" fill="#6B626D">06</text>
+</svg>
