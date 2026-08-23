@@ -4,18 +4,11 @@ import {
   Fragment,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { gsap } from "gsap";
-import {
-  Alert,
-  Button,
-  Spinner,
-  formatDayLabel,
-} from "@sinapsa/ui";
+import { Alert, Button, formatDayMark } from "@sinapsa/ui";
 import { describeError, newIdempotencyKey, type Message } from "@sinapsa/api-client";
 import { useMessages, useRetryMessage, useSendMessage } from "@/lib/queries";
 import { useNow } from "@/lib/useNow";
@@ -28,41 +21,27 @@ import {
 
 const RETRY_WINDOW_MS = 60_000;
 
+/* Brand Book V2 §25 — "Loading: skeleton em linhas e blocos; shimmer muito
+   sutil ou nenhum."
+
+   As quatro barrinhas pulsando em GSAP saíram: era animação decorativa no
+   caminho da leitura. Ficou o esqueleto do que vai aparecer — linhas na
+   medida do texto, na posição do texto. */
 function ConversationLoading() {
-  const root = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    if (!root.current) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const bars = root.current.querySelectorAll("[data-loading-bar]");
-    const context = gsap.context(() => {
-      gsap.to(bars, {
-        scaleY: 0.35,
-        autoAlpha: 0.42,
-        duration: 0.52,
-        stagger: { each: 0.11, yoyo: true, repeat: -1 },
-        transformOrigin: "center",
-        ease: "sine.inOut",
-      });
-    }, root);
-
-    return () => context.revert();
-  }, []);
-
   return (
-    <div ref={root} className="grid h-full min-h-[18rem] place-items-center">
-      <div className="flex flex-col items-center gap-4 text-secondary">
-        <div className="flex h-6 items-center gap-1.5" aria-hidden="true">
-          {[0, 1, 2, 3].map((bar) => (
-            <span
-              key={bar}
-              data-loading-bar
-              className="h-5 w-0.5 rounded-full bg-brand"
-            />
-          ))}
-        </div>
-        <span className="metadata">Preparando seu espaço…</span>
+    <div className="mx-auto flex w-full max-w-(--container-conversation) flex-col gap-8 px-5 pt-10 sm:px-6">
+      <span className="sr-only">Preparando seu espaço…</span>
+      <div aria-hidden="true" className="flex flex-col gap-3">
+        <div className="h-4 w-[62%] rounded-xs bg-sunken" />
+        <div className="h-4 w-[88%] rounded-xs bg-sunken" />
+        <div className="h-4 w-[74%] rounded-xs bg-sunken" />
+      </div>
+      <div aria-hidden="true" className="flex justify-end">
+        <div className="h-16 w-[58%] rounded-md rounded-br-xs bg-sunken" />
+      </div>
+      <div aria-hidden="true" className="flex flex-col gap-3">
+        <div className="h-4 w-[80%] rounded-xs bg-sunken" />
+        <div className="h-4 w-[55%] rounded-xs bg-sunken" />
       </div>
     </div>
   );
@@ -74,22 +53,21 @@ export function ChatConversation({ conversationId }: { conversationId: string })
   const retry = useRetryMessage(conversationId);
   const now = useNow();
   const [draft, setDraft] = useState("");
-  const [isReady, setIsReady] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [composerHeight, setComposerHeight] = useState(96);
   const idempotency = useRef<{ content: string; key: string } | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const messageListRef = useRef<HTMLUListElement>(null);
-  const animatedMessages = useRef(new Set<string>());
+  const scrollRef = useRef<HTMLDivElement>(null);
   const positionedConversation = useRef<string | null>(null);
   const messages = useMemo(() => data?.messages ?? [], [data]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
+    // Dois frames: o primeiro deixa o React pintar a mensagem nova, o
+    // segundo deixa o textarea elástico terminar de medir a própria altura.
     requestAnimationFrame(() => {
-      // O marcador vive DEPOIS do composer. Esperar mais um frame garante que
-      // mensagens, estado de envio e a altura elástica do textarea já tenham
-      // sido medidos antes de definir o fim real da conversa.
       requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({ block: "end", behavior });
+        const element = scrollRef.current;
+        if (!element) return;
+        element.scrollTo({ top: element.scrollHeight, behavior });
       });
     });
   }, []);
@@ -111,78 +89,13 @@ export function ChatConversation({ conversationId }: { conversationId: string })
   }
 
   useEffect(() => {
-    if (isPending || !isReady) return;
+    if (isPending) return;
 
     const behavior =
       positionedConversation.current === conversationId ? "smooth" : "auto";
     scrollToBottom(behavior);
     positionedConversation.current = conversationId;
-  }, [conversationId, isPending, isReady, messages.length, scrollToBottom, send.isPending]);
-
-  useEffect(() => {
-    if (isPending) return;
-
-    let cancelled = false;
-    let firstFrame = 0;
-    let secondFrame = 0;
-    const fontsReady = document.fonts?.ready ?? Promise.resolve();
-
-    void fontsReady.then(() => {
-      firstFrame = requestAnimationFrame(() => {
-        secondFrame = requestAnimationFrame(() => {
-          if (!cancelled) setIsReady(true);
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(firstFrame);
-      cancelAnimationFrame(secondFrame);
-    };
-  }, [isPending]);
-
-  useLayoutEffect(() => {
-    animatedMessages.current.clear();
-  }, [conversationId]);
-
-  useLayoutEffect(() => {
-    if (isPending || !isReady || !messageListRef.current) return;
-    const elements = Array.from(
-      messageListRef.current.querySelectorAll<HTMLElement>("[data-message-id]"),
-    );
-    const unseen = elements.filter((element) => {
-      const id = element.dataset.messageId;
-      return id && !animatedMessages.current.has(id);
-    });
-    unseen.forEach((element) => {
-      const id = element.dataset.messageId;
-      if (id) animatedMessages.current.add(id);
-    });
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const parts = unseen.slice(-8).flatMap((element) =>
-      Array.from(element.children),
-    );
-    if (parts.length === 0) return;
-
-    gsap.fromTo(
-      parts,
-      { autoAlpha: 0, y: 9 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.38,
-        stagger: 0.035,
-        ease: "power3.out",
-        clearProps: "opacity,visibility,transform",
-      },
-    );
-
-    return () => {
-      gsap.killTweensOf(parts);
-    };
-  }, [isPending, isReady, messages]);
+  }, [conversationId, isPending, messages.length, scrollToBottom, send.isPending]);
 
   async function handleSend() {
     const content = draft.trim();
@@ -224,71 +137,97 @@ export function ChatConversation({ conversationId }: { conversationId: string })
     return null;
   }
 
-  if (isPending || !isReady) return <ConversationLoading />;
-
   return (
-    <div className="flex min-h-full flex-col gap-6 pt-24">
-      {error && <Alert tone="danger">{describeError(error).message}</Alert>}
+    <div className="relative flex h-full min-h-0 flex-col">
+      {/* Área de leitura. Rola por dentro; a moldura não rola junto. */}
+      <div
+        ref={scrollRef}
+        data-chat-scroll
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
+        <div
+          className="mx-auto flex w-full max-w-(--container-conversation) flex-col gap-6 px-5 pt-[6.25rem] sm:px-6 lg:pt-10"
+          style={{ paddingBottom: `${composerHeight + 24}px` }}
+        >
+          {error && <Alert tone="danger">{describeError(error).message}</Alert>}
 
-      <div className="flex-1">
-        <ul ref={messageListRef} className="flex flex-col gap-6 pb-4">
-          {messages.length === 0 && <ConversationOpening />}
-          {messages.map((message, index) => {
-            const previous = messages[index - 1];
-            const showDay =
-              !previous ||
-              formatDayLabel(previous.created_at) !== formatDayLabel(message.created_at);
-            const hint = retryHint(message);
+          {isPending ? (
+            <ConversationLoading />
+          ) : (
+            <ul className="flex flex-col gap-8">
+              {messages.length === 0 && <ConversationOpening />}
 
-            return (
-              <Fragment key={message.id}>
-                {showDay && <DaySeparator label={formatDayLabel(message.created_at)} />}
-                <MessageBubble
-                  message={message}
-                  showTime={endsBlock(index)}
-                  footer={
-                    hint && (
-                      <span className="flex items-center gap-2">
-                        <span className="metadata text-secondary">{hint.label}</span>
-                        {hint.canRetry && (
-                          <Button
-                            size="sm"
-                            variant="tertiary"
-                            loading={retry.isPending && retry.variables === message.id}
-                            onClick={() => retry.mutate(message.id)}
-                          >
-                            Tentar novamente
-                          </Button>
-                        )}
-                      </span>
-                    )
-                  }
-                />
-              </Fragment>
-            );
-          })}
+              {messages.map((message, index) => {
+                const previous = messages[index - 1];
+                const showDay =
+                  !previous ||
+                  formatDayMark(previous.created_at) !==
+                    formatDayMark(message.created_at);
+                const hint = retryHint(message);
 
-          {send.isPending && (
-            <li className="flex items-center gap-4 pl-5 text-secondary">
-              <Spinner />
-              <span className="metadata">Sinapsa está lendo…</span>
-            </li>
+                return (
+                  <Fragment key={message.id}>
+                    {showDay && (
+                      <DaySeparator label={formatDayMark(message.created_at)} />
+                    )}
+                    <MessageBubble
+                      message={message}
+                      showTime={endsBlock(index)}
+                      footer={
+                        hint && (
+                          <span className="flex items-center gap-3">
+                            <span className="type-meta text-tertiary">
+                              {hint.label}
+                            </span>
+                            {hint.canRetry && (
+                              <Button
+                                size="sm"
+                                variant="text"
+                                loading={
+                                  retry.isPending && retry.variables === message.id
+                                }
+                                onClick={() => retry.mutate(message.id)}
+                              >
+                                Tentar novamente
+                              </Button>
+                            )}
+                          </span>
+                        )
+                      }
+                    />
+                  </Fragment>
+                );
+              })}
+
+              {send.isPending && (
+                <li className="type-meta flex items-center gap-3 text-tertiary">
+                  {/* Três pontos estáticos: presença sem espetáculo (§27). */}
+                  <span aria-hidden="true" className="flex gap-1">
+                    <span className="size-1 rounded-full bg-accent-lavender" />
+                    <span className="size-1 rounded-full bg-accent-lavender" />
+                    <span className="size-1 rounded-full bg-accent-lavender" />
+                  </span>
+                  Sinapsa está lendo…
+                </li>
+              )}
+            </ul>
           )}
-        </ul>
-      </div>
 
-      {sendError && (
-        <Alert tone="warning" title="Não consegui responder">{sendError}</Alert>
-      )}
+          {sendError && (
+            <Alert tone="warning" title="Não consegui responder">
+              {sendError}
+            </Alert>
+          )}
+        </div>
+      </div>
 
       <Composer
         value={draft}
         onChange={setDraft}
         onSubmit={handleSend}
         sending={send.isPending}
+        onHeightChange={setComposerHeight}
       />
-
-      <div ref={bottomRef} className="-mt-6 h-px shrink-0" aria-hidden="true" />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function RecuperarSenhaPage() {
       title="Vamos recuperar seu acesso."
       description="Informe seu e-mail e enviaremos um código para criar uma senha nova."
       footer={
-        <Link href="/entrar" className="font-utility font-bold text-brand underline">
+        <Link href="/entrar" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
           Voltar para entrar
         </Link>
       }

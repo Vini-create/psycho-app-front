@@ -5,20 +5,28 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
-  Badge,
   Button,
-  buttonStyles,
-  Card,
-  EmptyState,
-  Metadata,
+  ComparisonNote,
+  EditorialList,
+  EditorialRow,
+  Icon,
+  MetaStrip,
   Modal,
-  Overline,
-  PageTitle,
-  Prose,
+  PaperPanel,
+  ProvenanceLabel,
+  SectionIndex,
   Skeleton,
+  SourceTrace,
+  StatBlock,
+  StoryBlock,
   TextField,
+  TimelineEvent,
+  TimelineRail,
+  buttonStyles,
   formatDate,
+  formatDayMark,
   formatPeriod,
+  pluralize,
 } from "@sinapsa/ui";
 import {
   describeError,
@@ -28,8 +36,13 @@ import {
 import { AppShell } from "@/components/AppShell";
 import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import { ReportView } from "@/components/ReportView";
-import { ObservationMap } from "@/components/ReportSignals";
 import { previousComparableReport } from "@/lib/report-analytics";
+import {
+  completenessLabel,
+  emotionalValenceLabel,
+  evidenceLabel,
+  itemKindLabel,
+} from "@/lib/report-labels";
 import {
   keys,
   useContextReportRequests,
@@ -40,6 +53,24 @@ import {
   useSubscription,
 } from "@/lib/queries";
 
+/* Brand Book V2 §22 — "A leitura clínica é narrativa + evidência + tempo."
+
+   Layout 8/4. A coluna larga carrega a leitura: briefing do período,
+   acontecimentos na linha do tempo, recorrências descritas. A coluna
+   estreita carrega instrumento e controle: focos, permissões, solicitação
+   de período, encerramento.
+
+   O V1 era uma pilha de seções de largura única, cada uma dentro de um
+   Card — o profissional rolava a tela inteira para descobrir o que
+   importava. Agora o essencial cabe em 2–4 minutos de leitura, que é o
+   critério declarado do §22.
+
+   Duas regras que atravessam a tela inteira:
+
+   - toda agregação tem "ver fontes" quando existe fonte a mostrar (§22);
+   - o que a IA organizou nunca aparece sem dizer que foi organizado (§28).
+     `<ProvenanceLabel />` não é enfeite: é o que separa relato de síntese. */
+
 const MAX_PERIOD_DAYS = 31;
 const DAY_MS = 86_400_000;
 
@@ -47,6 +78,33 @@ const SCOPE_LABEL: Record<ConsentScope, string> = {
   summaries: "Relatórios de período",
   events: "Acontecimentos",
   marked_topics: "Assuntos para a sessão",
+};
+
+/* Famílias pastel por natureza de conteúdo — §04. Isto NÃO é escala
+   clínica: "dificuldade relatada" não é pior que "estratégia relatada",
+   é outra coisa. A cor separa tipos, e o rótulo textual carrega o sentido
+   sozinho para quem não distingue matiz. */
+const KIND_FAMILY: Record<string, "lavender" | "sage" | "clay" | "ochre" | "fogblue" | "dustrose"> = {
+  priority: "ochre",
+  event: "clay",
+  challenge: "dustrose",
+  emotion: "lavender",
+  thought: "lavender",
+  behavior: "fogblue",
+  strategy: "sage",
+  support: "sage",
+  change: "clay",
+  open_topic: "fogblue",
+  safety_context: "dustrose",
+};
+
+const RULE: Record<string, string> = {
+  lavender: "border-accent-lavender",
+  sage: "border-accent-sage",
+  clay: "border-accent-clay",
+  ochre: "border-accent-ochre",
+  fogblue: "border-accent-fogblue",
+  dustrose: "border-accent-dustrose",
 };
 
 function toIsoDay(value: string): string {
@@ -69,6 +127,7 @@ function Paciente({ connectionId }: { connectionId: string }) {
   const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
   const [confirmingEnd, setConfirmingEnd] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ContextReport | null>(null);
+  const [requesting, setRequesting] = useState(false);
 
   const today = new Date();
   const weekAgo = new Date(today.getTime() - 7 * DAY_MS);
@@ -95,7 +154,6 @@ function Paciente({ connectionId }: { connectionId: string }) {
   /**
    * Validamos as três regras do backend ANTES de enviar: período posterior à
    * ativação do vínculo, no máximo 31 dias, e ponta final depois da inicial.
-   * Errar aqui custaria um 422 e uma ida ao servidor à toa.
    */
   const periodError = ((): string | null => {
     const startMs = Date.parse(toIsoDay(start));
@@ -119,15 +177,21 @@ function Paciente({ connectionId }: { connectionId: string }) {
       period_end: toIsoDay(end),
     });
     setCreatedRequestId(response.id);
+    setRequesting(false);
   }
 
   if (patient.isPending) {
-    return <Skeleton className="h-96" aria-label="Carregando paciente" />;
+    return (
+      <div className="flex flex-col gap-6 pt-4">
+        <Skeleton className="h-16 w-2/3" aria-label="Carregando acompanhamento" />
+        <Skeleton className="h-64" />
+      </div>
+    );
   }
 
   if (patient.error || !connection) {
     return (
-      <Alert tone="danger" title="Paciente indisponível">
+      <Alert tone="danger" title="Acompanhamento indisponível">
         {patient.error
           ? describeError(patient.error).message
           : "Não encontramos este acompanhamento."}
@@ -142,127 +206,405 @@ function Paciente({ connectionId }: { connectionId: string }) {
       Date.parse(b.period_end) - Date.parse(a.period_end) ||
       Date.parse(b.created_at) - Date.parse(a.created_at),
   );
-  const latestReport = sortedReports[0] ?? null;
+  const latest = sortedReports[0] ?? null;
+  const previous = latest ? previousComparableReport(latest, reports) : null;
+  const name = connection.patient_display_name ?? "Paciente";
+
+  const included = latest?.items.filter((item) => item.included) ?? [];
+  // "Para a sessão": o que a pessoa relatou como prioridade, mais o que o
+  // sistema marcou como contexto de atenção. É o material que o §22 pede
+  // na capa interna — e o mais próximo de sinal declarado que os dados
+  // atuais oferecem.
+  const forSession = included.filter(
+    (item) =>
+      item.kind === "priority" ||
+      item.kind === "safety_context" ||
+      item.kind === "open_topic",
+  );
+  const recurring = included.filter(
+    (item) => item.evidence_strength === "explicit_repeated",
+  );
+  const others = included.filter(
+    (item) => !forSession.includes(item) && !recurring.includes(item),
+  );
 
   return (
-    <div className="flex flex-col gap-10 sm:gap-16">
-      <header className="flex flex-col gap-3">
-        <div>
-          <Link
-            href="/pacientes"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-surface px-3 font-utility text-label-md font-bold text-primary transition-[background-color,transform] duration-140 hover:bg-subtle active:scale-[0.98]"
-            aria-label="Voltar para todos os pacientes"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-4"
-              aria-hidden="true"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Voltar
-          </Link>
+    <div className="flex flex-col gap-14 sm:gap-16">
+      {/* ================= Masthead ================= */}
+      <header className="reveal flex flex-col gap-6 pt-2">
+        <Link
+          href="/pacientes"
+          className="type-ui inline-flex min-h-11 items-center gap-2 self-start text-ui text-secondary transition-colors hover:text-primary"
+        >
+          <Icon name="back" size={16} />
+          Todos os acompanhamentos
+        </Link>
+
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-10">
+          <div className="flex flex-col gap-3">
+            <p className="type-eyebrow text-tertiary">Acompanhamento</p>
+            <h1 className="font-editorial text-h1-editorial text-balance text-primary">
+              {name}
+            </h1>
+          </div>
+
+          <MetaStrip
+            className="md:justify-end"
+            items={[
+              active ? "Vínculo ativo" : "Vínculo encerrado",
+              connection.activated_at
+                ? `desde ${formatDate(connection.activated_at)}`
+                : null,
+              pluralize(reports.length, "contexto recebido", "contextos recebidos"),
+            ]}
+          />
         </div>
-        <Overline>Acompanhamento</Overline>
-        <div className="flex flex-wrap items-center gap-3">
-          <PageTitle>{connection.patient_display_name ?? "Paciente"}</PageTitle>
-          <Badge tone={active ? "success" : "neutral"}>
-            {active ? "Ativo" : "Encerrado"}
-          </Badge>
-        </div>
-        {connection.activated_at && (
-          <Metadata>Desde {formatDate(connection.activated_at)}</Metadata>
-        )}
       </header>
 
-      <section className="flex flex-col gap-3">
-        <Overline as="h2" className="text-secondary">
-          O que este paciente compartilha
-        </Overline>
-        <div className="flex flex-wrap gap-2">
-          {connection.consent_scopes.length === 0 ? (
-            <Badge tone="warning">Nada autorizado</Badge>
-          ) : (
-            connection.consent_scopes.map((scope) => (
-              <Badge key={scope} tone="brand">
-                {SCOPE_LABEL[scope] ?? scope}
-              </Badge>
-            ))
+      {/* ================= 8 / 4 ================= */}
+      <div className="grid gap-x-6 gap-y-14 lg:grid-cols-12 lg:gap-y-16">
+        {/* ---------- 8 colunas: leitura ---------- */}
+        <div className="flex flex-col gap-14 lg:col-span-8 lg:gap-16">
+          {contexts.error && (
+            <Alert tone="danger">{describeError(contexts.error).message}</Alert>
           )}
-        </div>
-        <Prose>
-          <p className="text-secondary">
-            O histórico de conversas não é acessível — por decisão de produto,
-            não por limitação técnica.
-          </p>
-        </Prose>
-      </section>
 
-      {latestReport && (
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <Overline as="h2" className="text-secondary">
-                Leitura mais recente
-              </Overline>
-              <p className="mt-1 font-editorial text-heading-lg text-primary">
-                {formatPeriod(latestReport.period_start, latestReport.period_end)}
+          {contexts.isPending && <Skeleton className="h-64" aria-label="Carregando contexto" />}
+
+          {!contexts.isPending && !latest && (
+            <section className="flex flex-col items-start gap-5 py-8">
+              <h2 className="max-w-[22ch] font-editorial text-h2 text-balance text-primary">
+                Nenhum contexto recebido ainda.
+              </h2>
+              <p className="measure text-body-l text-secondary">
+                Solicite um período ao lado. O contexto aparece depois que a
+                pessoa confirma o envio em Minha rede, nunca antes.
               </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setSelectedReport(latestReport)}
-            >
-              Abrir relatório
-            </Button>
-          </div>
-          <ObservationMap report={latestReport} compact />
-        </section>
-      )}
+            </section>
+          )}
 
-      {active && (
-        <section className="flex flex-col gap-4">
-          <Overline as="h2" className="text-secondary">
-            Solicitar relatório
-          </Overline>
-
-          {!subscription.active ? (
-            <Alert
-              tone="danger"
-              title={subscription.label}
-              action={
-                <Link
-                  href="/conta"
-                  className={buttonStyles({ variant: "secondary", size: "sm" })}
+          {latest && (
+            <>
+              {/* --- Briefing do período: a capa interna (§22) --- */}
+              <section className="reveal reveal-1 flex flex-col gap-6">
+                <SectionIndex
+                  index="01"
+                  meta={completenessLabel(latest.coverage.completeness)}
+                  action={
+                    <Button
+                      size="sm"
+                      variant="text"
+                      onClick={() => setSelectedReport(latest)}
+                    >
+                      Contexto completo
+                    </Button>
+                  }
                 >
-                  Ver assinatura
-                </Link>
-              }
-            >
-              Novos relatórios de contexto só podem ser solicitados com uma
-              assinatura vigente. O vínculo continua ativo e os relatórios já
-              gerados seguem acessíveis abaixo.
-            </Alert>
-          ) : !hasConsent ? (
-            <Alert tone="warning" title="Sem autorização para relatórios">
-              Este paciente não autorizou o compartilhamento de relatórios de
-              período. Converse com ele — a permissão é revogável e ele pode
-              reativá-la a qualquer momento.
-            </Alert>
-          ) : (
-            <Card variant="standard" className="gap-4">
-              <form onSubmit={handleRequest} className="flex flex-col gap-4" noValidate>
-                {request.error && (
-                  <Alert tone="danger">{describeError(request.error).message}</Alert>
+                  Resumo do período
+                </SectionIndex>
+
+                <p className="type-display text-h1-system text-primary">
+                  {formatPeriod(latest.period_start, latest.period_end)}
+                </p>
+
+                <div className="flex flex-col gap-4">
+                  <ProvenanceLabel kind="organized" />
+                  <p className="measure font-editorial text-body-l text-primary">
+                    {latest.summary}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-6 gap-y-6 border-t border-hairline pt-6 sm:grid-cols-3">
+                  <StatBlock
+                    size="sm"
+                    label="Dias com registro"
+                    value={latest.coverage.active_day_count}
+                    context="no período declarado"
+                  />
+                  <StatBlock
+                    size="sm"
+                    label="Conversas"
+                    value={latest.coverage.conversation_count}
+                    context="base desta leitura"
+                  />
+                  <StatBlock
+                    size="sm"
+                    label="Pontos observados"
+                    value={included.length}
+                    context="organizados a partir de relatos"
+                  />
+                </div>
+
+                {latest.coverage.note && (
+                  <p className="type-meta text-tertiary">{latest.coverage.note}</p>
                 )}
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                {previous && (
+                  <ComparisonNote
+                    basis={`${formatPeriod(latest.period_start, latest.period_end)} · período anterior: ${formatPeriod(previous.period_start, previous.period_end)}`}
+                  >
+                    O período anterior registrou{" "}
+                    {previous.coverage.active_day_count} dias com registro e{" "}
+                    {previous.items.filter((item) => item.included).length} pontos
+                    observados. A comparação é de cobertura e volume de relato,
+                    não de estado da pessoa.
+                  </ComparisonNote>
+                )}
+              </section>
+
+              {/* --- Acontecimentos na linha do tempo (§20) --- */}
+              {latest.timeline.length > 0 && (
+                <section className="reveal reveal-2 flex flex-col gap-6">
+                  <SectionIndex
+                    index="02"
+                    meta={pluralize(
+                      latest.timeline.length,
+                      "acontecimento",
+                      "acontecimentos",
+                    )}
+                  >
+                    Acontecimentos
+                  </SectionIndex>
+
+                  <TimelineRail>
+                    {latest.timeline.map((entry, index) => (
+                      <TimelineEvent
+                        key={entry.id}
+                        date={
+                          entry.occurred_at
+                            ? formatDayMark(entry.occurred_at)
+                            : "sem data"
+                        }
+                        last={index === latest.timeline.length - 1}
+                        provenance={
+                          index === 0 ? <ProvenanceLabel kind="organized" /> : undefined
+                        }
+                      >
+                        {entry.description}
+                      </TimelineEvent>
+                    ))}
+                  </TimelineRail>
+                </section>
+              )}
+
+              {/* --- Recorrências: faixa, não catorze pontos (§20) --- */}
+              {recurring.length > 0 && (
+                <section className="reveal reveal-3 flex flex-col gap-4">
+                  <SectionIndex index="03" meta="mencionado repetidamente">
+                    Recorrências relatadas
+                  </SectionIndex>
+
+                  <ul className="flex flex-col gap-6">
+                    {recurring.map((item) => (
+                      <li
+                        key={item.id}
+                        className={`flex flex-col gap-2 border-l-2 pl-5 ${RULE[KIND_FAMILY[item.kind] ?? "fogblue"]}`}
+                      >
+                        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                          <h3 className="font-editorial text-body-l text-primary">
+                            {item.title}
+                          </h3>
+                          <span className="type-meta text-tertiary">
+                            {itemKindLabel(item.kind)}
+                          </span>
+                        </div>
+                        <p className="measure text-body text-secondary">
+                          {item.description}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* --- Demais pontos observados --- */}
+              {others.length > 0 && (
+                <section className="reveal reveal-4 flex flex-col gap-2">
+                  <SectionIndex index="04" meta="organizados a partir de relatos">
+                    Outros pontos
+                  </SectionIndex>
+
+                  <div className="flex flex-col">
+                    {others.map((item, index) => (
+                      <StoryBlock
+                        key={item.id}
+                        headline={item.title}
+                        flush={index === others.length - 1}
+                        provenance={<ProvenanceLabel kind="organized" />}
+                        meta={
+                          <MetaStrip
+                            items={[
+                              itemKindLabel(item.kind),
+                              evidenceLabel(item.evidence_strength),
+                              item.emotional_valence
+                                ? emotionalValenceLabel(item.emotional_valence)
+                                : null,
+                            ]}
+                          />
+                        }
+                        source={
+                          item.limitations.length > 0 ? (
+                            <SourceTrace
+                              count={item.limitations.length}
+                              label="Ver limitações registradas"
+                              onClick={() => setSelectedReport(latest)}
+                            />
+                          ) : undefined
+                        }
+                      >
+                        {item.description}
+                        {item.impact && (
+                          <span className="mt-2 block text-tertiary">{item.impact}</span>
+                        )}
+                      </StoryBlock>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+
+          {/* --- Contextos anteriores --- */}
+          {sortedReports.length > 1 && (
+            <section className="flex flex-col gap-2">
+              <SectionIndex meta="do mais recente ao mais antigo">
+                Contextos anteriores
+              </SectionIndex>
+
+              <EditorialList as="ul" className="border-t-0">
+                {sortedReports.slice(1).map((report) => (
+                  <li key={report.id}>
+                    <EditorialRow
+                      onClick={() => setSelectedReport(report)}
+                      lead={formatDayMark(report.period_end)}
+                      title={formatPeriod(report.period_start, report.period_end)}
+                      meta={
+                        <MetaStrip
+                          className="md:justify-end"
+                          items={[
+                            `recebido em ${formatDate(report.created_at)}`,
+                            pluralize(
+                              report.items.filter((item) => item.included).length,
+                              "ponto",
+                              "pontos",
+                            ),
+                          ]}
+                        />
+                      }
+                    >
+                      <span className="line-clamp-2">{report.summary}</span>
+                    </EditorialRow>
+                  </li>
+                ))}
+              </EditorialList>
+            </section>
+          )}
+        </div>
+
+        {/* ---------- 4 colunas: instrumento e controle ---------- */}
+        <aside className="flex flex-col gap-10 lg:col-span-4 lg:sticky lg:top-6 lg:self-start lg:border-l lg:border-hairline lg:pl-8">
+          {/* Para a sessão — o painel pastel da coluna (§22). */}
+          {forSession.length > 0 && (
+            <PaperPanel
+              family="ochre"
+              eyebrow="Para a sessão"
+              title="O que a pessoa marcou como prioridade"
+            >
+              <ul className="flex flex-col gap-4">
+                {forSession.map((item) => (
+                  <li key={item.id} className="flex flex-col gap-1">
+                    <p className="font-editorial text-body-l text-on-panel">
+                      {item.title}
+                    </p>
+                    <p className="type-meta text-on-panel-muted">
+                      {itemKindLabel(item.kind)} ·{" "}
+                      {evidenceLabel(item.evidence_strength)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </PaperPanel>
+          )}
+
+          {/* Vínculo e permissões — índice, não card corporativo (§34). */}
+          <section className="flex flex-col gap-4">
+            <SectionIndex>O que é compartilhado</SectionIndex>
+
+            {connection.consent_scopes.length === 0 ? (
+              <p className="text-body text-secondary">
+                Nada autorizado no momento.
+              </p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-hairline">
+                {(["summaries", "events", "marked_topics"] as ConsentScope[]).map(
+                  (scope) => {
+                    const granted = connection.consent_scopes.includes(scope);
+                    return (
+                      <li
+                        key={scope}
+                        className="flex items-center justify-between gap-3 py-3"
+                      >
+                        <span className="type-ui min-w-0 text-ui break-words text-primary">
+                          {SCOPE_LABEL[scope]}
+                        </span>
+                        {/* Estado por ícone + palavra, nunca só por cor (§29). */}
+                        <span
+                          className={
+                            granted
+                              ? "type-meta flex shrink-0 items-center gap-1.5 text-positive"
+                              : "type-meta flex shrink-0 items-center gap-1.5 text-tertiary"
+                          }
+                        >
+                          <Icon name={granted ? "confirm" : "close"} size={16} />
+                          {granted ? "autorizado" : "não autorizado"}
+                        </span>
+                      </li>
+                    );
+                  },
+                )}
+              </ul>
+            )}
+
+            <p className="type-meta text-tertiary">
+              O histórico de conversas não é acessível por decisão de
+              produto, não por limitação técnica.
+            </p>
+          </section>
+
+          {/* Solicitar contexto — formulário direto no grid (§15, §18). */}
+          {active && (
+            <section className="flex flex-col gap-4">
+              <SectionIndex>Solicitar um período</SectionIndex>
+
+              {!subscription.active ? (
+                <Alert
+                  tone="danger"
+                  title={subscription.label}
+                  action={
+                    <Link
+                      href="/conta"
+                      className={buttonStyles({ variant: "secondary", size: "sm" })}
+                    >
+                      Ver assinatura
+                    </Link>
+                  }
+                >
+                  Novos contextos só podem ser solicitados com assinatura
+                  vigente. O vínculo continua ativo e o que já foi recebido
+                  segue acessível.
+                </Alert>
+              ) : !hasConsent ? (
+                <Alert tone="warning" title="Sem autorização para contextos">
+                  Esta pessoa não autoriza o compartilhamento de contextos de
+                  período. A permissão é dela e pode ser reativada a qualquer
+                  momento.
+                </Alert>
+              ) : requesting ? (
+                <form onSubmit={handleRequest} className="flex flex-col gap-4" noValidate>
+                  {request.error && (
+                    <Alert tone="danger">{describeError(request.error).message}</Alert>
+                  )}
+
                   <TextField
                     label="Início do período"
                     type="date"
@@ -278,127 +620,88 @@ function Paciente({ connectionId }: { connectionId: string }) {
                     required
                     error={periodError ?? undefined}
                   />
-                </div>
 
-                <Button
-                  type="submit"
-                  loading={request.isPending}
-                  disabled={periodError !== null || !canRequest}
-                >
-                  Enviar solicitação ao paciente
-                </Button>
-              </form>
-
-              {createdRequestId && (
-                <div className="flex flex-col gap-3 border-t border-border-subtle pt-4">
-                  <Alert tone="success" title="Solicitação enviada">
-                    O período foi enviado para o paciente. A IA só prepara o
-                    relatório depois que ele confirmar em Minha rede.
-                  </Alert>
-                  <div>
-                    <Button size="sm" variant="tertiary" onClick={() => setCreatedRequestId(null)}>
-                      Fechar aviso
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      type="submit"
+                      loading={request.isPending}
+                      disabled={periodError !== null || !canRequest}
+                    >
+                      Enviar solicitação
+                    </Button>
+                    <Button variant="text" onClick={() => setRequesting(false)}>
+                      Cancelar
                     </Button>
                   </div>
+                </form>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <p className="text-body text-secondary">
+                    A pessoa recebe o período e decide se envia. Nada é
+                    preparado antes disso.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    className="self-start"
+                    onClick={() => setRequesting(true)}
+                  >
+                    Escolher período
+                  </Button>
                 </div>
               )}
-            </Card>
+
+              {createdRequestId && (
+                <Alert tone="success" title="Solicitação enviada">
+                  O período foi enviado. O contexto só é preparado depois que a
+                  pessoa confirmar em Minha rede.
+                </Alert>
+              )}
+
+              {reportRequests.data && reportRequests.data.requests.length > 0 && (
+                <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
+                  {reportRequests.data.requests.map((item) => (
+                    <li key={item.id} className="flex flex-col gap-1 py-3">
+                      <span className="type-meta text-tertiary">
+                        {formatPeriod(item.period_start, item.period_end)}
+                      </span>
+                      <span className="type-ui text-ui-sm text-primary">
+                        {item.status === "sent"
+                          ? "Contexto recebido"
+                          : item.status === "pending"
+                            ? "Aguardando a pessoa"
+                            : item.status === "processing"
+                              ? "Em preparação"
+                              : "Não concluído"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           )}
 
-          {reportRequests.data && reportRequests.data.requests.length > 0 && (
-            <ul className="flex flex-col gap-2">
-              {reportRequests.data.requests.map((item) => (
-                <Card key={item.id} as="li" variant="compact" className="gap-2">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <Metadata>{formatPeriod(item.period_start, item.period_end)}</Metadata>
-                    <Badge tone={item.status === "sent" ? "success" : item.status === "pending" ? "warning" : "neutral"}>
-                      {item.status === "sent"
-                        ? "Relatório recebido"
-                        : item.status === "pending"
-                          ? "Aguardando paciente"
-                          : item.status === "processing"
-                            ? "Em preparação"
-                            : "Não concluído"}
-                    </Badge>
-                  </div>
-                  <Metadata>Solicitado em {formatDate(item.requested_at)}</Metadata>
-                </Card>
-              ))}
-            </ul>
+          {active && (
+            <section className="flex flex-col gap-3 border-t border-hairline pt-6">
+              <p className="type-eyebrow text-tertiary">Encerrar</p>
+              <p className="text-body text-secondary">
+                O vínculo termina e os consentimentos são revogados.
+              </p>
+              <Button
+                variant="danger"
+                className="self-start"
+                onClick={() => setConfirmingEnd(true)}
+              >
+                Encerrar acompanhamento
+              </Button>
+            </section>
           )}
-        </section>
-      )}
-
-      <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
-          Relatórios gerados
-        </Overline>
-
-        {contexts.error && (
-          <Alert tone="danger">{describeError(contexts.error).message}</Alert>
-        )}
-        {contexts.isPending && (
-          <Skeleton className="h-40" aria-label="Carregando relatórios" />
-        )}
-
-        {!contexts.isPending && reports.length === 0 && (
-          <EmptyState
-            title="Nenhum relatório gerado ainda."
-            description="Envie uma solicitação acima. O relatório aparecerá depois que o paciente confirmar o envio em Minha rede."
-          />
-        )}
-
-        {sortedReports.length > 0 && (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {sortedReports.map((report) => (
-              <li key={report.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedReport(report)}
-                  className="group flex min-h-24 w-full items-center justify-between gap-4 rounded-lg bg-card px-4 py-3.5 text-left transition-[background-color,transform] duration-200 ease-sinapsa hover:-translate-y-0.5 hover:bg-brand-surface active:translate-y-0"
-                  aria-label={`Abrir relatório do período ${formatPeriod(report.period_start, report.period_end)}`}
-                >
-                  <div className="min-w-0">
-                    <Overline as="span" className="text-brand">
-                      Período analisado
-                    </Overline>
-                    <span className="mt-1 block font-editorial text-heading-md font-semibold leading-tight text-primary">
-                      {formatPeriod(report.period_start, report.period_end)}
-                    </span>
-                    <Metadata className="mt-2 block">
-                      Recebido em {formatDate(report.created_at)}
-                    </Metadata>
-                  </div>
-                  <span
-                    aria-hidden="true"
-                    className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-surface font-utility text-lg text-brand transition-transform group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {active && (
-        <section className="flex flex-col gap-4 border-t border-border-subtle pt-8">
-          <Overline as="h2" className="text-secondary">
-            Encerrar acompanhamento
-          </Overline>
-          <div>
-            <Button variant="danger" onClick={() => setConfirmingEnd(true)}>
-              Encerrar acompanhamento
-            </Button>
-          </div>
-        </section>
-      )}
+        </aside>
+      </div>
 
       <Modal
         open={selectedReport !== null}
         onClose={() => setSelectedReport(null)}
-        title={selectedReport?.title ?? "Relatório"}
+        title={selectedReport?.title ?? "Contexto"}
         description={
           selectedReport
             ? formatPeriod(selectedReport.period_start, selectedReport.period_end)
@@ -422,14 +725,14 @@ function Paciente({ connectionId }: { connectionId: string }) {
         open={confirmingEnd}
         onClose={() => setConfirmingEnd(false)}
         title="Encerrar este acompanhamento?"
-        description="O vínculo termina e os consentimentos são revogados. Você deixa de poder solicitar novos relatórios."
+        description="O vínculo termina e os consentimentos são revogados. Você deixa de poder solicitar novos contextos."
         footer={
           <>
-            <Button variant="tertiary" onClick={() => setConfirmingEnd(false)}>
+            <Button variant="text" onClick={() => setConfirmingEnd(false)}>
               Manter
             </Button>
             <Button
-              variant="danger"
+              variant="danger-solid"
               loading={endConnection.isPending}
               onClick={async () => {
                 await endConnection.mutateAsync(connectionId);

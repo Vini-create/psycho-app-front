@@ -48,7 +48,7 @@ export default function EntrarPage() {
       footer={
         <p className="max-w-none">
           Ainda não tem conta?{" "}
-          <Link href="/criar-conta" className="font-utility font-bold text-brand underline">
+          <Link href="/criar-conta" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
             Criar conta
           </Link>
         </p>
@@ -84,7 +84,7 @@ export default function EntrarPage() {
 
         <Link
           href="/recuperar-senha"
-          className="self-start font-utility text-label-md font-bold text-brand underline"
+          className="touch-target self-start type-ui text-ui font-semibold text-accent underline underline-offset-4"
         >
           Esqueci minha senha
         </Link>

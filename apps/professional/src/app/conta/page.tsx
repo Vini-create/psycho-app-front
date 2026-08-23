@@ -5,17 +5,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   Alert,
+  Icon,
+  MetaStrip,
+  describeDevice,
   Badge,
   Button,
   Card,
   CardMeta,
   CardTitle,
-  Metadata,
   Modal,
-  Overline,
-  PageTitle,
+  Masthead,
+  SectionIndex,
   Skeleton,
-  ThemeToggle,
   buttonStyles,
   formatDateTime,
 } from "@sinapsa/ui";
@@ -63,19 +64,20 @@ function Conta() {
   }
 
   return (
-    <div className="flex flex-col gap-10 sm:gap-16">
-      <header className="flex flex-col gap-3">
-        <Overline>Conta</Overline>
-        <PageTitle>{account?.display_name}</PageTitle>
-        <Metadata>{account?.email}</Metadata>
-      </header>
+    <div className="flex flex-col gap-12 sm:gap-14">
+      <Masthead
+        className="reveal pt-2"
+        eyebrow="Conta"
+        tone="editorial"
+        meta={<MetaStrip className="md:justify-end" items={[account?.email]} />}
+      >
+        {account?.display_name}
+      </Masthead>
 
       {actionError && <Alert tone="danger">{actionError}</Alert>}
 
       <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
-          Perfil
-        </Overline>
+        <SectionIndex index="01">Perfil</SectionIndex>
         <div>
           <Link href="/onboarding" className={buttonStyles({ variant: "secondary" })}>
             Editar perfil profissional
@@ -84,9 +86,7 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
-          Chaves de acesso
-        </Overline>
+        <SectionIndex index="02" meta="entrada sem senha">Chaves de acesso</SectionIndex>
 
         {passkeys.error && (
           <Alert tone="danger">{describeError(passkeys.error).message}</Alert>
@@ -99,7 +99,7 @@ function Conta() {
           {passkeyList.map((passkey) => (
             <Card key={passkey.id} as="li" variant="compact" className="gap-2">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <CardTitle className="text-body-lg">{passkey.label}</CardTitle>
+                <CardTitle className="text-body-l">{passkey.label}</CardTitle>
                 {passkeyList.length === 1 && <Badge tone="warning">Única chave</Badge>}
               </div>
               <CardMeta>
@@ -128,7 +128,7 @@ function Conta() {
 
         {passkeyList.length === 1 && (
           <p className="metadata max-w-none text-secondary">
-            Cadastre uma segunda chave antes de remover esta — sem nenhuma
+            Cadastre uma segunda chave antes de remover esta, sem nenhuma
             chave você perde o acesso à conta.
           </p>
         )}
@@ -154,12 +154,12 @@ function Conta() {
         )}
 
         {newCodes && (
-          <Alert tone="warning" title="Novos códigos — mostrados uma única vez">
+          <Alert tone="warning" title="Novos códigos mostrados uma única vez">
             <div className="flex flex-col gap-3">
               <ul className="grid gap-2 sm:grid-cols-2">
                 {newCodes.map((code) => (
                   <li key={code}>
-                    <Metadata className="text-warning">{code}</Metadata>
+                    <span className="type-meta block text-notice">{code}</span>
                   </li>
                 ))}
               </ul>
@@ -171,7 +171,7 @@ function Conta() {
                 >
                   Copiar códigos
                 </Button>
-                <Button size="sm" variant="tertiary" onClick={() => setNewCodes(null)}>
+                <Button size="sm" variant="text" onClick={() => setNewCodes(null)}>
                   Já guardei
                 </Button>
               </div>
@@ -181,30 +181,51 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
-          Sessões ativas
-        </Overline>
+        <SectionIndex index="03" meta="você pode encerrar qualquer uma">Sessões ativas</SectionIndex>
 
         {sessions.isPending && (
           <Skeleton className="h-32" aria-label="Carregando sessões" />
         )}
 
-        <ul className="flex flex-col gap-4">
-          {sessions.data?.sessions.map((session) => (
-            <Card key={session.id} as="li" variant="compact" className="gap-2">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <CardTitle className="text-body-lg">
-                  {session.user_agent || "Aparelho desconhecido"}
-                </CardTitle>
-                <div className="flex gap-2">
-                  {session.mfa_verified && <Badge tone="success">Chave verificada</Badge>}
-                  {session.current_session && <Badge tone="brand">Esta sessão</Badge>}
+        {/* §20 — identificação legível primeiro; cabeçalho HTTP em expansão. */}
+        <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
+          {sessions.data?.sessions.map((session) => {
+            const device = describeDevice(session.user_agent);
+            return (
+            <li key={session.id} className="flex flex-col gap-2 py-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <span className="font-editorial text-h3 text-primary">
+                  {device.label}
+                </span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  {session.mfa_verified && (
+                    <span className="type-meta flex items-center gap-1.5 text-positive">
+                      <Icon name="confirm" size={16} />
+                      chave verificada
+                    </span>
+                  )}
+                  {session.current_session && (
+                    <span className="type-meta text-accent">esta sessão</span>
+                  )}
                 </div>
               </div>
-              <CardMeta>
-                Último acesso em {formatDateTime(session.last_used_at)} ·{" "}
-                {session.last_used_ip}
-              </CardMeta>
+
+              <MetaStrip
+                items={[
+                  `último acesso ${formatDateTime(session.last_used_at)}`,
+                  session.last_used_ip,
+                ]}
+              />
+
+              <details className="group">
+                <summary className="type-meta inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-tertiary transition-colors hover:text-secondary">
+                  <Icon name="expand" size={16} className="transition-transform group-open:rotate-180" />
+                  Detalhes técnicos
+                </summary>
+                <p className="type-meta pt-1 break-all text-tertiary">
+                  {session.user_agent || "sem identificação enviada"}
+                </p>
+              </details>
               {!session.current_session && (
                 <div className="pt-1">
                   <Button
@@ -216,22 +237,14 @@ function Conta() {
                   </Button>
                 </div>
               )}
-            </Card>
-          ))}
+            </li>
+            );
+          })}
         </ul>
       </section>
 
       <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
-          Aparência
-        </Overline>
-        <ThemeToggle />
-      </section>
-
-      <section className="flex flex-col gap-4 border-t border-border-subtle pt-8">
-        <Overline as="h2" className="text-secondary">
-          Sair
-        </Overline>
+        <SectionIndex index="04">Sair</SectionIndex>
         <div className="flex flex-wrap gap-3">
           <Button variant="secondary" onClick={signOut}>
             Sair desta sessão
@@ -259,7 +272,7 @@ function Conta() {
         description="Todos os códigos anteriores deixam de funcionar imediatamente. Os novos serão mostrados uma única vez."
         footer={
           <>
-            <Button variant="tertiary" onClick={() => setConfirmingRegenerate(false)}>
+            <Button variant="text" onClick={() => setConfirmingRegenerate(false)}>
               Cancelar
             </Button>
             <Button

@@ -1,7 +1,13 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
 import { cx } from "../lib/cx";
 
-/** Archivo Narrow 700, caixa alta, tracking 0.10em. Nomeia a seção. */
+/* Compatibilidade V1. O V2 tem lugares próprios para cada uma destas
+   funções — <SectionIndex /> abre seção, <MetaStrip /> alinha metadata,
+   <Masthead /> abre tela. Estes três seguem exportados porque telas ainda
+   não migradas dependem deles; código novo deve usar os componentes
+   editoriais. */
+
+/** Eyebrow mono em caixa alta. Nomeia a seção. */
 export function Overline({
   children,
   className,
@@ -13,13 +19,13 @@ export function Overline({
   as?: ElementType;
 }) {
   return (
-    <Tag {...rest} className={cx("type-overline text-brand", className)}>
+    <Tag {...rest} className={cx("type-eyebrow text-accent", className)}>
       {children}
     </Tag>
   );
 }
 
-/** Source Code Pro 500. Data, hora, id técnico, medida — nunca leitura longa. */
+/** IBM Plex Mono. Data, hora, id técnico, período — nunca leitura longa. */
 export function Metadata({
   children,
   className,
@@ -31,13 +37,13 @@ export function Metadata({
   as?: ElementType;
 }) {
   return (
-    <Tag {...rest} className={cx("metadata text-secondary", className)}>
+    <Tag {...rest} className={cx("type-meta text-tertiary", className)}>
       {children}
     </Tag>
   );
 }
 
-/** Título editorial em STIX. O tamanho vem do token, não de classe solta. */
+/** Título editorial em Newsreader. O tamanho vem do token. */
 export function PageTitle({
   children,
   className,
@@ -52,7 +58,7 @@ export function PageTitle({
     <Tag
       {...rest}
       className={cx(
-        "font-editorial text-display-md font-normal tracking-[-0.025em] text-primary text-balance",
+        "font-editorial text-h1-editorial text-balance text-primary",
         className,
       )}
     >
@@ -74,7 +80,7 @@ export function Prose({
     <div
       {...rest}
       className={cx(
-        "flex flex-col gap-4 font-editorial text-body-md text-primary",
+        "flex flex-col gap-4 text-body text-primary",
         className,
       )}
     >

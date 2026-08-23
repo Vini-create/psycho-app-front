@@ -23,7 +23,7 @@ if (designMock && typeof window !== "undefined") {
   console.info(
     "%cSinapsa · modo de desenho",
     "font-weight:bold",
-    "— dados mocados, sem backend. Nenhuma alteração visual em relação ao original.",
+    "dados mocados, sem backend. Nenhuma alteração visual em relação ao original.",
   );
 }
 

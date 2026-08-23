@@ -27,7 +27,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         className="flex min-h-dvh items-center justify-center gap-3 text-secondary"
       >
         <Spinner className="text-[1.5rem]" />
-        <span className="font-utility text-label-md font-bold">
+        <span className="type-ui text-ui font-semibold">
           Abrindo seu espaço…
         </span>
       </div>

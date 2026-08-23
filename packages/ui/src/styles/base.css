@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Sinapsa — camada base
-   Aplica as regras globais de design.md que não pertencem a um componente.
+   Sinapsa — camada base V2
+   Regras globais do Brand Book V2 que não pertencem a um componente.
    ========================================================================== */
 
 @layer base {
@@ -8,21 +8,23 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: var(--bg-canvas);
+    background-color: var(--surface-page);
     color: var(--text-primary);
-    font-family: var(--font-editorial);
-    font-size: var(--text-body-md);
-    line-height: 1.55;
+    /* V2: o corpo é UI sans. A serif é escolha explícita de narrativa,
+       não o padrão da aplicação — brandbook §05. */
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    line-height: 1.45;
     /* Nenhuma tela pode quebrar em 320 CSS px. */
     min-width: 320px;
   }
 
   /* Scrollbars discretas: o trilho desaparece e o thumb preserva área de
-     clique sem parecer uma barra pesada. Firefox usa as propriedades padrão;
-     Chromium e Safari recebem o acabamento WebKit abaixo. */
+     clique sem parecer uma barra pesada. */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -50,26 +52,23 @@
     background-color: var(--scrollbar-thumb-hover);
   }
 
-  /* Foco: borda roxa + anel externo de 3px, sempre visível.
-     design.md §7 — foco nunca some, nem em mouse. */
+  /* Foco: 2px com offset 2 — brandbook §09 e §15.
+     Nunca removido sem substituição. */
   :focus-visible {
-    outline: 3px solid var(--focus-ring);
+    outline: 2px solid var(--border-focus);
     outline-offset: 2px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs);
   }
 
-  /* Só removemos o outline nativo de quem já recebe :focus-visible acima. */
   :focus:not(:focus-visible) {
     outline: none;
   }
 
   ::selection {
-    background-color: var(--surface-brand-strong);
-    color: var(--text-primary);
+    background-color: var(--accent-lavender);
+    color: var(--ink-100);
   }
 
-  /* Nimbus foi substituída por Archivo Narrow; a função na hierarquia é a mesma:
-     a condensada organiza a função, a serif conduz a leitura. */
   button,
   input,
   select,
@@ -78,23 +77,29 @@
     color: inherit;
   }
 
-  /* Linha de leitura 45–75 caracteres, alvo 60–68. */
+  /* Medida de leitura 55–70 caracteres — brandbook §29. */
   p {
     max-width: 68ch;
   }
 
-  /* Títulos podem ultrapassar a medida de leitura. */
   h1, h2, h3, h4, h5, h6 {
     max-width: none;
     text-wrap: balance;
   }
 
-  hr {
-    border: 0;
-    border-top: 1px solid var(--border-subtle);
+  /* Números tabulares em toda metadata: datas e contagens não devem
+     "dançar" ao atualizar. */
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
   }
 
-  /* design.md §9 — respeitar prefers-reduced-motion sem exceção. */
+  hr {
+    border: 0;
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  /* Brandbook §27 — reduced motion sem exceção. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -108,30 +113,64 @@
 }
 
 @layer utilities {
-  /* Overline: Archivo 700, caixa alta, tracking 0.10em.
-     Chamado `type-overline` e não `overline` porque o Tailwind já define
-     uma utility `overline` (text-decoration-line: overline) — as duas
-     aplicavam juntas e desenhavam um risco acima do texto. */
-  .type-overline {
-    font-family: var(--font-utility);
-    font-size: var(--text-label-md);
-    font-weight: 700;
-    line-height: 1.15;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
+  /* ------------------------------------------------------------------
+     Microtipografia. É uma das assinaturas do sistema — brandbook §16.
+     ------------------------------------------------------------------ */
 
-  /* Metadado: Source Code Pro, tracking 0–0.04em. */
-  .metadata {
+  /* MetaLabel: IBM Plex Mono, +0.06em. Datas, índices, períodos, IDs. */
+  .type-meta {
     font-family: var(--font-mono);
-    font-size: var(--text-caption);
+    font-size: var(--text-meta);
     font-weight: 500;
-    line-height: 1.4;
-    letter-spacing: 0.02em;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
   }
 
-  /* Alvo de toque mínimo 44×44px sem inflar o visual do controle. */
+  /* Eyebrow: o rótulo em caixa alta que abre uma seção editorial.
+     Caixa alta é permitida aqui e em índices — nunca em título narrativo. */
+  .type-eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Display: Archivo apertado. Mastheads, números grandes, contagens. */
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Editorial: Newsreader. Narrativa, títulos humanos, resposta da IA. */
+  .type-editorial {
+    font-family: var(--font-editorial);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* UI: Instrument Sans. Controles, labels, navegação. */
+  .type-ui {
+    font-family: var(--font-ui);
+    font-weight: 500;
+  }
+
+  /* Medida de leitura explícita, quando o elemento não é <p>. */
+  .measure {
+    max-width: 68ch;
+  }
+
+  .measure-narrow {
+    max-width: 54ch;
+  }
+
+  /* Alvo de toque mínimo 44×44 sem inflar o visual do controle — §29. */
   .touch-target {
     position: relative;
   }
@@ -146,48 +185,53 @@
     height: 100%;
   }
 
-  /* Medida de leitura explícita, quando o elemento não é <p>. */
-  .measure {
-    max-width: 68ch;
+  /* Hairline: a divisória padrão do sistema. Borda antes de sombra. */
+  .hairline-t { border-top: 1px solid var(--border-hairline); }
+  .hairline-b { border-bottom: 1px solid var(--border-hairline); }
+  .hairline-l { border-left: 1px solid var(--border-hairline); }
+  .hairline-r { border-right: 1px solid var(--border-hairline); }
+
+  /* ------------------------------------------------------------------
+     Compatibilidade V1. Não usar em código novo.
+     ------------------------------------------------------------------ */
+  .type-overline {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
-  /* Navegação flutuante: vidro sem stroke. A transparência deixa a superfície
-     herdar o contexto da página; blur e saturação preservam legibilidade. */
-  .glass-nav {
-    border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
-    background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
-    -webkit-backdrop-filter: blur(32px) saturate(150%);
-    backdrop-filter: blur(32px) saturate(150%);
-    box-shadow:
-      0 20px 56px -28px rgb(29 25 30 / 0.62),
-      inset 0 1px 0 rgb(255 255 255 / 0.12);
+  .metadata {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
   }
+
+  /* `.reveal` e seus antigos sufixos permanecem como marcadores sem
+     apresentação própria. O AppFrame os orquestra com GSAP para que a
+     folha e o conteúdo compartilhem a mesma timeline. Sem JS, tudo segue
+     visível — movimento nunca é requisito para ler ou operar a página. */
 }
 
+
 @layer base {
-  /* design.md §2 — reduzir ou remover textura em alto contraste e
-     prefers-reduced-transparency. */
+  /* Brandbook §11 — a textura é acabamento. Some quando o usuário pede
+     menos transparência ou mais contraste, e a tela precisa continuar
+     inteira sem ela (§35). */
   @media (prefers-reduced-transparency: reduce) {
     [data-texture] {
       display: none !important;
-    }
-
-    .glass-nav {
-      background: var(--bg-elevated);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
     }
   }
 
   @media (prefers-contrast: more) {
     [data-texture] {
       display: none !important;
-    }
-
-    .glass-nav {
-      background: var(--bg-elevated);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
     }
   }
 }

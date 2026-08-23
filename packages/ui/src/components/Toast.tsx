@@ -24,11 +24,11 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const TONES: Record<Tone, string> = {
-  neutral: "bg-elevated text-primary",
-  brand: "bg-brand-surface text-primary",
+  neutral: "bg-raised text-primary",
+  brand: "bg-panel-lavender text-primary",
   success: "bg-success-surface text-success",
   warning: "bg-warning-surface text-warning",
-  danger: "bg-danger-surface text-danger",
+  danger: "bg-destructive-surface text-destructive",
   info: "bg-info-surface text-info",
 };
 
@@ -60,7 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={toast.id}
             className={cx(
               "pointer-events-auto w-full max-w-sm rounded-md p-4",
-              "text-body-md shadow-overlay",
+              "text-body shadow-overlay",
               TONES[toast.tone],
             )}
           >

@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider, ToastProvider } from "@sinapsa/ui";
+import { ToastProvider } from "@sinapsa/ui";
 import { isApiError } from "@sinapsa/api-client";
 import { SessionProvider } from "./session";
 
@@ -27,11 +27,9 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ToastProvider>
-          <SessionProvider>{children}</SessionProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <ToastProvider>
+        <SessionProvider>{children}</SessionProvider>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

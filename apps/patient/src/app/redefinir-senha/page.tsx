@@ -42,7 +42,7 @@ function RedefinirSenha() {
       title="Escolha uma senha nova."
       description="Ao confirmar, todas as sessões abertas em outros aparelhos serão encerradas."
       footer={
-        <Link href="/entrar" className="font-utility font-bold text-brand underline">
+        <Link href="/entrar" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
           Voltar para entrar
         </Link>
       }

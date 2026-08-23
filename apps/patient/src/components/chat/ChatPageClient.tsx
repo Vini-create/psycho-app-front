@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, EmptyState, Skeleton } from "@sinapsa/ui";
+import { Button, EmptyState, Skeleton, VisuallyHidden } from "@sinapsa/ui";
 import { useConversations, useCreateConversation } from "@/lib/queries";
 import { ChatConversation } from "./ChatConversation";
 
@@ -52,5 +52,17 @@ export function ChatPageClient() {
     );
   }
 
-  return <ChatConversation key={activeId} conversationId={activeId} />;
+  const activeTitle =
+    items.find((item) => item.id === activeId)?.title ?? "Conversa";
+
+  return (
+    <>
+      {/* Toda tela precisa de um h1. Aqui ele é o nome da conversa: visível
+          para leitor de tela, ausente do desenho — o título já está na
+          navegação local, e repeti-lo acima da conversa roubaria a abertura
+          editorial da página. */}
+      <VisuallyHidden as="h1">{activeTitle}</VisuallyHidden>
+      <ChatConversation key={activeId} conversationId={activeId} />
+    </>
+  );
 }

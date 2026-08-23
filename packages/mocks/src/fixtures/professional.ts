@@ -16,8 +16,8 @@ export const profile: ProfessionalProfile = {
   registration_number: "06/123456",
   bio: "Atendo adultos em terapia cognitivo-comportamental, com foco em ansiedade e questões relacionadas a trabalho.",
   certifications: [
-    "Formação em terapia cognitivo-comportamental — Instituto Beck",
-    "Especialização em saúde mental do trabalhador — USP",
+    "Formação em terapia cognitivo-comportamental, Instituto Beck",
+    "Especialização em saúde mental do trabalhador, USP",
   ],
   organization: { id: "org-1", name: "Consultório Rui Andrade" },
   membership: { role: "owner" },

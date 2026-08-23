@@ -56,7 +56,7 @@ function CoveragePulse({
             Ritmo do período
           </Overline>
           <p className="mt-2 flex items-end gap-2">
-            <span className="font-utility text-[3.5rem] leading-[0.82] font-bold tracking-[-0.04em] text-on-inverse">
+            <span className="font-ui text-[3.5rem] leading-[0.82] font-bold tracking-[-0.04em] text-on-inverse">
               {percentage}%
             </span>
             <span className="max-w-[10ch] pb-1 text-sm leading-tight text-on-inverse-muted">
@@ -82,14 +82,14 @@ function CoveragePulse({
 
       <dl className="grid grid-cols-2 gap-3">
         <div className="rounded-md bg-white/10 p-3">
-          <dt className="type-overline text-on-inverse-muted">Mensagens</dt>
-          <dd className="mt-1 font-utility text-xl font-bold text-on-inverse">
+          <dt className="type-eyebrow text-on-inverse-muted">Mensagens</dt>
+          <dd className="mt-1 font-ui text-xl font-bold text-on-inverse">
             {report.coverage.user_message_count}
           </dd>
         </div>
         <div className="rounded-md bg-white/10 p-3">
-          <dt className="type-overline text-on-inverse-muted">Por dia ativo</dt>
-          <dd className="mt-1 font-utility text-xl font-bold text-on-inverse">
+          <dt className="type-eyebrow text-on-inverse-muted">Por dia ativo</dt>
+          <dd className="mt-1 font-ui text-xl font-bold text-on-inverse">
             {messagesPerActiveDay.toLocaleString("pt-BR", {
               maximumFractionDigits: 1,
             })}
@@ -97,7 +97,7 @@ function CoveragePulse({
         </div>
       </dl>
 
-      <p className="font-utility text-label-md font-bold text-on-inverse">
+      <p className="type-ui text-ui font-semibold text-on-inverse">
         {delta === null
           ? "Primeiro período comparável deste acompanhamento."
           : delta === 0
@@ -129,8 +129,8 @@ export function ObservationMap({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Overline as={headingAs}>Mapa do período</Overline>
-          <p className="mt-1 font-editorial text-heading-md font-semibold text-primary">
-            O que apareceu — e quando.
+          <p className="mt-1 font-editorial text-h3 font-semibold text-primary">
+            O que apareceu e quando.
           </p>
         </div>
         <Metadata>
@@ -139,7 +139,7 @@ export function ObservationMap({
       </div>
 
       {grouped.length === 0 ? (
-        <p className="rounded-md bg-surface p-4 text-body-md text-secondary">
+        <p className="rounded-md bg-raised p-4 text-body text-secondary">
           Este relatório não organizou observações individuais.
         </p>
       ) : (
@@ -152,10 +152,10 @@ export function ObservationMap({
                 className="grid items-center gap-2.5"
                 style={{ gridTemplateColumns: compact ? "4.25rem minmax(0, 1fr)" : "5.5rem minmax(0, 1fr)" }}
               >
-                <span className="font-utility text-caption font-bold leading-tight text-secondary">
+                <span className="type-meta leading-tight text-secondary">
                   {group.shortLabel}
                 </span>
-                <div className="relative h-7 rounded-full bg-surface/75">
+                <div className="relative h-7 rounded-full bg-raised/75">
                   {dated.map((item) => {
                     const position = Math.max(
                       3,
@@ -179,7 +179,7 @@ export function ObservationMap({
                     );
                   })}
                   {dated.length === 0 && (
-                    <span className="absolute inset-0 grid place-items-center font-utility text-caption text-secondary">
+                    <span className="absolute inset-0 grid place-items-center type-meta text-secondary">
                       sem data definida
                     </span>
                   )}
@@ -201,7 +201,7 @@ export function ObservationMap({
       )}
 
       {!compact && grouped.length > 0 && (
-        <div className="flex flex-wrap gap-x-4 gap-y-2 font-utility text-caption font-bold text-secondary">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 type-meta text-secondary">
           <span className="inline-flex items-center gap-2">
             <span className="size-3 rounded-full bg-chart-3" aria-hidden="true" />
             Menção pontual
@@ -228,14 +228,14 @@ function ObservationComposition({ report }: { report: ContextReport }) {
     <Card variant="standard" className="min-h-0 gap-5 p-5 sm:p-6">
       <div>
         <Overline as="h4">Composição da leitura</Overline>
-        <p className="mt-1 max-w-[48ch] text-body-md text-secondary">
+        <p className="mt-1 max-w-[48ch] text-body text-secondary">
           Mostra como o relatório organizou os relatos. Não mede frequência,
           intensidade ou gravidade clínica.
         </p>
       </div>
 
       <div
-        className="flex h-4 gap-1 overflow-hidden rounded-full bg-surface"
+        className="flex h-4 gap-1 overflow-hidden rounded-full bg-raised"
         role="img"
         aria-label={groups
           .map((group) => `${group.label}: ${group.items.length}`)
@@ -257,14 +257,14 @@ function ObservationComposition({ report }: { report: ContextReport }) {
               <span className={`size-2.5 shrink-0 rounded-full ${group.colorClass}`} aria-hidden="true" />
               <span>{group.label}</span>
             </span>
-            <span className="font-utility text-label-md font-bold text-primary">
+            <span className="type-ui text-ui font-semibold text-primary">
               {group.items.length}
             </span>
           </div>
         ))}
       </div>
 
-      <div className="rounded-lg bg-surface p-4">
+      <div className="rounded-lg bg-raised p-4">
         <Overline as="h5" className="text-secondary">
           Força das evidências
         </Overline>
@@ -274,7 +274,7 @@ function ObservationComposition({ report }: { report: ContextReport }) {
               <dt className="text-sm leading-tight text-secondary">
                 {evidenceLabel(strength)}
               </dt>
-              <dd className="mt-1 font-utility text-xl font-bold text-primary">
+              <dd className="mt-1 font-ui text-xl font-bold text-primary">
                 {counts[strength] ?? 0}
               </dd>
             </div>
@@ -302,7 +302,7 @@ function ReportedEmotionalContext({ report }: { report: ContextReport }) {
       <div className="grid grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] gap-4 sm:grid-cols-[minmax(12rem,0.7fr)_minmax(18rem,1.3fr)] sm:gap-7">
         <div className="self-center">
           <Overline as="h4">Contexto emocional relatado</Overline>
-          <p className="mt-2 font-editorial text-xl font-semibold leading-tight text-primary sm:text-heading-md">
+          <p className="mt-2 font-editorial text-xl font-semibold leading-tight text-primary sm:text-h3">
             {headline}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-secondary sm:text-sm">
@@ -323,10 +323,10 @@ function ReportedEmotionalContext({ report }: { report: ContextReport }) {
                   key={row.value}
                   className="grid grid-cols-[3.35rem_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[4.25rem_minmax(0,1fr)]"
                 >
-                  <span className="font-utility text-[0.6rem] font-bold leading-tight text-secondary sm:text-caption">
+                  <span className="font-ui text-[0.6rem] font-bold leading-tight text-secondary sm:text-meta-lg">
                     {emotionalValenceLabel(row.value)}
                   </span>
-                  <div className="relative h-6 rounded-full bg-surface/80">
+                  <div className="relative h-6 rounded-full bg-raised/80">
                     {rowItems.map((item) => {
                       const position = Math.max(
                         4,
@@ -354,18 +354,18 @@ function ReportedEmotionalContext({ report }: { report: ContextReport }) {
           </div>
           <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5" aria-label="Emoções relatadas no período">
             {items.slice(0, 4).map((item) => (
-              <li key={item.id} className="font-utility text-caption text-secondary">
+              <li key={item.id} className="type-meta text-secondary">
                 <span className="font-bold text-primary">{item.title}</span>
                 {item.occurred_at && ` · ${formatDateShort(item.occurred_at)}`}
               </li>
             ))}
             {items.length > 4 && (
-              <li className="font-utility text-caption text-secondary">
+              <li className="type-meta text-secondary">
                 +{items.length - 4} observações
               </li>
             )}
             {items.some((item) => !item.occurred_at) && (
-              <li className="font-utility text-caption text-secondary">
+              <li className="type-meta text-secondary">
                 Há observação sem data definida.
               </li>
             )}
@@ -389,7 +389,7 @@ export function ReportSignals({
         <Overline as="h3" id={`signals-${report.id}`} className="text-secondary">
           Leitura estruturada
         </Overline>
-        <p className="mt-1 font-editorial text-heading-lg leading-tight text-primary">
+        <p className="mt-1 font-editorial text-h2 leading-tight text-primary">
           Evidências do período, sem transformar relato em diagnóstico.
         </p>
       </div>

@@ -116,7 +116,7 @@ export default function EntrarPage() {
           </Button>
           <Button
             type="button"
-            variant="tertiary"
+            variant="text"
             onClick={() => setUsingRecovery(false)}
           >
             Voltar e tentar a chave de acesso
@@ -134,7 +134,7 @@ export default function EntrarPage() {
       footer={
         <p className="max-w-none">
           Ainda não tem conta?{" "}
-          <Link href="/criar-conta" className="font-utility font-bold text-brand underline">
+          <Link href="/criar-conta" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
             Criar conta
           </Link>
         </p>
@@ -167,7 +167,7 @@ export default function EntrarPage() {
 
         {/* Só oferecemos recuperação depois que o backend pediu passkey. */}
         {ceremony && (
-          <div className="flex flex-col gap-3 border-t border-border-subtle pt-5">
+          <div className="flex flex-col gap-3 border-t border-hairline pt-5">
             <Button
               type="button"
               variant="secondary"
@@ -179,7 +179,7 @@ export default function EntrarPage() {
             </Button>
             <Button
               type="button"
-              variant="tertiary"
+              variant="text"
               onClick={() => setUsingRecovery(true)}
             >
               Não consigo usar minha chave
@@ -189,7 +189,7 @@ export default function EntrarPage() {
 
         <Link
           href="/recuperar-senha"
-          className="self-start font-utility text-label-md font-bold text-brand underline"
+          className="touch-target self-start type-ui text-ui font-semibold text-accent underline underline-offset-4"
         >
           Esqueci minha senha
         </Link>

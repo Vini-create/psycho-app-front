@@ -51,7 +51,7 @@ export function ScopePicker({
 
   return (
     <fieldset className="flex flex-col gap-4">
-      <legend className="type-overline max-w-none text-secondary">
+      <legend className="type-eyebrow max-w-none text-secondary">
         O que este profissional pode receber
       </legend>
       {SCOPES.map((item) => (

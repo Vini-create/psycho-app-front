@@ -86,7 +86,7 @@ export const messages: Record<string, Message[]> = {
       sequence: 4,
       role: "assistant",
       content:
-        "Silêncio depois de expor uma ideia é difícil de ler — sobra espaço para a gente preencher com o pior. Você chegou a saber depois o que acharam, ou ficou só com o silêncio daquele momento?",
+        "Silêncio depois de expor uma ideia é difícil de ler, sobra espaço para a gente preencher com o pior. Você chegou a saber depois o que acharam, ou ficou só com o silêncio daquele momento?",
       in_reply_to_message_id: "m3",
       generation_status: "completed",
       ai_provider: "mock",
@@ -110,7 +110,7 @@ export const messages: Record<string, Message[]> = {
       sequence: 6,
       role: "assistant",
       content:
-        "Dois dias de espera com pouca informação, e a informação quando veio era boa. Você comentou que quer levar isso para a próxima sessão — quer que eu marque?",
+        "Dois dias de espera com pouca informação, e a informação quando veio era boa. Você comentou que quer levar isso para a próxima sessão. Quer que eu marque?",
       in_reply_to_message_id: "m5",
       generation_status: "completed",
       ai_provider: "mock",

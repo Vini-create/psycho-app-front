@@ -8,12 +8,20 @@ import {
 import { cx } from "../lib/cx";
 
 /* Altura mínima 48px, raio 12px, borda de controle acessível — design.md §8. */
+/* Brand Book V2 §15 — "TextField: label acima; 44–48px; border 1px;
+   background paper."
+
+   O que mudou do V1: raio 12 → 8 (radius.sm é o dos inputs; 12 é de card
+   funcional, §12), corpo em UI sans em vez de serif (a serif é para leitura,
+   não para digitar), e a borda escurece no foco além do anel — um campo
+   focado precisa se destacar por conta própria, não só pelo outline. */
 const CONTROL_BASE =
-  "w-full min-h-12 rounded-md border border-border-control bg-surface px-4 py-2.5 " +
-  "text-primary font-editorial text-body-md placeholder:text-secondary/70 " +
-  "transition-[border-color,box-shadow] duration-140 ease-sinapsa " +
-  "disabled:cursor-not-allowed disabled:opacity-55 " +
-  "aria-[invalid=true]:border-danger";
+  "w-full min-h-11 rounded-sm border border-border-control bg-raised px-4 py-2.5 " +
+  "text-primary font-ui text-body placeholder:text-tertiary " +
+  "transition-[border-color] duration-140 ease-sinapsa " +
+  "hover:border-primary/60 focus:border-primary " +
+  "disabled:cursor-not-allowed disabled:opacity-50 " +
+  "aria-[invalid=true]:border-destructive";
 
 type FieldShellProps = {
   label: string;
@@ -44,7 +52,7 @@ function FieldShell({
       {/* Label sempre visível acima do campo. Placeholder é exemplo, não label. */}
       <label
         htmlFor={htmlFor}
-        className="font-utility text-label-md font-bold text-primary"
+        className="type-ui text-ui font-semibold text-primary"
       >
         {label}
         {required && (
@@ -59,14 +67,14 @@ function FieldShell({
       {/* Ajuda e erro ficam abaixo do campo. O erro não depende só de cor:
           vem acompanhado de texto e do estado aria-invalid. */}
       {help && !error && (
-        <p id={helpId} className="metadata max-w-none text-secondary">
+        <p id={helpId} className="type-meta max-w-none text-tertiary">
           {help}
         </p>
       )}
       {error && (
         <p
           id={errorId}
-          className="font-utility text-label-md max-w-none font-bold text-danger"
+          className="type-ui text-ui-sm max-w-none font-semibold text-destructive"
         >
           {error}
         </p>
@@ -263,7 +271,7 @@ export function Checkbox({
           aria-describedby={help ? helpId : undefined}
           className="mt-0.5 size-5 shrink-0 accent-[var(--action-primary)]"
         />
-        <span className="text-body-md text-primary">{label}</span>
+        <span className="text-body text-primary">{label}</span>
       </label>
       {help && (
         <p id={helpId} className="metadata ml-8 max-w-none text-secondary">

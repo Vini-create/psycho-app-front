@@ -97,7 +97,7 @@ function CadastrarPasskey() {
       >
         <div className="flex flex-col gap-6">
           <Alert tone="warning" title="Mostrados uma única vez">
-            Guarde-os fora deste aplicativo — num gerenciador de senhas ou
+            Guarde-os fora deste aplicativo, num gerenciador de senhas ou
             impressos em lugar seguro.
           </Alert>
 
@@ -158,7 +158,7 @@ function CadastrarPasskey() {
               <p>
                 Ao continuar, o navegador vai pedir sua digital, seu rosto, o
                 PIN do aparelho ou uma chave física. Nada disso é enviado para
-                nós — recebemos apenas a confirmação.
+                nós. Recebemos apenas a confirmação.
               </p>
             </Prose>
           </CardBody>

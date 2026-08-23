@@ -1,27 +1,51 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cx } from "../lib/cx";
 import { Spinner } from "./Spinner";
+import { Icon, type IconName } from "../icons";
 
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "danger";
+/* Brand Book V2 §15 — "Controles devem parecer ferramentas editoriais, não
+   componentes de template."
+
+   Primary é fill Ink, não roxo. Isso é deliberado: no V2 a cor pertence ao
+   conteúdo (pastéis classificam natureza de informação), e a ação se
+   distingue por contraste tipográfico e peso. Um botão colorido em cada
+   bloco devolveria o produto ao "dashboard genérico com CTA roxo".
+
+   Uma ação principal por zona (§15). */
+
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  /** TextAction: sem container. "abrir", "editar", "ver fontes". */
+  | "text"
+  /** Destrutivo contido: Wine em texto e borda. O padrão para risco. */
+  | "danger"
+  /** Destrutivo sólido: só na confirmação final, dentro do diálogo. */
+  | "danger-solid";
+
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-action text-on-action hover:bg-action-hover active:bg-action-pressed",
+    "border border-transparent bg-action text-on-action hover:bg-action-hover active:bg-action-pressed",
   secondary:
-    "bg-subtle text-primary hover:bg-brand-surface active:bg-brand-surface",
-  tertiary:
-    "bg-transparent text-brand hover:bg-brand-surface active:bg-brand-surface",
-  // Vermelho é exclusivo de risco explícito e ação destrutiva (design.md §1).
-  // Par fg/bg semântico funciona nos dois temas; texto claro sobre sólido não.
+    "border border-border-strong bg-transparent text-primary hover:border-primary hover:bg-sunken/60",
+  text:
+    "border border-transparent bg-transparent px-0 text-accent hover:text-primary",
   danger:
-    "bg-danger-surface text-danger hover:brightness-95 active:brightness-90 dark:hover:brightness-110",
+    "border border-destructive/45 bg-transparent text-destructive hover:bg-destructive-surface",
+  "danger-solid":
+    "border border-transparent bg-destructive text-on-action hover:brightness-110",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-9 px-3 text-label-md gap-2",
-  md: "h-11 px-4 text-label-md gap-2",
-  lg: "h-13 px-5 text-base gap-2.5",
+  // control.sm / control.md / control.lg — §32.
+  // `touch-target` resolve a tensão entre os dois números do brandbook: o
+  // §32 pede controle pequeno de 36px, o §29 exige alvo de 44. O pseudo
+  // elemento estende só a área clicável, sem inflar o desenho.
+  sm: "h-9 gap-2 px-3 text-ui-sm touch-target",
+  md: "h-11 gap-2 px-4 text-ui",
+  lg: "h-13 gap-2.5 px-6 text-body",
 };
 
 export function buttonStyles({
@@ -36,11 +60,14 @@ export function buttonStyles({
   className?: string;
 } = {}): string {
   return cx(
-    "inline-flex items-center justify-center rounded-md font-utility font-bold",
-    "transition-[background-color,color,filter] duration-140 ease-sinapsa",
-    "disabled:cursor-not-allowed disabled:opacity-55",
-    VARIANTS[variant],
+    // radius.sm — 8px. Botão não é pill: §12, "arredondamento não é identidade".
+    "inline-flex items-center justify-center rounded-sm font-ui font-semibold",
+    "transition-[background-color,color,border-color,filter] duration-140 ease-sinapsa",
+    "disabled:cursor-not-allowed disabled:opacity-50",
     SIZES[size],
+    VARIANTS[variant],
+    // TextAction dispensa altura de caixa, mas mantém alvo de toque de 44px.
+    variant === "text" && "h-auto min-h-11 px-0",
     fullWidth && "w-full",
     className,
   );
@@ -50,7 +77,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   fullWidth?: boolean;
-  /** Mantém a largura do botão enquanto carrega (design.md §8). */
+  /** Mantém a largura do botão enquanto carrega. */
   loading?: boolean;
   loadingLabel?: string;
   startIcon?: ReactNode;
@@ -58,9 +85,9 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 /**
- * Regra de conteúdo: o label começa com verbo — "Enviar", "Aprovar", "Convidar".
- * `disabled` não substitui explicação: quem desabilita precisa dizer por quê
- * em texto próximo, não só apagar o botão.
+ * Regra de conteúdo: o label começa com verbo — "Enviar", "Guardar para a
+ * sessão", "Convidar". `disabled` não substitui explicação: quem desabilita
+ * precisa dizer por quê em texto próximo, não só apagar o botão.
  */
 export function Button({
   variant = "primary",
@@ -101,6 +128,47 @@ export function Button({
           <Spinner className="col-start-1 row-start-1" label={loadingLabel} />
         )}
       </span>
+    </button>
+  );
+}
+
+/**
+ * IconButton — §15. Quadrado de 44px, borda discreta.
+ *
+ * `label` é obrigatório e não decorativo: o ícone sozinho nunca carrega o
+ * significado (§29). Vira `aria-label` e `title`.
+ */
+export function IconButton({
+  icon,
+  label,
+  size = "md",
+  variant = "quiet",
+  className,
+  type = "button",
+  ...rest
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
+  icon: IconName;
+  label: string;
+  size?: "sm" | "md";
+  variant?: "quiet" | "bordered";
+}) {
+  return (
+    <button
+      {...rest}
+      type={type}
+      aria-label={label}
+      title={label}
+      className={cx(
+        "inline-grid shrink-0 place-items-center rounded-sm transition-colors duration-140 ease-sinapsa",
+        "text-secondary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50",
+        size === "md" ? "size-11" : "size-9 touch-target",
+        variant === "bordered"
+          ? "border border-hairline bg-raised hover:border-border-strong"
+          : "hover:bg-sunken",
+        className,
+      )}
+    >
+      <Icon name={icon} size={size === "md" ? 20 : 16} />
     </button>
   );
 }

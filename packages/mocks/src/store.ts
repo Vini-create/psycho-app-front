@@ -89,7 +89,7 @@ const REPLIES = [
   "Entendi. O que veio junto com isso?",
   "Obrigada por contar. Quer desenvolver um pouco mais essa parte?",
   "Faz sentido. Isso é algo que apareceu outras vezes, ou foi pontual desta vez?",
-  "Anotei. Se quiser, podemos voltar nisso outro dia — não precisa resolver agora.",
+  "Anotei. Se quiser, podemos voltar nisso outro dia, não precisa resolver agora.",
   "Você quer que eu marque isso como algo para levar na próxima sessão?",
 ];
 
@@ -145,7 +145,7 @@ export function retryMessage(userMessageId: string) {
       sequence: userMessage.sequence + 1,
       role: "assistant",
       content:
-        "Desculpa a demora. Você mencionou o sono — como têm sido as noites nesses dias?",
+        "Desculpa a demora. Você mencionou o sono. Como têm sido as noites nesses dias?",
       in_reply_to_message_id: userMessage.id,
       generation_status: "completed",
       ai_provider: "mock",

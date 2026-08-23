@@ -56,7 +56,7 @@ function VerificarEmail() {
           : "Cole abaixo o código que enviamos para o seu e-mail."
       }
       footer={
-        <Link href="/entrar" className="font-utility font-bold text-brand underline">
+        <Link href="/entrar" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
           Voltar para entrar
         </Link>
       }
@@ -84,7 +84,7 @@ function VerificarEmail() {
           Confirmar e-mail
         </Button>
 
-        <Button type="button" variant="tertiary" onClick={handleResend}>
+        <Button type="button" variant="text" onClick={handleResend}>
           Reenviar código
         </Button>
       </form>

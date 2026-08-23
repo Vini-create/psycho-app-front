@@ -17,7 +17,7 @@ export function Skeleton({
       role={ariaLabel ? "status" : "presentation"}
       aria-label={ariaLabel}
       className={cx(
-        "animate-pulse rounded-md bg-subtle motion-reduce:animate-none",
+        "animate-pulse rounded-md bg-sunken motion-reduce:animate-none",
         className,
       )}
     />

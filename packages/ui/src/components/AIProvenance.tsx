@@ -47,20 +47,20 @@ export function AIProvenance({
   return (
     <aside
       className={cx(
-        "flex flex-col gap-3 rounded-lg bg-subtle p-5",
+        "flex flex-col gap-3 rounded-lg bg-sunken p-5",
         className,
       )}
     >
       <Overline>Origem deste conteúdo</Overline>
 
-      <p className="text-body-md max-w-none text-primary">
+      <p className="text-body max-w-none text-primary">
         Organizado automaticamente a partir das conversas incluídas no período. É um registro
-        do que foi relatado — não é diagnóstico nem avaliação.
+        do que foi relatado. Não é diagnóstico nem avaliação.
       </p>
 
       <dl className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline gap-2">
-          <dt className="type-overline max-w-none text-secondary">Período</dt>
+          <dt className="type-eyebrow max-w-none text-secondary">Período</dt>
           <dd className="metadata max-w-none text-primary">
             {formatPeriod(periodStart, periodEnd)}
           </dd>
@@ -69,7 +69,7 @@ export function AIProvenance({
         {coverage && (
           <>
             <div className="flex flex-wrap items-baseline gap-2">
-              <dt className="type-overline max-w-none text-secondary">Base</dt>
+              <dt className="type-eyebrow max-w-none text-secondary">Base</dt>
               <dd className="metadata max-w-none text-primary">
                 {coverage.conversation_count} conversas ·{" "}
                 {coverage.user_message_count} mensagens do paciente ·{" "}
@@ -78,7 +78,7 @@ export function AIProvenance({
             </div>
             {completeness && (
               <div className="flex flex-wrap items-baseline gap-2">
-                <dt className="type-overline max-w-none text-secondary">Alcance</dt>
+                <dt className="type-eyebrow max-w-none text-secondary">Alcance</dt>
                 <dd className="metadata max-w-none text-primary">
                   {completeness}
                 </dd>
@@ -89,15 +89,15 @@ export function AIProvenance({
       </dl>
 
       {coverage?.note && (
-        <p className="text-body-md max-w-none text-secondary">{coverage.note}</p>
+        <p className="text-body max-w-none text-secondary">{coverage.note}</p>
       )}
 
       {limitations && limitations.length > 0 && (
-        <div className="flex flex-col gap-2 rounded-md bg-surface p-3">
+        <div className="flex flex-col gap-2 rounded-md bg-raised p-3">
           <Overline as="h3" className="text-secondary">
             O que este relatório não cobre
           </Overline>
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md text-secondary">
+          <ul className="flex list-disc flex-col gap-1 pl-5 text-body text-secondary">
             {limitations.map((limitation) => (
               <li key={limitation}>{limitation}</li>
             ))}

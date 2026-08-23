@@ -1,42 +1,50 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo_Narrow, STIX_Two_Text, Source_Code_Pro } from "next/font/google";
-import { themeScript } from "@sinapsa/ui";
+import { Archivo, Newsreader, Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 
-/* As três famílias de design.md §3.
-   Archivo Narrow ocupa o lugar funcional da Nimbus Sans Narrow, que não
-   existe no Google Fonts. next/font hospeda tudo no build — sem CDN. */
-const stix = STIX_Two_Text({
+/* As quatro famílias do Brand Book V2 §05.
+   Display grotesk / editorial serif / UI sans / metadata mono.
+   next/font hospeda tudo no build — nenhuma requisição a CDN em runtime.
+   Nunca as quatro na mesma viewport: no máximo três. */
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-stix",
-  display: "swap",
-});
-
-const archivo = Archivo_Narrow({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-archivo",
   display: "swap",
 });
 
-const sourceCode = Source_Code_Pro({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  variable: "--font-source-code",
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
 });
 
+const instrument = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+
+
 export const metadata: Metadata = {
-  title: "Sinapsa. — Profissional",
+  title: "Sinapsa. Profissional",
   description:
     "Contexto organizado sobre o que seus pacientes relataram entre as sessões.",
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f4f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#242527" },
-  ],
+  themeColor: "#141312",
 };
 
 export default function RootLayout({
@@ -47,14 +55,10 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${stix.variable} ${archivo.variable} ${sourceCode.variable}`}
-      suppressHydrationWarning
+      data-theme="dark"
+      className={`${archivo.variable} ${newsreader.variable} ${instrument.variable} ${plexMono.variable}`}
     >
-      <head>
-        {/* Aplica o tema salvo antes da primeira pintura. */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
-      <body className="min-h-dvh bg-canvas text-primary antialiased">
+      <body className="min-h-dvh bg-page text-primary antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

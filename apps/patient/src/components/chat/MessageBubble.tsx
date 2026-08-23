@@ -2,18 +2,21 @@ import { formatTime } from "@sinapsa/ui";
 import type { Message } from "@sinapsa/api-client";
 import type { ReactNode } from "react";
 
-/**
- * A conversa é lida, não "trocada".
- *
- * design.md §8 pede fundo de marca para o paciente e superfície neutra para a
- * Sinapsa, sem avatar humano. Duas bolhas simétricas atendem a letra da regra
- * e erram o espírito: viram messenger, e o produto é editorial.
- *
- * Então: o que a pessoa escreve tem a forma de um recado — bloco de marca,
- * alinhado à direita, curto. O que a Sinapsa responde é tipografado na página,
- * em medida de leitura, com um filete roxo no lugar do avatar. Uma voz escreve
- * bilhetes; a outra responde em prosa.
- */
+/* Brand Book V2 §19 — "Diário conversacional, não mensageiro."
+
+   O princípio: o chat deve parecer uma página onde uma conversa está sendo
+   escrita ao longo do tempo. Não é WhatsApp e não é ChatGPT.
+
+   Duas vozes, duas naturezas tipográficas — e essa é a decisão inteira:
+
+   - a Sinapsa não tem bolha. O que ela responde é tipografado direto na
+     página, em Newsreader 18–20, na medida de leitura. Texto numa folha.
+   - a pessoa escreve num bloco pastel assimétrico, à direita, com no máximo
+     72% da coluna no desktop. É um recado colado na página, com matéria.
+
+   Bolhas simétricas dos dois lados atenderiam a letra de "distinguir quem
+   fala" e errariam o espírito: viram messenger, e o produto é editorial. */
+
 export function MessageBubble({
   message,
   footer,
@@ -28,15 +31,25 @@ export function MessageBubble({
 
   if (isUser) {
     return (
-      <li data-message-id={message.id} className="flex flex-col items-end gap-1.5">
-        <div className="isolate max-w-[min(85%,34rem)] transform-gpu overflow-hidden rounded-xl rounded-br-sm bg-brand-surface px-5 py-3.5 text-body-lg whitespace-pre-wrap text-primary [backface-visibility:hidden] [background-clip:padding-box]">
+      <li data-message-id={message.id} className="flex flex-col items-end gap-2">
+        <div
+          className={[
+            // 72% desktop / 88% mobile — §19.
+            "max-w-[88%] sm:max-w-[72%]",
+            // radius.md com um canto fechado: a assimetria que o brandbook
+            // pede, e que faz o bloco apontar para quem escreveu.
+            "rounded-md rounded-br-xs bg-message-user px-5 py-4",
+            "text-body-l whitespace-pre-wrap text-on-panel",
+          ].join(" ")}
+        >
           <span className="sr-only">Você escreveu:</span>
           {message.content}
         </div>
+
         {(showTime || footer) && (
-          <div className="flex flex-row-reverse flex-wrap items-center justify-start gap-x-3 gap-y-1">
+          <div className="flex flex-row-reverse flex-wrap items-center justify-start gap-x-4 gap-y-1">
             {showTime && (
-              <time dateTime={message.created_at} className="metadata text-secondary">
+              <time dateTime={message.created_at} className="type-meta text-tertiary">
                 {formatTime(message.created_at)}
               </time>
             )}
@@ -48,22 +61,17 @@ export function MessageBubble({
   }
 
   return (
-    <li data-message-id={message.id} className="flex flex-col gap-1.5">
-      <div className="flex gap-4">
-        {/* O filete substitui o avatar: marca quem fala sem inventar um rosto. */}
-        <span
-          aria-hidden="true"
-          className="mt-1.5 w-px shrink-0 self-stretch bg-brand-surface-strong"
-        />
-        <div className="text-body-lg whitespace-pre-wrap text-primary">
-          <span className="sr-only">Sinapsa respondeu:</span>
-          {message.content}
-        </div>
+    <li data-message-id={message.id} className="flex flex-col gap-2">
+      {/* Sem container, sem filete, sem avatar. A resposta É a página. */}
+      <div className="measure font-editorial text-body-l whitespace-pre-wrap text-primary">
+        <span className="sr-only">Sinapsa respondeu:</span>
+        {message.content}
       </div>
+
       {(showTime || footer) && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {showTime && (
-            <time dateTime={message.created_at} className="metadata text-secondary">
+            <time dateTime={message.created_at} className="type-meta text-tertiary">
               {formatTime(message.created_at)}
             </time>
           )}
@@ -74,15 +82,18 @@ export function MessageBubble({
   );
 }
 
-/** Separador de dia. Filete fino e data em mono — marca de página. */
+/**
+ * Marca temporal — §19, "tempo como elemento visual".
+ *
+ * Alinhada à esquerda, com um único filete que corre até a margem. O
+ * separador centrado entre dois filetes é gramática de mensageiro; este é
+ * um índice de seção editorial que por acaso marca um dia.
+ */
 export function DaySeparator({ label }: { label: string }) {
   return (
-    <li className="flex items-center gap-4 pt-6 pb-2" aria-hidden="true">
-      <span className="h-px flex-1 bg-border-subtle" />
-      <span className="metadata uppercase tracking-[0.12em] text-secondary">
-        {label}
-      </span>
-      <span className="h-px flex-1 bg-border-subtle" />
+    <li className="flex items-center gap-4 pt-4">
+      <span className="type-eyebrow shrink-0 text-tertiary">{label}</span>
+      <span aria-hidden="true" className="h-px flex-1 bg-hairline" />
     </li>
   );
 }
@@ -90,14 +101,14 @@ export function DaySeparator({ label }: { label: string }) {
 /** Abertura da conversa: a página em branco precisa convidar. */
 export function ConversationOpening() {
   return (
-    <li className="flex flex-col gap-3 pb-4">
-      <p className="type-overline max-w-none text-brand">Este espaço é seu</p>
-      <p className="font-editorial text-heading-lg text-primary text-balance">
+    <li className="flex flex-col gap-4 pb-2">
+      <p className="type-eyebrow text-tertiary">Este espaço é seu</p>
+      <p className="font-editorial text-h2 text-balance text-primary">
         Conte como foi.
       </p>
-      <p className="text-body-md text-secondary">
+      <p className="measure text-body-l text-secondary">
         Não precisa ser organizado, importante, nem bonito de ler. O que vier
-        já serve — seu histórico bruto nunca é aberto ao profissional.
+        já serve. Seu histórico bruto nunca é aberto ao profissional.
       </p>
     </li>
   );

@@ -3,22 +3,18 @@
 import { useState, type FormEvent } from "react";
 import {
   Alert,
-  Badge,
   Button,
-  Card,
-  CardActions,
-  CardMeta,
-  CardTitle,
-  EmptyState,
-  Metadata,
-  Overline,
-  PageTitle,
-  Prose,
+  EditorialList,
+  EditorialRow,
+  Icon,
+  Masthead,
+  MetaStrip,
+  SectionIndex,
   Skeleton,
   TextField,
   formatDate,
+  pluralize,
   useToast,
-  type Tone,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
 import { AppShell } from "@/components/AppShell";
@@ -29,11 +25,22 @@ import {
   useRevokeInvitation,
 } from "@/lib/queries";
 
-const STATUS: Record<string, { label: string; tone: Tone }> = {
-  pending: { label: "Aguardando aceite", tone: "warning" },
-  accepted: { label: "Aceito", tone: "success" },
-  expired: { label: "Expirado", tone: "neutral" },
-  revoked: { label: "Cancelado", tone: "neutral" },
+/* Brand Book V2 §18 e §34 — "Convites: form direto no grid + lista.
+   Não: card gigante só para input."
+
+   O V1 tinha um Card inteiro cercando um campo de e-mail e um botão. O §15
+   é explícito: "o bloco 'Novo convite' não precisa de um card gigante:
+   título + explicação + input + ação podem viver diretamente no grid com
+   divisor abaixo."
+
+   Estados sempre com rótulo textual (§18) — aceito, aguardando, expirado,
+   cancelado nunca são só uma cor. */
+
+const STATUS: Record<string, { label: string; tint: string }> = {
+  pending: { label: "Aguardando aceite", tint: "text-notice" },
+  accepted: { label: "Aceito", tint: "text-positive" },
+  expired: { label: "Expirado", tint: "text-tertiary" },
+  revoked: { label: "Cancelado", tint: "text-tertiary" },
 };
 
 /** O backend devolve só o token; o link é montado pelo frontend. */
@@ -66,111 +73,152 @@ function Convites() {
   }
 
   const invitations = data?.invitations ?? [];
+  const pending = invitations.filter((item) => item.status === "pending");
 
   return (
-    <div className="flex flex-col gap-10 sm:gap-16">
-      <header className="flex flex-col gap-3">
-        <Overline>Convites</Overline>
-        <PageTitle>Convidar um paciente.</PageTitle>
-        <Prose>
-          <p>
-            O convite precisa ser aceito por uma conta com o mesmo e-mail. Na
-            hora de aceitar, o paciente escolhe o que você poderá receber.
-          </p>
-        </Prose>
-      </header>
+    <div className="flex flex-col gap-14 sm:gap-16">
+      <Masthead
+        className="reveal pt-2"
+        eyebrow="Convites"
+        tone="editorial"
+        deck="O convite precisa ser aceito por uma conta com o mesmo e-mail. Na hora de aceitar, a pessoa escolhe o que você poderá receber e pode mudar isso depois."
+        meta={
+          invitations.length > 0 ? (
+            <MetaStrip
+              className="md:justify-end"
+              items={[
+                pluralize(invitations.length, "convite enviado", "convites enviados"),
+                pending.length > 0 ? `${pending.length} aguardando` : null,
+              ]}
+            />
+          ) : undefined
+        }
+      >
+        Começar um acompanhamento
+      </Masthead>
 
-      <Card variant="standard" className="gap-4">
-        <CardTitle>Novo convite</CardTitle>
-        <form onSubmit={handleCreate} className="flex flex-col gap-4" noValidate>
+      {/* Formulário direto no grid: 6 colunas para o campo, o resto respira. */}
+      <section className="reveal reveal-1 flex flex-col gap-6 border-b border-hairline pb-12">
+        <SectionIndex index="01">Novo convite</SectionIndex>
+
+        <form
+          onSubmit={handleCreate}
+          className="flex flex-col gap-5 lg:max-w-xl"
+          noValidate
+        >
           {create.error && (
             <Alert tone="danger">{describeError(create.error).message}</Alert>
           )}
+
           <TextField
-            label="E-mail do paciente"
+            label="E-mail da pessoa"
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-          <Button type="submit" loading={create.isPending}>
+
+          <Button type="submit" className="self-start" loading={create.isPending}>
             Gerar convite
           </Button>
         </form>
 
         {lastToken && (
-          <Alert tone="success" title="Convite criado">
-            <div className="flex flex-col gap-3">
-              <Metadata className="break-all text-success">
-                {inviteLink(lastToken)}
-              </Metadata>
-              <div>
-                <Button size="sm" variant="secondary" onClick={() => copy(lastToken)}>
-                  Copiar link
-                </Button>
-              </div>
-            </div>
-          </Alert>
+          <div className="flex flex-col gap-3 border-l-2 border-accent-sage pl-5">
+            <p className="type-eyebrow text-ink-sage">Convite criado</p>
+            <p className="type-meta break-all text-secondary">
+              {inviteLink(lastToken)}
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="self-start"
+              startIcon={<Icon name="copy" size={16} />}
+              onClick={() => copy(lastToken)}
+            >
+              Copiar link
+            </Button>
+          </div>
         )}
-      </Card>
+      </section>
 
-      <section className="flex flex-col gap-4">
-        <Overline as="h2" className="text-secondary">
+      <section className="reveal reveal-2 flex flex-col gap-2">
+        <SectionIndex index="02" meta="do mais recente ao mais antigo">
           Convites enviados
-        </Overline>
+        </SectionIndex>
 
         {error && <Alert tone="danger">{describeError(error).message}</Alert>}
         {isPending && <Skeleton className="h-32" aria-label="Carregando convites" />}
 
         {!isPending && invitations.length === 0 && (
-          <EmptyState
-            title="Nenhum convite enviado."
-            description="Convites criados aparecem aqui até serem aceitos, expirarem ou serem cancelados."
-          />
+          <div className="flex flex-col items-start gap-4 py-12">
+            <h3 className="max-w-[24ch] font-editorial text-h2 text-balance text-primary">
+              Nenhum convite enviado ainda.
+            </h3>
+            <p className="measure text-body-l text-secondary">
+              Convites criados aparecem aqui até serem aceitos, expirarem ou
+              serem cancelados.
+            </p>
+          </div>
         )}
 
         {invitations.length > 0 && (
-          <ul className="flex flex-col gap-4">
+          <EditorialList as="ul" className="border-t-0">
             {invitations.map((invitation) => {
               const status = STATUS[invitation.status] ?? {
                 label: invitation.status,
-                tone: "neutral" as Tone,
+                tint: "text-tertiary",
               };
+
               return (
-                <Card key={invitation.id} as="li" variant="compact" className="gap-2">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <CardTitle className="text-body-lg">{invitation.email}</CardTitle>
-                    <Badge tone={status.tone}>{status.label}</Badge>
-                  </div>
-                  <CardMeta>
-                    Criado em {formatDate(invitation.created_at)} · expira em{" "}
-                    {formatDate(invitation.expires_at)}
-                  </CardMeta>
-                  {invitation.status === "pending" && (
-                    <CardActions>
-                      {invitation.invitation_token && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => copy(invitation.invitation_token!)}
-                        >
-                          Copiar link
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="tertiary"
-                        loading={revoke.isPending && revoke.variables === invitation.id}
-                        onClick={() => revoke.mutate(invitation.id)}
-                      >
-                        Cancelar convite
-                      </Button>
-                    </CardActions>
-                  )}
-                </Card>
+                <li key={invitation.id}>
+                  <EditorialRow
+                    lead={formatDate(invitation.created_at)}
+                    title={
+                      <span className="text-h3 break-all">{invitation.email}</span>
+                    }
+                    badge={
+                      <span className={`type-meta ${status.tint}`}>
+                        {status.label}
+                      </span>
+                    }
+                    meta={
+                      <MetaStrip
+                        className="md:justify-end"
+                        items={[`expira em ${formatDate(invitation.expires_at)}`]}
+                      />
+                    }
+                    actions={
+                      invitation.status === "pending" && (
+                        <span className="flex flex-wrap items-center gap-1">
+                          {invitation.invitation_token && (
+                            <Button
+                              size="sm"
+                              variant="text"
+                              onClick={() => copy(invitation.invitation_token!)}
+                            >
+                              Copiar link
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="text"
+                            className="text-destructive hover:text-destructive"
+                            loading={
+                              revoke.isPending && revoke.variables === invitation.id
+                            }
+                            onClick={() => revoke.mutate(invitation.id)}
+                          >
+                            Cancelar
+                          </Button>
+                        </span>
+                      )
+                    }
+                  />
+                </li>
               );
             })}
-          </ul>
+          </EditorialList>
         )}
       </section>
     </div>

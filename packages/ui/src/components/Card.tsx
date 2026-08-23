@@ -10,14 +10,14 @@ export type CardVariant =
 
 /* design.md §8 — cada variação existe porque muda a intenção, não a aparência. */
 const VARIANTS: Record<CardVariant, string> = {
-  compact: "min-h-24 gap-2 rounded-lg p-4 bg-card",
-  standard: "min-h-36 gap-3 rounded-lg p-6 bg-card",
+  compact: "min-h-24 gap-2 rounded-lg p-4 bg-raised",
+  standard: "min-h-36 gap-3 rounded-lg p-6 bg-raised",
   editorial:
-    "gap-4 rounded-[2rem_2rem_2rem_0.5rem] p-8 bg-brand-surface",
+    "gap-4 rounded-[2rem_2rem_2rem_0.5rem] p-8 bg-panel-lavender",
   interactive:
-    "min-h-32 gap-3 rounded-lg bg-card px-5 py-6 " +
+    "min-h-32 gap-3 rounded-lg bg-raised px-5 py-6 " +
     "transition-[background-color,transform] duration-140 ease-sinapsa " +
-    "hover:bg-brand-surface focus-within:bg-brand-surface",
+    "hover:bg-panel-lavender focus-within:bg-panel-lavender",
   // Uso restrito: um bloco de contraste, nunca uma grade inteira.
   // Redefinir os tokens localmente faz todo descendente acompanhar a
   // inversão — sem isso, `text-primary` de um CardBody sumiria no fundo.
@@ -72,7 +72,7 @@ export function CardOverline({
   className?: string;
 }) {
   return (
-    <p className={cx("type-overline max-w-none text-brand", className)}>{children}</p>
+    <p className={cx("type-eyebrow max-w-none text-accent", className)}>{children}</p>
   );
 }
 
@@ -89,7 +89,7 @@ export function CardTitle({
   return (
     <Tag
       className={cx(
-        "font-editorial text-heading-md font-semibold text-balance",
+        "font-editorial text-h3 font-semibold text-balance",
         className,
       )}
     >
@@ -106,7 +106,7 @@ export function CardBody({
   className?: string;
 }) {
   return (
-    <div className={cx("text-body-md", className)}>{children}</div>
+    <div className={cx("text-body", className)}>{children}</div>
   );
 }
 

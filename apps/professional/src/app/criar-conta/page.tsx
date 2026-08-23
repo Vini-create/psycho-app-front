@@ -47,11 +47,11 @@ export default function CriarContaPage() {
     <AuthCard
       overline="Criar conta"
       title="Criar conta profissional."
-      description="Depois do cadastro você configura uma chave de acesso — ela é o segundo fator obrigatório."
+      description="Depois do cadastro você configura uma chave de acesso. Ela é o segundo fator obrigatório."
       footer={
         <p className="max-w-none">
           Já tem conta?{" "}
-          <Link href="/entrar" className="font-utility font-bold text-brand underline">
+          <Link href="/entrar" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
             Entrar
           </Link>
         </p>

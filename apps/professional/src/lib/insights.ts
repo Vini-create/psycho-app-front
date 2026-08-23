@@ -4,7 +4,24 @@ import type {
   Invitation,
   ProfessionalProfile,
 } from "@sinapsa/api-client";
-import type { ActivityPoint, Tone } from "@sinapsa/ui";
+import type { Tone } from "@sinapsa/ui";
+
+/**
+ * Cobertura de um período, para as réguas de atividade.
+ *
+ * Vivia em `@sinapsa/ui` junto do componente ActivityBars. Com o V2 o
+ * desenho virou <BarStrip />, que é genérico, então o tipo desceu para
+ * onde o significado mora: "dias com registro" é vocabulário do
+ * acompanhamento, não do design system.
+ */
+export type ActivityPoint = {
+  /** Rótulo do período, para o texto acessível. */
+  label: string;
+  /** Dias em que a pessoa conversou. */
+  value: number;
+  /** Dias do período — o teto da barra. */
+  total: number;
+};
 
 const DAY = 86_400_000;
 
@@ -203,7 +220,7 @@ export function attentionItems({
           : `${blocked.length} pacientes não autorizam relatórios`,
       detail: `${blocked
         .map((insight) => insight.connection.patient_display_name ?? "Paciente")
-        .join(", ")} — a permissão é revogável e pode ser reativada por eles.`,
+        .join(", ")}. A permissão é revogável e pode ser reativada por eles.`,
     });
   }
 

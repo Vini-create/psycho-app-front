@@ -6,12 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Alert,
   Button,
-  Card,
-  CardBody,
-  CardMeta,
-  CardTitle,
-  Overline,
-  Prose,
+  MetaStrip,
   Skeleton,
   formatDate,
 } from "@sinapsa/ui";
@@ -74,22 +69,24 @@ function Convite({ token }: { token: string }) {
     <AuthCard
       overline="Convite"
       title="Um profissional quer te acompanhar."
-      description="Você decide o que ele pode receber — e pode mudar isso depois."
+      description="Você decide o que ele pode receber e pode mudar isso depois."
     >
-      <Card variant="editorial" className="gap-3">
-        <Overline>Quem está convidando</Overline>
-        <CardTitle>{data.professional_display_name}</CardTitle>
-        <CardBody>
-          <p className="max-w-none text-secondary">
-            {PROFESSION_LABEL[data.profession_type] ?? data.profession_type}
-            {data.organization_name ? ` · ${data.organization_name}` : ""}
-          </p>
-        </CardBody>
-        <CardMeta>
-          Convite enviado para {data.masked_email} · expira em{" "}
-          {formatDate(data.expires_at)}
-        </CardMeta>
-      </Card>
+      <div className="flex flex-col gap-3 border-l-2 border-accent-lavender pl-5">
+        <p className="type-eyebrow text-tertiary">Quem está convidando</p>
+        <p className="font-editorial text-h3 break-words text-primary">
+          {data.professional_display_name}
+        </p>
+        <p className="text-body text-secondary">
+          {PROFESSION_LABEL[data.profession_type] ?? data.profession_type}
+          {data.organization_name ? ` · ${data.organization_name}` : ""}
+        </p>
+        <MetaStrip
+          items={[
+            `enviado para ${data.masked_email}`,
+            `expira em ${formatDate(data.expires_at)}`,
+          ]}
+        />
+      </div>
 
       {status !== "authenticated" ? (
         <div className="flex flex-col gap-4">
@@ -106,7 +103,7 @@ function Convite({ token }: { token: string }) {
           </Button>
           <Link
             href="/criar-conta"
-            className="self-start font-utility text-label-md font-bold text-brand underline"
+            className="touch-target self-start type-ui text-ui font-semibold text-accent underline underline-offset-4"
           >
             Ainda não tenho conta
           </Link>
@@ -119,12 +116,10 @@ function Convite({ token }: { token: string }) {
 
           <ScopePicker selected={scopes} onChange={setScopes} />
 
-          <Prose>
-            <p className="text-secondary">
-              Você pode encerrar este vínculo a qualquer momento, e nada novo
-              será compartilhado a partir daí.
-            </p>
-          </Prose>
+          <p className="measure text-body text-secondary">
+            Você pode mudar essas permissões ou encerrar o vínculo a qualquer
+            momento. A partir daí, nada novo é compartilhado.
+          </p>
 
           <Button
             size="lg"

@@ -22,16 +22,16 @@ export function EmptyState({
   return (
     <div
       className={cx(
-        "flex flex-col items-start gap-4 border-y border-border-subtle py-8 sm:py-10",
+        "flex flex-col items-start gap-4 border-y border-hairline py-8 sm:py-10",
         className,
       )}
     >
       {overline && <Overline>{overline}</Overline>}
-      <PageTitle as="h2" className="text-heading-lg">
+      <PageTitle as="h2" className="text-h2">
         {title}
       </PageTitle>
       {description && (
-        <div className="text-body-md text-secondary">{description}</div>
+        <div className="text-body text-secondary">{description}</div>
       )}
       {action && <div className="pt-2">{action}</div>}
     </div>
