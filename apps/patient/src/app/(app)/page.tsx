@@ -15,9 +15,6 @@ import {
   pluralize,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate } from "@/components/AuthGate";
-import { ConsentGate } from "@/components/ConsentGate";
 import { useConversations } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 
@@ -134,13 +131,5 @@ function Caderno() {
 }
 
 export default function HomePage() {
-  return (
-    <AuthGate>
-      <AppShell>
-        <ConsentGate>
-          <Caderno />
-        </ConsentGate>
-      </AppShell>
-    </AuthGate>
-  );
+  return <Caderno />;
 }

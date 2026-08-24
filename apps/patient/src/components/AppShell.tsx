@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { Suspense, useRef, useState, type ReactNode } from "react";
 import {
   Alert,
   AppFrame,
@@ -15,6 +15,7 @@ import {
   TextField,
   cx,
   formatDayMark,
+  useActiveIndicator,
   type FolderNavItem,
 } from "@sinapsa/ui";
 import {
@@ -51,6 +52,9 @@ const NAV: FolderNavItem[] = [
   { href: "/conta", label: "Conta", icon: "person", color: "clay" },
 ];
 
+/** Ordem das pastas no trilho — governa o sentido do deslocamento (§12). */
+const FOLDER_ORDER = NAV.map((item) => item.href);
+
 function activeHref(pathname: string): string {
   const match = NAV.find((item) =>
     item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
@@ -73,6 +77,12 @@ function ConversationList({
   const rename = useRenameConversation();
   const remove = useDeleteConversation();
   const router = useRouter();
+
+  const listRef = useRef<HTMLUListElement>(null);
+  /* A régua da conversa aberta viaja entre itens de alturas diferentes —
+     o único movimento do produto que precisa medir geometria. Ver
+     motion/useActiveIndicator.ts. */
+  useActiveIndicator(listRef, "conversation-rail", activeId);
 
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   const [deleting, setDeleting] = useState<{ id: string; title: string } | null>(null);
@@ -104,7 +114,7 @@ function ConversationList({
 
   return (
     <>
-      <ul className="flex flex-col">
+      <ul ref={listRef} className="flex flex-col">
         {items.map((conversation) => {
           const active = conversation.id === activeId;
 
@@ -121,6 +131,7 @@ function ConversationList({
               {active && (
                 <span
                   aria-hidden="true"
+                  data-flip-id="conversation-rail"
                   className="absolute inset-y-0 left-0 w-0.5 bg-accent-lavender"
                 />
               )}
@@ -331,13 +342,7 @@ function ChatShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function AppShell({
-  children,
-  flush = false,
-}: {
-  children: ReactNode;
-  flush?: boolean;
-}) {
+export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const active = activeHref(pathname);
   const tone = NAV.find((item) => item.href === active)?.color ?? "dark";
@@ -347,6 +352,8 @@ export function AppShell({
     <AppFrame
       tone={tone}
       motionKey={pathname}
+      folderId={active}
+      folderOrder={FOLDER_ORDER}
       fill={isChat}
       rail={
         <FolderNav
@@ -372,14 +379,13 @@ export function AppShell({
       }
     >
       {isChat ? (
-        <ChatShell>{children}</ChatShell>
+        /* `useSearchParams` lê a conversa aberta dentro do ChatShell; o
+           App Router exige a fronteira de Suspense para isso. */
+        <Suspense fallback={<div className="min-h-0 flex-1" />}>
+          <ChatShell>{children}</ChatShell>
+        </Suspense>
       ) : (
-        <main
-          className={cx(
-            "mx-auto w-full max-w-(--container-frame) flex-1 px-5 pt-8 sm:px-8 lg:px-12 xl:px-16",
-            flush ? "pb-0" : "pb-16 sm:pb-20",
-          )}
-        >
+        <main className="mx-auto w-full max-w-(--container-frame) flex-1 px-5 pt-8 pb-16 sm:px-8 sm:pb-20 lg:px-12 xl:px-16">
           {children}
         </main>
       )}

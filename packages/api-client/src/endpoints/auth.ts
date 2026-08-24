@@ -3,6 +3,7 @@ import type {
   Account,
   AppLoginResponse,
   GenericAcceptedResponse,
+  GoogleChallenge,
   ProfessionalLoginResponse,
   RegisterResponse,
   Session,
@@ -47,6 +48,20 @@ export function authEndpoints(client: ApiClient) {
     login(input: { email: string; password: string }) {
       return client.request<AppLoginResponse | ProfessionalLoginResponse>(
         `${base}/login`,
+        { method: "POST", body: input, skipAuth: true },
+      );
+    },
+
+    googleChallenge() {
+      return client.request<GoogleChallenge>(`${base}/google/challenge`, {
+        method: "POST",
+        skipAuth: true,
+      });
+    },
+
+    googleLogin(input: { challenge_id: string; credential: string }) {
+      return client.request<AppLoginResponse | ProfessionalLoginResponse>(
+        `${base}/google`,
         { method: "POST", body: input, skipAuth: true },
       );
     },

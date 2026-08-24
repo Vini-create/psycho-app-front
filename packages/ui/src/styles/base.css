@@ -213,9 +213,10 @@
   }
 
   /* `.reveal` e seus antigos sufixos permanecem como marcadores sem
-     apresentação própria. O AppFrame os orquestra com GSAP para que a
-     folha e o conteúdo compartilhem a mesma timeline. Sem JS, tudo segue
-     visível — movimento nunca é requisito para ler ou operar a página. */
+     apresentação própria. Quem os orquestra é o motion system — a mesma
+     timeline que abre a pasta (ver MOTION.md) —, e `[data-motion-list]`
+     marca listas com stagger. Sem JS, tudo segue visível: movimento nunca é
+     requisito para ler ou operar a página. */
 }
 
 

@@ -61,6 +61,48 @@ pnpm contrast    # valida os pares de cor contra WCAG 2.2 AA
 Revisão visual do design system: <http://localhost:3000/design-system>
 (exige `NEXT_PUBLIC_DESIGN_PREVIEW=true`).
 
+## Configuração de deploy
+
+As variáveis `NEXT_PUBLIC_*` são embutidas no bundle no momento do build. Use
+[`apps/patient/.env.production.example`](apps/patient/.env.production.example)
+e
+[`apps/professional/.env.production.example`](apps/professional/.env.production.example)
+como referência e configure os valores na plataforma antes de executar
+`pnpm build`. O build falha se `NEXT_PUBLIC_API_URL` estiver ausente ou se os
+mocks estiverem ligados em produção.
+
+No backend, configure no mínimo:
+
+```bash
+APP_ENV=production
+AUTH_ALLOWED_ORIGINS=https://app.example.com,https://pro.example.com
+AUTH_COOKIE_SECURE=true
+AUTH_WEBAUTHN_RP_ID=pro.example.com
+AUTH_WEBAUTHN_ORIGINS=https://pro.example.com
+COMPANION_ENABLED=true
+COMPANION_BASE_URL=https://ai-internal.example.com
+AI_CONTEXT_WORKER_ENABLED=true
+AI_PROVIDER=openai
+AUTH_GOOGLE_CLIENT_ID=replace-with-google-web-client-id.apps.googleusercontent.com
+EMAIL_PROVIDER=brevo
+EMAIL_BREVO_API_KEY=replace-with-brevo-api-key
+EMAIL_FROM_NAME=Sinapsa
+EMAIL_FROM_ADDRESS=contato@example.com
+EMAIL_PATIENT_APP_URL=https://app.example.com
+EMAIL_PROFESSIONAL_APP_URL=https://pro.example.com
+EMAIL_WORKER_ENABLED=true
+```
+
+`AI_OPENAI_API_KEY`, `COMPANION_API_KEY`, chaves de JWT/cifra e credenciais do
+PostgreSQL devem vir do secret manager. Frontends e API devem permanecer sob o
+mesmo site registrável (por exemplo `app.example.com`, `pro.example.com` e
+`api.example.com`) para o refresh cookie `SameSite=Lax` funcionar no navegador.
+Nos dois builds Next, configure também `NEXT_PUBLIC_GOOGLE_CLIENT_ID` com o mesmo
+Web Client ID autorizado no Google Cloud para as origens dos dois aplicativos.
+
+Sistema de movimento — princípios, tokens e o ciclo de vida da troca de
+pasta: [MOTION.md](MOTION.md).
+
 ## Decisões que não são negociáveis
 
 Estas vieram do contrato da API e do [design.md](design.md); mexer nelas quebra
@@ -82,6 +124,10 @@ segurança ou acessibilidade, não só estilo.
 - **Estado nunca depende só de cor** — sempre cor + rótulo + forma.
 - **Conteúdo crítico não vive só em toast.** Para isso existe o `<Alert>`.
 - **Sombra só em superfície flutuante** (modal, drawer, menu).
+- **Motion é do sistema, não da tela.** Páginas marcam `.reveal` e
+  `data-motion-list`; quem anima é o shell. Nada de `gsap` solto em página,
+  nada de duração ou ease literal fora de
+  [`packages/ui/src/motion/tokens.ts`](packages/ui/src/motion/tokens.ts).
 - **Relatório exige solicitação profissional e confirmação do paciente.** A
   solicitação fixa o período e exige vínculo, escopo e assinatura vigentes.
   Somente a confirmação em Minha rede inicia a geração; o conteúdo fica apenas

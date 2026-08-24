@@ -10,6 +10,10 @@ import type { NextConfig } from "next";
  */
 const designMock = process.env.NEXT_PUBLIC_DESIGN_MOCK === "true";
 
+if (process.env.NODE_ENV === "production" && designMock) {
+  throw new Error("NEXT_PUBLIC_DESIGN_MOCK cannot be enabled in production");
+}
+
 const mocksAlias: Record<string, string> = designMock
   ? {}
   : { "@sinapsa/mocks": "./src/lib/mocks-stub.ts" };

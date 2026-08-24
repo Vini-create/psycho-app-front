@@ -7,6 +7,9 @@
 export type ApiErrorCode =
   | "invalid_json"
   | "invalid_credentials"
+  | "invalid_google_credential"
+  | "google_not_configured"
+  | "google_link_required"
   | "invalid_access_token"
   | "invalid_token"
   | "invalid_recovery_code"
@@ -90,6 +93,18 @@ const DESCRIPTIONS: Record<string, ErrorDescription> = {
   },
   invalid_credentials: {
     message: "E-mail ou senha incorretos.",
+    action: "show_message",
+  },
+  invalid_google_credential: {
+    message: "Não foi possível confirmar sua entrada com o Google. Tente novamente.",
+    action: "restart_ceremony",
+  },
+  google_not_configured: {
+    message: "A entrada com Google está indisponível no momento.",
+    action: "escalate",
+  },
+  google_link_required: {
+    message: "Esta conta já existe. Entre com e-mail e senha.",
     action: "show_message",
   },
   invalid_access_token: {

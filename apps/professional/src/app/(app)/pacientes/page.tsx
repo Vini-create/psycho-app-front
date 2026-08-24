@@ -14,8 +14,6 @@ import {
   pluralize,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import { usePatientInsights } from "@/lib/queries";
 import { ENGAGEMENT_LABEL } from "@/lib/insights";
 
@@ -193,15 +191,5 @@ function Pacientes() {
 }
 
 export default function PacientesPage() {
-  return (
-    <AuthGate>
-      <MfaGate>
-        <OnboardingGate>
-          <AppShell>
-            <Pacientes />
-          </AppShell>
-        </OnboardingGate>
-      </MfaGate>
-    </AuthGate>
-  );
+  return <Pacientes />;
 }

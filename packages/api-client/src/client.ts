@@ -14,6 +14,44 @@ export type RequestOptions = Omit<RequestInit, "body"> & {
 
 export type ApiClient = ReturnType<typeof createApiClient>;
 
+/**
+ * Resolve e valida a origem pública da API antes de ela ser embutida no bundle.
+ * Em produção não aceitamos o fallback local silencioso: a plataforma de
+ * deploy precisa declarar NEXT_PUBLIC_API_URL explicitamente.
+ */
+export function resolveApiBaseUrl(
+  configuredValue: string | undefined,
+  environment: string | undefined,
+): string {
+  const value = configuredValue?.trim();
+  if (!value) {
+    if (environment === "production") {
+      throw new Error("NEXT_PUBLIC_API_URL is required in production");
+    }
+    return "http://localhost:8080";
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("NEXT_PUBLIC_API_URL must be a valid absolute URL");
+  }
+
+  if (
+    (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+    parsed.username !== "" ||
+    parsed.password !== "" ||
+    parsed.pathname !== "/" ||
+    parsed.search !== "" ||
+    parsed.hash !== ""
+  ) {
+    throw new Error("NEXT_PUBLIC_API_URL must be an HTTP(S) origin without path, query, or credentials");
+  }
+
+  return parsed.origin;
+}
+
 export function createApiClient({
   baseUrl,
   audience,

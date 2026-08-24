@@ -33,8 +33,6 @@ import {
   type ConsentScope,
   type ContextReport,
 } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import { ReportView } from "@/components/ReportView";
 import { previousComparableReport } from "@/lib/report-analytics";
 import {
@@ -759,15 +757,5 @@ export default function PacientePage({
   params: Promise<{ connectionId: string }>;
 }) {
   const { connectionId } = use(params);
-  return (
-    <AuthGate>
-      <MfaGate>
-        <OnboardingGate>
-          <AppShell>
-            <Paciente connectionId={connectionId} />
-          </AppShell>
-        </OnboardingGate>
-      </MfaGate>
-    </AuthGate>
-  );
+  return <Paciente connectionId={connectionId} />;
 }

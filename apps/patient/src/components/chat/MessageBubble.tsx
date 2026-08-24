@@ -1,4 +1,7 @@
-import { formatTime } from "@sinapsa/ui";
+"use client";
+
+import { useRef } from "react";
+import { formatTime, useEnterOnMount } from "@sinapsa/ui";
 import type { Message } from "@sinapsa/api-client";
 import type { ReactNode } from "react";
 
@@ -21,17 +24,29 @@ export function MessageBubble({
   message,
   footer,
   showTime,
+  entering = false,
 }: {
   message: Message;
   footer?: ReactNode;
   /** Só a última mensagem de um bloco mostra a hora — o resto é ruído. */
   showTime?: boolean;
+  /**
+   * Mensagem que chegou com a conversa já aberta. Só ela anima: encenar a
+   * entrada do histórico inteiro a cada abertura seria irritante (§20).
+   */
+  entering?: boolean;
 }) {
+  const ref = useRef<HTMLLIElement>(null);
+  useEnterOnMount(ref, { enabled: entering });
   const isUser = message.role === "user";
 
   if (isUser) {
     return (
-      <li data-message-id={message.id} className="flex flex-col items-end gap-2">
+      <li
+        ref={ref}
+        data-message-id={message.id}
+        className="flex flex-col items-end gap-2"
+      >
         <div
           className={[
             // 72% desktop / 88% mobile — §19.
@@ -61,7 +76,7 @@ export function MessageBubble({
   }
 
   return (
-    <li data-message-id={message.id} className="flex flex-col gap-2">
+    <li ref={ref} data-message-id={message.id} className="flex flex-col gap-2">
       {/* Sem container, sem filete, sem avatar. A resposta É a página. */}
       <div className="measure font-editorial text-body-l whitespace-pre-wrap text-primary">
         <span className="sr-only">Sinapsa respondeu:</span>

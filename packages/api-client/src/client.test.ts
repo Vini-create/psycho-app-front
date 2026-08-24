@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApiClient } from "./client";
+import { createApiClient, resolveApiBaseUrl } from "./client";
 import { ApiError } from "./errors";
 
 const BASE = "http://api.test";
@@ -128,6 +128,32 @@ describe("createApiClient", () => {
 
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).code).toBe("network_error");
+  });
+});
+
+describe("resolveApiBaseUrl", () => {
+  it("remove a barra final de uma origem válida", () => {
+    expect(resolveApiBaseUrl("https://api.sinapsa.test/", "production")).toBe(
+      "https://api.sinapsa.test",
+    );
+  });
+
+  it("falha em produção quando a URL não foi configurada", () => {
+    expect(() => resolveApiBaseUrl(undefined, "production")).toThrow(
+      "NEXT_PUBLIC_API_URL is required in production",
+    );
+  });
+
+  it("mantém o fallback local somente em desenvolvimento", () => {
+    expect(resolveApiBaseUrl(undefined, "development")).toBe(
+      "http://localhost:8080",
+    );
+  });
+
+  it("rejeita URL com path para não montar rotas duplicadas", () => {
+    expect(() =>
+      resolveApiBaseUrl("https://api.sinapsa.test/v1", "production"),
+    ).toThrow("must be an HTTP(S) origin");
   });
 });
 

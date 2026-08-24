@@ -2,10 +2,14 @@ import {
   appEndpoints,
   authEndpoints,
   createApiClient,
+  resolveApiBaseUrl,
 } from "@sinapsa/api-client";
 import { createMockFetch } from "@sinapsa/mocks";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const baseUrl = resolveApiBaseUrl(
+  process.env.NEXT_PUBLIC_API_URL,
+  process.env.NODE_ENV,
+);
 
 /**
  * MODO DE DESENHO — temporário, sai junto com o backend real.

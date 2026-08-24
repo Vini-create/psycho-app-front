@@ -15,8 +15,6 @@ import {
   formatDateTime,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate } from "@/components/AuthGate";
 import { auth } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -160,11 +158,5 @@ function Conta() {
 }
 
 export default function ContaPage() {
-  return (
-    <AuthGate>
-      <AppShell>
-        <Conta />
-      </AppShell>
-    </AuthGate>
-  );
+  return <Conta />;
 }

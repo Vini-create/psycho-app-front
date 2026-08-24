@@ -17,8 +17,6 @@ import {
   describeError,
   type ContextReportRequestStatus,
 } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate } from "@/components/AuthGate";
 import {
   useConnections,
   useContextReportRequests,
@@ -245,11 +243,5 @@ export default function ProfessionalConnectionPage({
   params: Promise<{ connectionId: string }>;
 }) {
   const { connectionId } = use(params);
-  return (
-    <AuthGate>
-      <AppShell>
-        <ProfessionalConnection connectionId={connectionId} />
-      </AppShell>
-    </AuthGate>
-  );
+  return <ProfessionalConnection connectionId={connectionId} />;
 }

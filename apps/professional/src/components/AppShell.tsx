@@ -29,6 +29,9 @@ const NAV: FolderNavItem[] = [
   { href: "/conta", label: "Conta", icon: "person", color: "lavender" },
 ];
 
+/** Ordem das pastas no trilho — governa o sentido do deslocamento (§12). */
+const FOLDER_ORDER = NAV.map((item) => item.href);
+
 function activeHref(pathname: string): string {
   if (pathname === "/") return "/";
   const match = NAV.find(
@@ -47,6 +50,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppFrame
       tone={tone}
       motionKey={pathname}
+      folderId={active}
+      folderOrder={FOLDER_ORDER}
       rail={
         <FolderNav
           items={NAV}

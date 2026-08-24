@@ -19,8 +19,6 @@ import {
   pluralize,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import { useInvitations, usePatientInsights } from "@/lib/queries";
 import { itemKindLabel } from "@/lib/report-labels";
 import {
@@ -458,15 +456,5 @@ function Painel() {
 }
 
 export default function PainelPage() {
-  return (
-    <AuthGate>
-      <MfaGate>
-        <OnboardingGate>
-          <AppShell>
-            <Painel />
-          </AppShell>
-        </OnboardingGate>
-      </MfaGate>
-    </AuthGate>
-  );
+  return <Painel />;
 }

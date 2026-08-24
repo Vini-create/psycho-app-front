@@ -1,4 +1,8 @@
-export { createApiClient, newIdempotencyKey } from "./client";
+export {
+  createApiClient,
+  newIdempotencyKey,
+  resolveApiBaseUrl,
+} from "./client";
 export type { ApiClient, RequestOptions } from "./client";
 export {
   ApiError,

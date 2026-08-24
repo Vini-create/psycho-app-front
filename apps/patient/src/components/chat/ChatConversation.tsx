@@ -60,6 +60,32 @@ export function ChatConversation({ conversationId }: { conversationId: string })
   const positionedConversation = useRef<string | null>(null);
   const messages = useMemo(() => data?.messages ?? [], [data]);
 
+  /* Quais mensagens já estavam na tela quando esta conversa abriu.
+
+     O histórico de uma conversa recém-aberta aparece pronto; só o que chega
+     depois — a mensagem enviada e a resposta — tem entrada animada (§20).
+
+     O baseline é ajustado durante o render, e não num efeito: assim a
+     mensagem nova já nasce sabendo que é nova, e não pisca visível por um
+     frame antes de começar a animar. */
+  const [baseline, setBaseline] = useState<{
+    conversation: string;
+    ids: ReadonlySet<string>;
+  } | null>(null);
+
+  if (
+    !isPending &&
+    (baseline === null || baseline.conversation !== conversationId)
+  ) {
+    setBaseline({
+      conversation: conversationId,
+      ids: new Set(messages.map((message) => message.id)),
+    });
+  }
+
+  const isNewMessage = (id: string) =>
+    baseline?.conversation === conversationId && !baseline.ids.has(id);
+
   const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
     // Dois frames: o primeiro deixa o React pintar a mensagem nova, o
     // segundo deixa o textarea elástico terminar de medir a própria altura.
@@ -172,6 +198,7 @@ export function ChatConversation({ conversationId }: { conversationId: string })
                     )}
                     <MessageBubble
                       message={message}
+                      entering={isNewMessage(message.id)}
                       showTime={endsBlock(index)}
                       footer={
                         hint && (

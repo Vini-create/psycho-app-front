@@ -48,6 +48,12 @@ export type GenericAcceptedResponse = {
   development_token?: string;
 };
 
+export type GoogleChallenge = {
+  challenge_id: string;
+  nonce: string;
+  expires_at: string;
+};
+
 /* ---------------------------------------------------------------- passkeys */
 
 export type PasskeyCeremony = {

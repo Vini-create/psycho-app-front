@@ -42,6 +42,19 @@ const routes: Route[] = [
     "/v1/professional/auth/login",
     () => ok({ tokens: issuedToken(), passkey_required: false, passkey_enrollment_needed: false }),
   ],
+  ["POST", "/v1/:audience/auth/google/challenge", () =>
+    ok({
+      challenge_id: "google-challenge-design-mode",
+      nonce: "google-nonce-design-mode",
+      expires_at: new Date(Date.now() + 300_000).toISOString(),
+    }),
+  ],
+  ["POST", "/v1/app/auth/google", () =>
+    ok({ tokens: issuedToken(), passkey_required: false }),
+  ],
+  ["POST", "/v1/professional/auth/google", () =>
+    ok({ tokens: issuedToken(), passkey_required: false, passkey_enrollment_needed: false }),
+  ],
   ["POST", "/v1/:audience/auth/refresh", () => ok(issuedToken())],
   ["POST", "/v1/:audience/auth/register", ({ body }) =>
     created({

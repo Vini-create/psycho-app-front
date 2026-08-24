@@ -1,23 +1,35 @@
 "use client";
 
-import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { gsap } from "gsap";
+import { type ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { TextureLayer } from "../TextureLayer";
+import {
+  FolderMotionProvider,
+  useFolderMotionRefs,
+} from "../../motion/FolderMotion";
 
 /* Brand Book V2 §09 e §14 — a moldura da aplicação é parte da marca.
 
    O produto não é uma página que rola dentro do navegador: é uma folha
    dentro de uma moldura contínua, com borda fina e cantos arredondados.
    No mobile a moldura encosta nas bordas e perde o raio, porque ali a
-   tela inteira já é a folha. */
+   tela inteira já é a folha.
+
+   A moldura é montada uma vez, no layout persistente de cada app, e não
+   desmonta em nenhuma troca de rota. É o que permite que a pasta mude de
+   estado enquanto o conteúdo troca por dentro — em vez de uma página inteira
+   sumir e outra aparecer. */
 
 export interface AppFrameProps {
   children: ReactNode;
   /** Cor da pasta aberta. Afeta somente a aba ativa e sua folha interna. */
   tone?: "dark" | "sage" | "lavender" | "clay";
-  /** Identidade da página; reinicia a coreografia quando a rota muda. */
+  /** Identidade da página; reinicia a entrada de conteúdo quando a rota muda. */
   motionKey?: string;
+  /** Pasta aberta, derivada da rota. Dispara a coreografia estrutural. */
+  folderId?: string;
+  /** Ordem das pastas no trilho — define o sentido do deslocamento. */
+  folderOrder?: readonly string[];
   /** Trilho de navegação principal, renderizado colado ao topo da moldura. */
   rail?: ReactNode;
   /** Doca inferior do mobile, integrada à borda de baixo. */
@@ -48,9 +60,37 @@ const WIDTH: Record<NonNullable<AppFrameProps["width"]>, string> = {
 };
 
 export function AppFrame({
+  folderId,
+  folderOrder,
+  motionKey,
+  ...props
+}: AppFrameProps) {
+  return (
+    <FolderMotionProvider
+      activeId={folderId ?? ""}
+      order={folderOrder ?? EMPTY_ORDER}
+      motionKey={motionKey}
+    >
+      <AppFrameSurface {...props} />
+    </FolderMotionProvider>
+  );
+}
+
+const EMPTY_ORDER: readonly string[] = [];
+
+type AppFrameSurfaceProps = Omit<
+  AppFrameProps,
+  "folderId" | "folderOrder" | "motionKey"
+>;
+
+/**
+ * A moldura em si. Separada do provider porque precisa consumir as refs que
+ * ele cria: a moldura para a entrada única do app, o corpo da pasta para a
+ * coreografia de troca.
+ */
+function AppFrameSurface({
   children,
   tone = "dark",
-  motionKey,
   rail,
   dock,
   mobileBar,
@@ -58,89 +98,8 @@ export function AppFrame({
   fill = false,
   className,
   contentClassName,
-}: AppFrameProps) {
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const sheet = sheetRef.current;
-    const content = contentRef.current;
-    if (!sheet || !content) return;
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (reduceMotion) {
-      gsap.set([content, ...sheet.querySelectorAll(".reveal")], {
-        clearProps: "all",
-      });
-      return;
-    }
-
-    const context = gsap.context(() => {
-      const mobile = window.matchMedia("(max-width: 639px)").matches;
-      const reveals = Array.from(
-        sheet.querySelectorAll<HTMLElement>(".reveal"),
-      );
-      const listItems = Array.from(
-        sheet.querySelectorAll<HTMLElement>("[data-motion-list] > *"),
-      );
-      const timeline = gsap.timeline({
-        defaults: { ease: "power3.out" },
-      });
-
-      timeline.fromTo(
-        content,
-        {
-          autoAlpha: 0.94,
-          y: mobile ? -4 : 5,
-        },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.28,
-          clearProps: "opacity,visibility,transform",
-        },
-        0,
-      );
-
-      if (reveals.length > 0) {
-        timeline.fromTo(
-          reveals,
-          { autoAlpha: 0, y: 8 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.36,
-            stagger: 0.055,
-            clearProps: "opacity,visibility,transform",
-          },
-          0.07,
-        );
-      }
-
-      if (listItems.length > 0) {
-        timeline.fromTo(
-          listItems,
-          { autoAlpha: 0, y: 5 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.28,
-            stagger: {
-              amount: Math.min(0.22, listItems.length * 0.025),
-              from: "start",
-            },
-            clearProps: "opacity,visibility,transform",
-          },
-          0.12,
-        );
-      }
-    }, sheet);
-
-    return () => context.revert();
-  }, [motionKey, tone]);
+}: AppFrameSurfaceProps) {
+  const refs = useFolderMotionRefs();
 
   return (
     <div
@@ -154,6 +113,7 @@ export function AppFrame({
       )}
     >
       <div
+        ref={refs?.frameRef}
         className={cx(
           "relative mx-auto flex flex-col",
           fill
@@ -166,7 +126,6 @@ export function AppFrame({
       >
         {rail}
         <div
-          ref={sheetRef}
           data-folder-tone={tone}
           className={cx(
             // A cor pertence à pasta aberta: começa exatamente sob o trilho
@@ -181,7 +140,11 @@ export function AppFrame({
           {mobileBar}
 
           <div
-            ref={contentRef}
+            ref={refs?.bodyRef}
+            // O corpo da pasta. Transparente sobre a folha colorida: é por
+            // isso que ele pode escalar e deslocar sem abrir fresta nenhuma
+            // — qualquer folga mostra a própria cor da pasta.
+            data-folder-body=""
             className={cx(
               "relative isolate flex min-h-0 flex-1 flex-col",
               fill && "overflow-hidden",

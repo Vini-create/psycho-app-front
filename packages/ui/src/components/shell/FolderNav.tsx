@@ -1,16 +1,20 @@
 "use client";
 
 import {
-  useLayoutEffect,
   useRef,
   type ComponentType,
   type CSSProperties,
+  type MouseEvent,
   type ReactNode,
   type RefObject,
 } from "react";
-import { gsap } from "gsap";
 import { cx } from "../../lib/cx";
 import { Icon, type IconName } from "../../icons";
+import { useGSAP } from "../../motion/gsap";
+import { resolveMotionVariant } from "../../motion/media";
+import { useFolderMotion } from "../../motion/FolderMotion";
+import { tabSwapTimeline, type TabParts } from "../../motion/tab-motion";
+import { layer } from "../../motion/tokens";
 
 /* Brand Book V2 §09 — navegação "Folder Frame".
 
@@ -31,7 +35,16 @@ import { Icon, type IconName } from "../../icons";
 
    Consequência de acessibilidade que vem de graça: o estado ativo é forma
    + posição + aria-current, não cor. Passa no teste do grayscale (§34) e
-   na regra de "cor nunca é portadora única de significado" (§29). */
+   na regra de "cor nunca é portadora única de significado" (§29).
+
+   Divisão de trabalho com o motion system:
+
+   - repouso  → CSS. Aberta é 46px, fechada é 38px, e isso vale sem
+                JavaScript, no primeiro paint e sob movimento reduzido.
+   - hover e press → CSS, no elemento externo da aba (o <a>), nunca na forma
+                colorida. É o que impede uma `transition` de brigar com as
+                escritas por frame do GSAP.
+   - troca    → GSAP, na forma colorida. Ver motion/tab-motion.ts. */
 
 /**
  * Ombro côncavo — o filete que liga a lateral da aba à superfície da folha.
@@ -39,8 +52,12 @@ import { Icon, type IconName } from "../../icons";
  * Um quadrado de 12px em que um quarto de círculo é recortado pelo gradiente
  * radial: o que sobra é a cunha que curva da vertical da aba para a
  * horizontal da página. `side` decide de qual canto o círculo é centrado.
+ *
+ * Fica sempre no DOM, visível só quando a aba está aberta. Renderizá-lo
+ * condicionalmente tiraria do GSAP a chance de fechá-lo junto com a aba —
+ * ele sumiria de um frame para o outro, no meio do movimento.
  */
-function TabShoulder({ side }: { side: "left" | "right" }) {
+function TabShoulder({ side, open }: { side: "left" | "right"; open: boolean }) {
   return (
     <span
       data-folder-shoulder
@@ -48,6 +65,7 @@ function TabShoulder({ side }: { side: "left" | "right" }) {
       className={cx(
         "pointer-events-none absolute bottom-0 size-3",
         side === "left" ? "-left-3" : "-right-3",
+        open ? "opacity-100" : "opacity-0",
       )}
       style={{
         // 11.4 → 12 dá meio pixel de suavização na curva; sem isso a borda
@@ -61,7 +79,7 @@ function TabShoulder({ side }: { side: "left" | "right" }) {
 }
 
 /** Versão espelhada do ombro para a doca inferior. */
-function DockShoulder({ side }: { side: "left" | "right" }) {
+function DockShoulder({ side, open }: { side: "left" | "right"; open: boolean }) {
   return (
     <span
       data-folder-shoulder
@@ -69,6 +87,7 @@ function DockShoulder({ side }: { side: "left" | "right" }) {
       className={cx(
         "pointer-events-none absolute top-0 size-3",
         side === "left" ? "-left-3" : "-right-3",
+        open ? "opacity-100" : "opacity-0",
       )}
       style={{
         background: `radial-gradient(circle at ${
@@ -127,64 +146,84 @@ function folderStateStyle(active: boolean): CSSProperties {
       ? "var(--folder-fill)"
       : "color-mix(in srgb, var(--folder-fill) 38%, transparent)",
     color: active ? "var(--folder-ink)" : "var(--folder-muted)",
+    /* A pasta à frente cobre os ombros das vizinhas — e é só isso que o
+       empilhamento precisa resolver aqui (§36). */
+    zIndex: active ? layer.folderActive : layer.folderStack,
   } as CSSProperties;
 }
 
-function useFolderActivation(
+/** Lê as peças animáveis de uma aba a partir do id da pasta. */
+function readTabParts(root: HTMLElement, folderId: string): TabParts | null {
+  const shape = root.querySelector<HTMLElement>(
+    `[data-folder-shape][data-folder-id="${folderId}"]`,
+  );
+  if (!shape) return null;
+  return {
+    shape,
+    inner: shape.querySelector<HTMLElement>("[data-folder-tab-inner]"),
+    shoulders: Array.from(
+      shape.querySelectorAll<HTMLElement>("[data-folder-shoulder]"),
+    ),
+  };
+}
+
+/**
+ * Abre a aba nova e fecha a anterior.
+ *
+ * No primeiro paint não anima nada: a rota já chega resolvida do servidor e
+ * animar aqui significaria encenar a abertura de uma pasta que nunca esteve
+ * fechada (§63).
+ */
+function useFolderTabs(
   rootRef: RefObject<HTMLElement | null>,
   activeHref: string,
-  direction: "down" | "up",
+  grow: "up" | "down",
 ) {
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || !activeHref) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const previousHref = useRef<string | null>(null);
 
-    const context = gsap.context(() => {
-      const link = root.querySelector<HTMLElement>('[aria-current="page"]');
-      if (!link) return;
-      const shape =
-        link.querySelector<HTMLElement>("[data-folder-shape]") ?? link;
-      const shoulders = shape.querySelectorAll<HTMLElement>(
-        "[data-folder-shoulder]",
-      );
-      const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+  useGSAP(
+    () => {
+      const root = rootRef.current;
+      if (!root || !activeHref) return;
 
-      timeline.fromTo(
-        shape,
-        {
-          // Cresce preso à folha: base fixa no desktop, topo fixo no
-          // mobile. Transladar a forma abriria uma fenda no encontro.
-          scaleY: 0.92,
-          transformOrigin:
-            direction === "down" ? "center top" : "center bottom",
-        },
-        {
-          scaleY: 1,
-          duration: 0.26,
-          clearProps: "transform,transform-origin",
-        },
-        0,
-      );
+      const previous = previousHref.current;
+      previousHref.current = activeHref;
+      if (previous === null || previous === activeHref) return;
 
-      if (shoulders.length > 0) {
-        timeline.fromTo(
-          shoulders,
-          { autoAlpha: 0, scaleX: 0.35 },
-          {
-            autoAlpha: 1,
-            scaleX: 1,
-            duration: 0.22,
-            stagger: 0.025,
-            clearProps: "opacity,visibility,transform",
-          },
-          0.06,
-        );
-      }
-    }, root);
+      tabSwapTimeline({
+        opening: readTabParts(root, activeHref),
+        closing: readTabParts(root, previous),
+        variant: resolveMotionVariant(),
+        grow,
+      });
+    },
+    { dependencies: [activeHref], scope: rootRef },
+  );
+}
 
-    return () => context.revert();
-  }, [activeHref, direction, rootRef]);
+/**
+ * Adianta o recuo da pasta atual no clique — sem segurar a navegação.
+ *
+ * Ignora tudo que não vai virar uma troca de rota nesta aba: clique do meio,
+ * ctrl/cmd/shift, e cliques já cancelados por outro handler. Sem isso, abrir
+ * a pasta em uma nova aba faria a pasta desta aqui recuar sem motivo.
+ */
+function useFolderLinkHandler() {
+  const { requestFolder } = useFolderMotion();
+
+  return (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    requestFolder(href);
+  };
 }
 
 /** Componente de link da app hospedeira (next/link nas duas apps). */
@@ -194,7 +233,7 @@ export type NavLinkComponent = ComponentType<{
   style?: CSSProperties;
   children: ReactNode;
   "aria-current"?: "page" | undefined;
-  onClick?: () => void;
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }>;
 
 const DefaultLink: NavLinkComponent = ({ href, children, ...props }) => (
@@ -232,7 +271,8 @@ export function FolderNav({
   className,
 }: FolderNavProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  useFolderActivation(rootRef, activeHref, "up");
+  const handleFolderClick = useFolderLinkHandler();
+  useFolderTabs(rootRef, activeHref, "up");
 
   return (
     <div
@@ -264,6 +304,7 @@ export function FolderNav({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   style={folderVariables(item)}
+                  onClick={handleFolderClick(item.href)}
                   className={cx(
                     "group relative flex items-end",
                     // A área clicável tem sempre 46px de altura — o alvo
@@ -271,46 +312,54 @@ export function FolderNav({
                     // interno, não de encolher a aba: encolher a caixa
                     // deixava o alvo em 38px e reprovava a regra de toque.
                     "-mb-px h-[2.875rem]",
+                    // Hover e press moram aqui, no elemento externo: a forma
+                    // colorida é território do GSAP durante a troca (§13/§14).
+                    "transition-transform duration-140 ease-[var(--ease-sinapsa)]",
+                    !active &&
+                      "hover:-translate-y-[3px] active:translate-y-0 active:duration-100",
                   )}
                 >
                   <span
                     data-folder-shape
+                    data-folder-id={item.href}
                     style={folderStateStyle(active)}
                     className={cx(
                       "relative flex items-center gap-2 rounded-t-md px-4",
-                      "transition-transform duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-                      active
-                        ? "h-[2.875rem]"
-                        : "h-[2.375rem] group-hover:-translate-y-[3px]",
+                      // Só cor faz transição por CSS aqui. Forma é do GSAP.
+                      "transition-colors duration-200 ease-[var(--ease-sinapsa)]",
+                      active ? "h-[2.875rem]" : "h-[2.375rem]",
                     )}
                   >
-                    {active && (
-                      <>
-                        <TabShoulder side="left" />
-                        <TabShoulder side="right" />
-                      </>
-                    )}
-                    <Icon
-                      name={item.icon}
-                      size={16}
-                      className={cx(
-                        "shrink-0",
-                        active ? "opacity-70" : "opacity-80",
-                      )}
-                    />
-                    <span className="type-ui text-ui-sm whitespace-nowrap">
-                      {item.label}
-                    </span>
-                    {typeof item.count === "number" && item.count > 0 && (
-                      <span
+                    <TabShoulder side="left" open={active} />
+                    <TabShoulder side="right" open={active} />
+                    {/* Contra-escala: a forma estica na vertical durante a
+                        abertura, o conteúdo da aba não. */}
+                    <span
+                      data-folder-tab-inner
+                      className="flex items-center gap-2"
+                    >
+                      <Icon
+                        name={item.icon}
+                        size={16}
                         className={cx(
-                          "type-meta rounded-xs px-1.5 py-0.5 tabular-nums",
-                          "bg-sunken/70 text-primary",
+                          "shrink-0",
+                          active ? "opacity-70" : "opacity-80",
                         )}
-                      >
-                        {item.count}
+                      />
+                      <span className="type-ui text-ui-sm whitespace-nowrap">
+                        {item.label}
                       </span>
-                    )}
+                      {typeof item.count === "number" && item.count > 0 && (
+                        <span
+                          className={cx(
+                            "type-meta rounded-xs px-1.5 py-0.5 tabular-nums",
+                            "bg-sunken/70 text-primary",
+                          )}
+                        >
+                          {item.count}
+                        </span>
+                      )}
+                    </span>
                   </span>
                 </Link>
               </li>
@@ -344,7 +393,8 @@ export function FolderDock({
   className,
 }: Omit<FolderNavProps, "leading" | "trailing">) {
   const rootRef = useRef<HTMLElement>(null);
-  useFolderActivation(rootRef, activeHref, "down");
+  const handleFolderClick = useFolderLinkHandler();
+  useFolderTabs(rootRef, activeHref, "down");
 
   return (
     <>
@@ -376,41 +426,51 @@ export function FolderDock({
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  style={{
-                    ...folderVariables(item),
-                    ...folderStateStyle(active),
-                  }}
+                  style={folderVariables(item)}
+                  onClick={handleFolderClick(item.href)}
                   className={cx(
-                    "relative flex flex-col items-center justify-center gap-1 px-1",
-                    "transition-transform duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-                    active
-                      ? // A folha vem de cima e continua dentro da aba. O
-                        // pixel negativo cobre a hairline somente no trecho
-                        // ativo; os ombros fazem a transição para o trilho.
-                        "z-10 -mt-px h-[calc(4rem+1px)] rounded-b-xl"
-                      : "h-14 rounded-b-xl hover:translate-y-[3px]",
+                    "relative flex h-16 items-start",
+                    "transition-transform duration-140 ease-[var(--ease-sinapsa)]",
+                    !active && "active:translate-y-[1px]",
                   )}
                 >
-                  {active && (
-                    <>
-                      <DockShoulder side="left" />
-                      <DockShoulder side="right" />
-                    </>
-                  )}
-                  <Icon
-                    name={item.icon}
-                    size={20}
-                    className={active ? "opacity-70" : "opacity-80"}
-                  />
-                  <span className="type-ui w-full truncate text-center text-meta-lg leading-none">
-                    {item.label}
-                  </span>
-                  {typeof item.count === "number" && item.count > 0 && (
+                  <span
+                    data-folder-shape
+                    data-folder-id={item.href}
+                    style={folderStateStyle(active)}
+                    className={cx(
+                      "relative flex w-full flex-col items-center justify-center gap-1 rounded-b-xl px-1",
+                      "transition-colors duration-200 ease-[var(--ease-sinapsa)]",
+                      active
+                        ? // A folha vem de cima e continua dentro da aba. O
+                          // pixel negativo cobre a hairline somente no trecho
+                          // ativo; os ombros fazem a transição para o trilho.
+                          "-mt-px h-[calc(4rem+1px)]"
+                        : "h-14",
+                    )}
+                  >
+                    <DockShoulder side="left" open={active} />
+                    <DockShoulder side="right" open={active} />
                     <span
-                      aria-hidden="true"
-                      className="absolute top-1.5 right-[22%] size-1.5 rounded-full bg-accent-clay"
-                    />
-                  )}
+                      data-folder-tab-inner
+                      className="flex w-full flex-col items-center gap-1"
+                    >
+                      <Icon
+                        name={item.icon}
+                        size={20}
+                        className={active ? "opacity-70" : "opacity-80"}
+                      />
+                      <span className="type-ui w-full truncate text-center text-meta-lg leading-none">
+                        {item.label}
+                      </span>
+                    </span>
+                    {typeof item.count === "number" && item.count > 0 && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-1.5 right-[22%] size-1.5 rounded-full bg-accent-clay"
+                      />
+                    )}
+                  </span>
                 </Link>
               </li>
             );

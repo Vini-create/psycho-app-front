@@ -21,8 +21,6 @@ import {
   formatDateTime,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import { auth } from "@/lib/api";
 import {
   usePasskeys,
@@ -293,15 +291,5 @@ function Conta() {
 }
 
 export default function ContaPage() {
-  return (
-    <AuthGate>
-      <MfaGate>
-        <OnboardingGate>
-          <AppShell>
-            <Conta />
-          </AppShell>
-        </OnboardingGate>
-      </MfaGate>
-    </AuthGate>
-  );
+  return <Conta />;
 }

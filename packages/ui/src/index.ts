@@ -45,6 +45,7 @@ export { Spinner } from "./components/Spinner";
 export { TextureLayer } from "./components/TextureLayer";
 export type { TextureVariant } from "./components/TextureLayer";
 export { ThemeToggle } from "./components/ThemeToggle";
+export { GoogleSignInButton } from "./components/GoogleSignInButton";
 export { ToastProvider, useToast } from "./components/Toast";
 export { Metadata, Overline, PageTitle, Prose } from "./components/Typography";
 export { VisuallyHidden } from "./components/VisuallyHidden";
@@ -55,6 +56,28 @@ export type { ProvenanceCoverage } from "./components/AIProvenance";
 
 export { Icon } from "./icons";
 export type { IconName, IconSize, IconProps } from "./icons";
+
+/* ---- Motion system. Ver MOTION.md. ---- */
+
+export { gsap, Flip, useGSAP } from "./motion/gsap";
+export {
+  duration as motionDuration,
+  ease as motionEase,
+  distance as motionDistance,
+  scale as motionScale,
+  stagger as motionStagger,
+  layer as motionLayer,
+} from "./motion/tokens";
+export type { MotionScale } from "./motion/tokens";
+export {
+  MOTION_QUERY,
+  prefersReducedMotion,
+  resolveMotionVariant,
+  useReducedMotion,
+} from "./motion/media";
+export { FolderMotionProvider, useFolderMotion } from "./motion/FolderMotion";
+export { useEnterOnMount } from "./motion/useEnterOnMount";
+export { useActiveIndicator } from "./motion/useActiveIndicator";
 
 export { AppFrame, EditorialGrid, FrameGutter } from "./components/shell/AppFrame";
 export type { AppFrameProps } from "./components/shell/AppFrame";

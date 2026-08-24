@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  type ReactNode,
-} from "react";
-import { gsap } from "gsap";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cx } from "../lib/cx";
+import { useDialogMotion } from "../motion/useDialogMotion";
 import { IconButton } from "./Button";
 
 /* Brand Book V2 §26 — "A interface não deve quebrar a sensação de página."
@@ -45,76 +39,7 @@ export function Modal({
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (open) {
-      if (!dialog.open) dialog.showModal();
-      if (reduceMotion) {
-        gsap.set(dialog, { clearProps: "all" });
-        return;
-      }
-
-      const content = dialog.firstElementChild;
-      const timeline = gsap.timeline();
-      timeline.fromTo(
-        dialog,
-        { autoAlpha: 0, y: 10, scale: 0.985 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.24,
-          ease: "power3.out",
-          clearProps: "opacity,visibility,transform",
-        },
-      );
-      if (content) {
-        timeline.fromTo(
-          Array.from(content.children),
-          { autoAlpha: 0, y: 5 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.2,
-            stagger: 0.025,
-            ease: "power2.out",
-            clearProps: "opacity,visibility,transform",
-          },
-          0.04,
-        );
-      }
-      return () => {
-        timeline.revert();
-      };
-    }
-
-    if (!dialog.open) return;
-    if (reduceMotion) {
-      dialog.close();
-      return;
-    }
-
-    const tween = gsap.to(dialog, {
-      autoAlpha: 0,
-      y: 6,
-      scale: 0.99,
-      duration: 0.16,
-      ease: "power2.in",
-      onComplete: () => {
-        dialog.close();
-        gsap.set(dialog, { clearProps: "opacity,visibility,transform" });
-      },
-    });
-    return () => {
-      tween.kill();
-    };
-  }, [open]);
+  useDialogMotion(ref, open);
 
   useEffect(() => {
     const dialog = ref.current;

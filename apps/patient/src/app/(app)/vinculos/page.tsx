@@ -15,8 +15,6 @@ import {
   pluralize,
 } from "@sinapsa/ui";
 import { describeError, type Connection, type ConsentScope } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate } from "@/components/AuthGate";
 import { SCOPES, ScopePicker } from "@/components/ScopePicker";
 import {
   useConnections,
@@ -279,11 +277,5 @@ function MinhaRede() {
 }
 
 export default function VinculosPage() {
-  return (
-    <AuthGate>
-      <AppShell>
-        <MinhaRede />
-      </AppShell>
-    </AuthGate>
-  );
+  return <MinhaRede />;
 }

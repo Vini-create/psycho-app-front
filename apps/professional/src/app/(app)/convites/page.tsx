@@ -17,8 +17,6 @@ import {
   useToast,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { AppShell } from "@/components/AppShell";
-import { AuthGate, MfaGate, OnboardingGate } from "@/components/Gates";
 import {
   useCreateInvitation,
   useInvitations,
@@ -226,15 +224,5 @@ function Convites() {
 }
 
 export default function ConvitesPage() {
-  return (
-    <AuthGate>
-      <MfaGate>
-        <OnboardingGate>
-          <AppShell>
-            <Convites />
-          </AppShell>
-        </OnboardingGate>
-      </MfaGate>
-    </AuthGate>
-  );
+  return <Convites />;
 }
