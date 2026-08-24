@@ -71,6 +71,33 @@ como referência e configure os valores na plataforma antes de executar
 `pnpm build`. O build falha se `NEXT_PUBLIC_API_URL` estiver ausente ou se os
 mocks estiverem ligados em produção.
 
+### Cloudflare Workers
+
+O monorepo usa dois Workers independentes, empacotados com OpenNext. No painel
+da Cloudflare, mantenha `Root directory` como `/` para que o pnpm encontre os
+pacotes compartilhados.
+
+Paciente (`sinapsa-patient`):
+
+```text
+Build command:   pnpm --filter @sinapsa/patient cf:build
+Deploy command:  pnpm --filter @sinapsa/patient cf:deploy
+Version command: pnpm --filter @sinapsa/patient cf:version
+Root directory:  /
+```
+
+Profissional (`sinapsa-professional`):
+
+```text
+Build command:   pnpm --filter @sinapsa/professional cf:build
+Deploy command:  pnpm --filter @sinapsa/professional cf:deploy
+Version command: pnpm --filter @sinapsa/professional cf:version
+Root directory:  /
+```
+
+As variáveis `NEXT_PUBLIC_*` devem ser cadastradas como build variables antes
+do build; elas são incorporadas ao bundle pelo Next.js.
+
 No backend, configure no mínimo:
 
 ```bash
