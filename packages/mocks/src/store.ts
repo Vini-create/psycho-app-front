@@ -1,4 +1,5 @@
 import type {
+  Account,
   Connection,
   Consent,
   ConsentScope,
@@ -13,11 +14,13 @@ import type {
 } from "@sinapsa/api-client";
 import * as app from "./fixtures/app";
 import * as professional from "./fixtures/professional";
-import { ago } from "./fixtures/shared";
+import { ago, patientAccount, professionalAccount } from "./fixtures/shared";
 
 const clone = <T>(value: T): T => structuredClone(value);
 
 type State = {
+  appAccount: Account;
+  professionalAccount: Account;
   consents: Consent[];
   conversations: Conversation[];
   messages: Record<string, Message[]>;
@@ -32,6 +35,8 @@ type State = {
 
 function initialState(): State {
   return {
+    appAccount: clone(patientAccount),
+    professionalAccount: clone(professionalAccount),
     consents: clone(app.consents),
     conversations: clone(app.conversations),
     messages: clone(app.messages),

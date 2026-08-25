@@ -24,6 +24,10 @@ export const patientAccount: Account = {
   email_verified_at: ago(120),
   audience: "app",
   mfa_verified: false,
+  created_at: ago(240),
+  updated_at: ago(3),
+  plan: "free",
+  google_connected: true,
 };
 
 export const professionalAccount: Account = {
@@ -35,6 +39,9 @@ export const professionalAccount: Account = {
   audience: "professional",
   // Já verificado: o modo de desenho não passa por cerimônia de passkey.
   mfa_verified: true,
+  created_at: ago(300),
+  updated_at: ago(6),
+  google_connected: false,
 };
 
 export function sessions(userAgent: string): Session[] {

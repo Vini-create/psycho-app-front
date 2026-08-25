@@ -7,6 +7,7 @@ import { Alert, Button, TextField } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
 import { auth } from "@/lib/api";
 import { AuthCard } from "@/components/AuthCard";
+import { GoogleAuthAction } from "@/components/GoogleAuthAction";
 
 const MIN_PASSWORD = 12;
 
@@ -59,6 +60,8 @@ export default function CriarContaPage() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         {error && <Alert tone="danger">{error}</Alert>}
+
+        <GoogleAuthAction mode="signup" disabled={submitting} />
 
         <TextField
           label="Como podemos te chamar"

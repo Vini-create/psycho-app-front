@@ -2,8 +2,6 @@ import * as app from "./fixtures/app";
 import * as professional from "./fixtures/professional";
 import {
   issuedToken,
-  patientAccount,
-  professionalAccount,
   sessions,
 } from "./fixtures/shared";
 import * as store from "./store";
@@ -78,10 +76,19 @@ const routes: Route[] = [
     }),
   ],
   ["POST", "/v1/:audience/auth/password-reset/confirm", () => noContent()],
+  ["PUT", "/v1/:audience/auth/password", () => noContent()],
   ["POST", "/v1/:audience/auth/logout", () => noContent()],
   ["POST", "/v1/:audience/auth/logout-all", () => noContent()],
-  ["GET", "/v1/app/me", () => ok(patientAccount)],
-  ["GET", "/v1/professional/me", () => ok(professionalAccount)],
+  ["GET", "/v1/app/me", () => ok(store.state.appAccount)],
+  ["GET", "/v1/professional/me", () => ok(store.state.professionalAccount)],
+  ["PATCH", "/v1/:audience/me", ({ params, body }) => {
+    const account = params.audience === "app"
+      ? store.state.appAccount
+      : store.state.professionalAccount;
+    account.display_name = String(body.display_name ?? account.display_name).trim();
+    account.updated_at = new Date().toISOString();
+    return ok(account);
+  }],
   ["GET", "/v1/:audience/auth/sessions", ({ params }) =>
     ok({
       sessions: sessions(

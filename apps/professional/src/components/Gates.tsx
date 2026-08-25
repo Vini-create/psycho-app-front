@@ -4,7 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@sinapsa/ui";
 import { useSession } from "@/lib/session";
-import { useProfile } from "@/lib/queries";
+import { isProfessionalProfileComplete, useProfile } from "@/lib/queries";
 
 function Loading({ label }: { label: string }) {
   return (
@@ -54,12 +54,13 @@ export function MfaGate({ children }: { children: ReactNode }) {
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const { data, isPending } = useProfile();
   const router = useRouter();
+  const profileComplete = isProfessionalProfileComplete(data);
 
   useEffect(() => {
-    if (!isPending && data === null) router.replace("/onboarding");
-  }, [isPending, data, router]);
+    if (!isPending && !profileComplete) router.replace("/onboarding");
+  }, [isPending, profileComplete, router]);
 
   if (isPending) return <Loading label="Carregando seu perfil…" />;
-  if (data === null) return null;
+  if (!profileComplete) return null;
   return <>{children}</>;
 }

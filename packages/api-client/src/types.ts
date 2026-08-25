@@ -33,6 +33,10 @@ export type Account = {
   email_verified_at: string | null;
   audience: Audience;
   mfa_verified: boolean;
+  created_at?: string;
+  updated_at?: string;
+  plan?: string;
+  google_connected?: boolean;
 };
 
 export type RegisterResponse = {
@@ -206,6 +210,7 @@ export type ProfessionalProfileInput = {
 
 export type ProfessionalProfile = ProfessionalProfileInput & {
   id?: string;
+  onboarding_complete?: boolean;
   organization?: { id: string; name: string } | null;
   membership?: { role: string } | null;
   plan?: { code: string; status: string } | null;

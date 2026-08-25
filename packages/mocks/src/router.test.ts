@@ -126,3 +126,30 @@ describe("envio autorizado pelo paciente", () => {
     });
   });
 });
+
+describe("gestão da conta", () => {
+  beforeEach(resetState);
+
+  it("atualiza o nome exibido da conta do paciente", () => {
+    expect(
+      resolve(
+        "PATCH",
+        new URL("http://sinapsa.local/v1/app/me"),
+        { display_name: "Helena Atualizada" },
+      ),
+    ).toMatchObject({
+      status: 200,
+      body: { display_name: "Helena Atualizada", audience: "app" },
+    });
+  });
+
+  it("aceita a troca autenticada de senha", () => {
+    expect(
+      resolve(
+        "PUT",
+        new URL("http://sinapsa.local/v1/app/auth/password"),
+        { current_password: "senha-atual", new_password: "nova-senha-longa" },
+      ),
+    ).toMatchObject({ status: 204 });
+  });
+});

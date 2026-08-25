@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 
 type GoogleCredentialResponse = { credential?: string };
 
+export type GoogleButtonText = "signin_with" | "signup_with" | "continue_with";
+
 type GoogleIdentityServices = {
   accounts: {
     id: {
@@ -16,10 +18,11 @@ type GoogleIdentityServices = {
         parent: HTMLElement,
         options: {
           type: "standard";
-          theme: "outline";
+          theme: "outline_dark";
           size: "large";
-          text: "continue_with";
-          shape: "rectangular";
+          text: GoogleButtonText;
+          shape: "pill";
+          logo_alignment: "left";
           width: number;
           locale: "pt-BR";
         },
@@ -40,12 +43,14 @@ const SCRIPT_URL = "https://accounts.google.com/gsi/client";
 export function GoogleSignInButton({
   clientId,
   nonce,
+  text = "continue_with",
   disabled = false,
   onCredential,
   onError,
 }: {
   clientId: string;
   nonce: string;
+  text?: GoogleButtonText;
   disabled?: boolean;
   onCredential: (credential: string) => void;
   onError: () => void;
@@ -74,10 +79,11 @@ export function GoogleSignInButton({
       });
       window.google.accounts.id.renderButton(container, {
         type: "standard",
-        theme: "outline",
+        theme: "outline_dark",
         size: "large",
-        text: "continue_with",
-        shape: "rectangular",
+        text,
+        shape: "pill",
+        logo_alignment: "left",
         width: Math.min(Math.max(container.clientWidth, 240), 400),
         locale: "pt-BR",
       });
@@ -106,8 +112,15 @@ export function GoogleSignInButton({
       script?.removeEventListener("load", render);
       script?.removeEventListener("error", errorRef.current);
     };
-  }, [clientId, disabled, nonce]);
+  }, [clientId, disabled, nonce, text]);
 
   if (!clientId || !nonce) return null;
-  return <div ref={containerRef} className={disabled ? "pointer-events-none opacity-60" : ""} />;
+  return (
+    <div
+      ref={containerRef}
+      className={`flex min-h-11 w-full items-center justify-center overflow-hidden rounded-full ${
+        disabled ? "pointer-events-none opacity-60" : ""
+      }`}
+    />
+  );
 }

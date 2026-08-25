@@ -7,7 +7,7 @@ const config = [
   ...next,
   ...nextCoreWebVitals,
   ...nextTypescript,
-  { ignores: [".next/**", "node_modules/**"] },
+  { ignores: [".next/**", ".open-next/**", "node_modules/**"] },
 ];
 
 export default config;

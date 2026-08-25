@@ -36,3 +36,29 @@ describe("Google auth endpoints", () => {
     });
   });
 });
+
+describe("account management endpoints", () => {
+  it("updates only the display name on the authenticated account", async () => {
+    const { client, request } = fakeClient();
+    await authEndpoints(client).updateAccount({ display_name: "Helena Marques" });
+    expect(request).toHaveBeenCalledWith("/v1/app/me", {
+      method: "PATCH",
+      body: { display_name: "Helena Marques" },
+    });
+  });
+
+  it("changes the password through an authenticated request", async () => {
+    const { client, request } = fakeClient();
+    await authEndpoints(client).changePassword({
+      current_password: "current-password",
+      new_password: "new-long-password",
+    });
+    expect(request).toHaveBeenCalledWith("/v1/app/auth/password", {
+      method: "PUT",
+      body: {
+        current_password: "current-password",
+        new_password: "new-long-password",
+      },
+    });
+  });
+});

@@ -93,6 +93,23 @@ export function authEndpoints(client: ApiClient) {
       return client.request<Account>(`/v1/${client.audience}/me`);
     },
 
+    updateAccount(input: { display_name: string }) {
+      return client.request<Account>(`/v1/${client.audience}/me`, {
+        method: "PATCH",
+        body: input,
+      });
+    },
+
+    changePassword(input: {
+      current_password: string;
+      new_password: string;
+    }) {
+      return client.request<void>(`${base}/password`, {
+        method: "PUT",
+        body: input,
+      });
+    },
+
     listSessions() {
       return client.request<{ sessions: Session[] }>(`${base}/sessions`);
     },

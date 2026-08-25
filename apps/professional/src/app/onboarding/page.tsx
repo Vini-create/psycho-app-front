@@ -68,10 +68,19 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
   const certificationTooLong = certificationList.some(
     (item) => item.length > 200,
   );
+  const countryInvalid = country.trim().length !== 2;
+  const regionMissing = region.trim() === "";
+  const numberMissing = number.trim() === "";
+  const profileInvalid =
+    countryInvalid ||
+    regionMissing ||
+    numberMissing ||
+    tooManyCertifications ||
+    certificationTooLong;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (tooManyCertifications || certificationTooLong) return;
+    if (profileInvalid) return;
 
     // A primeira chamada provisiona organização, membership e trial de uma vez.
     await upsert.mutateAsync({
@@ -130,6 +139,7 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
             maxLength={2}
             required
             help="Código de duas letras, como BR."
+            error={countryInvalid ? "Informe um código de país com duas letras." : undefined}
           />
           <TextField
             label="Estado ou região"
@@ -137,6 +147,7 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
             onChange={(event) => setRegion(event.target.value)}
             required
             placeholder="SP"
+            error={regionMissing ? "Informe o estado ou região do registro." : undefined}
           />
         </div>
 
@@ -146,6 +157,7 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
           onChange={(event) => setNumber(event.target.value)}
           required
           placeholder="06/123456"
+          error={numberMissing ? "Informe o número do registro profissional." : undefined}
         />
 
         <TextAreaField
@@ -172,7 +184,12 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
           }
         />
 
-        <Button type="submit" size="lg" loading={upsert.isPending}>
+        <Button
+          type="submit"
+          size="lg"
+          loading={upsert.isPending}
+          disabled={profileInvalid}
+        >
           {editing ? "Salvar perfil" : "Concluir cadastro"}
         </Button>
       </form>

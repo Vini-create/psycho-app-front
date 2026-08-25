@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Alert, Button, GoogleSignInButton, TextField } from "@sinapsa/ui";
-import {
-  describeError,
-  type AppLoginResponse,
-  type GoogleChallenge,
-} from "@sinapsa/api-client";
+import { Alert, Button, TextField } from "@sinapsa/ui";
+import { describeError, type AppLoginResponse } from "@sinapsa/api-client";
 import { auth } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { AuthCard } from "@/components/AuthCard";
-
-const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "";
+import { GoogleAuthAction } from "@/components/GoogleAuthAction";
 
 export default function EntrarPage() {
   const router = useRouter();
@@ -23,48 +18,6 @@ export default function EntrarPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [googleChallenge, setGoogleChallenge] = useState<GoogleChallenge | null>(null);
-
-  useEffect(() => {
-    if (!googleClientId) return;
-    let active = true;
-    auth.googleChallenge().then(
-      (challenge) => active && setGoogleChallenge(challenge),
-      () => active && setGoogleChallenge(null),
-    );
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  async function refreshGoogleChallenge() {
-    if (!googleClientId) return;
-    try {
-      setGoogleChallenge(await auth.googleChallenge());
-    } catch {
-      setGoogleChallenge(null);
-    }
-  }
-
-  async function handleGoogleCredential(credential: string) {
-    if (!googleChallenge) return;
-    setError(null);
-    setSubmitting(true);
-    try {
-      const response = (await auth.googleLogin({
-        challenge_id: googleChallenge.challenge_id,
-        credential,
-      })) as AppLoginResponse;
-      await establish(response.tokens);
-      router.replace("/");
-    } catch (caught) {
-      setError(describeError(caught).message);
-      await refreshGoogleChallenge();
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
@@ -105,25 +58,7 @@ export default function EntrarPage() {
         {/* Erro de entrada é conteúdo crítico: vive na página, não num toast. */}
         {error && <Alert tone="danger">{error}</Alert>}
 
-        {googleChallenge && (
-          <>
-            <GoogleSignInButton
-              clientId={googleClientId}
-              nonce={googleChallenge.nonce}
-              disabled={submitting}
-              onCredential={(credential) => void handleGoogleCredential(credential)}
-              onError={() => {
-                setError("Não foi possível carregar a entrada com Google.");
-                void refreshGoogleChallenge();
-              }}
-            />
-            <div className="flex items-center gap-3 text-ui text-muted" aria-hidden="true">
-              <span className="h-px flex-1 bg-hairline" />
-              ou entre com e-mail
-              <span className="h-px flex-1 bg-hairline" />
-            </div>
-          </>
-        )}
+        <GoogleAuthAction mode="signin" disabled={submitting} />
 
         <TextField
           label="E-mail"

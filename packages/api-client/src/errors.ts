@@ -24,6 +24,7 @@ export type ApiErrorCode =
   | "passkey_exists"
   | "last_passkey"
   | "passkey_limit"
+  | "password_unchanged"
   | "state_conflict"
   | "validation_failed"
   | "rate_limited"
@@ -33,6 +34,7 @@ export type ApiErrorCode =
   | "context_request_resolved"
   | "connection_inactive"
   | "subscription_required"
+  | "profile_incomplete"
   | "network_error";
 
 export class ApiError extends Error {
@@ -163,6 +165,10 @@ const DESCRIPTIONS: Record<string, ErrorDescription> = {
     message: "Você atingiu o limite de chaves. Remova uma antes de cadastrar.",
     action: "show_message",
   },
+  password_unchanged: {
+    message: "A nova senha precisa ser diferente da senha atual.",
+    action: "show_field_errors",
+  },
   state_conflict: {
     message: "Algo mudou enquanto você trabalhava. Recarregue e tente de novo.",
     action: "refresh_data",
@@ -198,6 +204,11 @@ const DESCRIPTIONS: Record<string, ErrorDescription> = {
   },
   subscription_required: {
     message: "Uma assinatura profissional vigente é necessária.",
+    action: "show_message",
+  },
+  profile_incomplete: {
+    message:
+      "Complete as informações do seu perfil profissional antes de solicitar um relatório.",
     action: "show_message",
   },
   network_error: {

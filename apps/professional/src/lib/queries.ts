@@ -6,7 +6,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { hasCode, type ProfessionalProfileInput } from "@sinapsa/api-client";
+import {
+  hasCode,
+  type ProfessionalProfile,
+  type ProfessionalProfileInput,
+} from "@sinapsa/api-client";
 import { pro } from "./api";
 import { buildInsight, connectionIdOf, subscriptionOf } from "./insights";
 
@@ -20,6 +24,21 @@ export const keys = {
   contextRequests: (connectionId: string) =>
     ["context-report-requests", connectionId] as const,
 };
+
+export function isProfessionalProfileComplete(
+  profile: ProfessionalProfile | null | undefined,
+): boolean {
+  if (!profile) return false;
+  if (profile.onboarding_complete !== undefined) {
+    return profile.onboarding_complete;
+  }
+  return (
+    (profile.profession_type?.trim().length ?? 0) > 0 &&
+    (profile.registration_country_code?.trim().length ?? 0) === 2 &&
+    (profile.registration_region?.trim().length ?? 0) > 0 &&
+    (profile.registration_number?.trim().length ?? 0) > 0
+  );
+}
 
 /* ------------------------------------------------------------------- perfil */
 
