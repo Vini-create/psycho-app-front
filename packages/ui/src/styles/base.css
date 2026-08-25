@@ -236,3 +236,43 @@
     }
   }
 }
+
+@layer base {
+  /* Altura da aba física — a mesma medida que `folderShape.tabHeight` usa
+     para desenhar o path. Vive no CSS porque é ela que empurra o conteúdo
+     para baixo da aba, e isso precisa estar certo no primeiro paint, antes
+     de qualquer medição de JavaScript.
+
+     Se um dos dois números mudar, o outro muda junto: o path desenharia uma
+     aba de uma altura e o texto começaria em outra. */
+  [data-folder-sheet] {
+    --folder-tab-height: 46px;
+  }
+
+  /* A pilha de pastas não existe abaixo de `sm` — §30. A decisão é do CSS
+     pelo mesmo motivo: o HTML servido a um telefone já mostra a folha
+     cheia, sem um quadro de abas que some em seguida. */
+  @media not all and (min-width: 48rem) {
+    [data-folder-sheet] {
+      --folder-tab-height: 0px;
+    }
+  }
+}
+
+@layer base {
+  /* Brandbook §11 — a textura é acabamento, e some quando o usuário pede
+     menos transparência ou mais contraste. Desliga só o ladrilho: o véu que
+     empurra as pastas fechadas para o fundo é hierarquia, não enfeite, e
+     precisa continuar valendo. */
+  @media (prefers-reduced-transparency: reduce) {
+    [data-folder-surface] {
+      --folder-tile: linear-gradient(#0000, #0000);
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    [data-folder-surface] {
+      --folder-tile: linear-gradient(#0000, #0000);
+    }
+  }
+}

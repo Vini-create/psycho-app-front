@@ -41,7 +41,7 @@ export function ChatPageClient() {
         <EmptyState
           overline="Seu espaço de IA"
           title="Comece sua primeira conversa."
-          description="A Sinapsa organiza a conversa enquanto você escreve, sem exigir que o pensamento chegue pronto."
+          description="A Si organiza a conversa enquanto você escreve, sem exigir que o pensamento chegue pronto."
           action={
             <Button loading={create.isPending} onClick={startConversation}>
               Começar conversa

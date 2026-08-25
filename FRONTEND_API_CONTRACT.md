@@ -623,7 +623,7 @@ retornam `404` sem revelar a existência da conversa.
       "generation_status": "completed",
       "ai_provider": "openai",
       "ai_model": "modelo-configurado-no-fastapi",
-      "prompt_version": "companion-v1",
+      "prompt_version": "companion-v2",
       "created_at": "2026-08-18T16:00:01Z"
     }
   ]

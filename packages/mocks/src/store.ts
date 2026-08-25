@@ -122,7 +122,7 @@ export function appendMessage(conversationId: string, content: string) {
     generation_status: "completed",
     ai_provider: "mock",
     ai_model: "design-mode",
-    prompt_version: "companion-v1",
+    prompt_version: "companion-v2",
     created_at: new Date().toISOString(),
   };
 
@@ -155,7 +155,7 @@ export function retryMessage(userMessageId: string) {
       generation_status: "completed",
       ai_provider: "mock",
       ai_model: "design-mode",
-      prompt_version: "companion-v1",
+      prompt_version: "companion-v2",
       created_at: new Date().toISOString(),
     };
     list.splice(index + 1, 0, assistantMessage);

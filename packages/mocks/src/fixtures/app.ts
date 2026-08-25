@@ -67,7 +67,7 @@ export const messages: Record<string, Message[]> = {
       generation_status: "completed",
       ai_provider: "mock",
       ai_model: "design-mode",
-      prompt_version: "companion-v1",
+      prompt_version: "companion-v2",
       created_at: ago(2, 9),
     },
     {
@@ -91,7 +91,7 @@ export const messages: Record<string, Message[]> = {
       generation_status: "completed",
       ai_provider: "mock",
       ai_model: "design-mode",
-      prompt_version: "companion-v1",
+      prompt_version: "companion-v2",
       created_at: ago(2, 8),
     },
     {
@@ -115,7 +115,7 @@ export const messages: Record<string, Message[]> = {
       generation_status: "completed",
       ai_provider: "mock",
       ai_model: "design-mode",
-      prompt_version: "companion-v1",
+      prompt_version: "companion-v2",
       created_at: ago(0, 5),
     },
     {
@@ -151,7 +151,7 @@ export const messages: Record<string, Message[]> = {
       generation_status: "completed",
       ai_provider: "mock",
       ai_model: "design-mode",
-      prompt_version: "companion-v1",
+      prompt_version: "companion-v2",
       created_at: ago(4),
     },
   ],

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { MissingPage } from "@sinapsa/ui";
 import { Logo } from "@/components/Logo";

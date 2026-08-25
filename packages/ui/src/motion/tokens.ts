@@ -12,8 +12,10 @@ export const duration = {
   fast: 0.18,
   /** Mudança de estado de um componente: seleção, indicador, accordion. */
   ui: 0.26,
-  /** Troca de pasta. A animação mais longa do produto — e ainda assim curta. */
-  folder: 0.42,
+  /** Entrada e assentamento da pasta nova. Curta de propósito: é o gesto
+      que mais se repete no dia, e peso não se comunica com duração — se
+      comunica com a curva e com o assentamento no fim. */
+  folder: 0.36,
   /** Entrada de conteúdo de uma página. */
   page: 0.3,
 } as const;
@@ -31,16 +33,16 @@ export const ease = {
   springLike: "power2.out",
 } as const;
 
-/* Amplitudes em pixels.
-
-   O teto é 10px. Movimento maior deixa de ser lido como profundidade e passa
-   a ser lido como slide — §42. */
+/* Amplitudes em pixels. A troca física de pasta é a única coreografia que
+   ultrapassa 10px: o deslocamento maior pertence à folha inteira, combinado
+   com perspectiva e rotação mínima, e não ao conteúdo como um slide. */
 export const distance = {
   hair: 1,
   nudge: 2,
   step: 4,
   lift: 6,
   shift: 8,
+  folderTravel: 18,
 } as const;
 
 /** Escalas. Sempre entre 0.99 e 1 — deformação percebida, nunca vista. */
@@ -56,18 +58,6 @@ export const stagger = {
   block: 0.055,
 } as const;
 
-/* Altura de repouso das abas, em pixels.
-
-   `tab` é a aba aberta (46px, o alvo mínimo do §09); `tabClosed`, a fechada.
-   A razão entre as duas é o fator de escala da animação de abrir/fechar —
-   por isso os dois números vivem aqui e não no componente. */
-export const folderGeometry = {
-  tab: 46,
-  tabClosed: 38,
-  dock: 64,
-  dockClosed: 56,
-} as const;
-
 /**
  * Camadas de empilhamento. Referência única para z-index no shell.
  *
@@ -76,8 +66,9 @@ export const folderGeometry = {
  */
 export const layer = {
   base: 0,
-  folderStack: 1,
-  folderActive: 2,
+  /* A pilha de pastas resolve a própria profundidade em
+     `components/shell/folder-shape.ts`, com um valor por folha: aqui só
+     entram as camadas que precisam ficar acima dela. */
   content: 10,
   navigation: 30,
   popover: 40,

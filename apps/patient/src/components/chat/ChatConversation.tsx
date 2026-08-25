@@ -234,7 +234,7 @@ export function ChatConversation({ conversationId }: { conversationId: string })
                     <span className="size-1 rounded-full bg-accent-lavender" />
                     <span className="size-1 rounded-full bg-accent-lavender" />
                   </span>
-                  Sinapsa está lendo…
+                  Si está lendo…
                 </li>
               )}
             </ul>

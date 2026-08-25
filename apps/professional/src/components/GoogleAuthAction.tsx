@@ -118,7 +118,7 @@ export function GoogleAuthAction({
         </Alert>
       )}
 
-      <div className="rounded-2xl border border-hairline bg-raised/50 px-4 py-4 shadow-sm">
+      <div className="flex min-h-11 w-full justify-center">
         <GoogleSignInButton
           clientId={googleClientId}
           nonce={challenge?.nonce ?? ""}
@@ -133,17 +133,18 @@ export function GoogleAuthAction({
         {!challenge && (
           <div
             role="status"
-            className="flex min-h-11 items-center justify-center rounded-full border border-hairline text-ui text-secondary"
+            className="flex min-h-11 w-full max-w-[400px] items-center justify-center rounded-sm border border-hairline text-ui text-secondary"
           >
             {loading ? "Preparando Google…" : "Google indisponível"}
           </div>
         )}
-        {mode === "signup" && (
-          <p className="type-meta mt-3 text-center text-tertiary">
-            O Google confirma seu e-mail automaticamente.
-          </p>
-        )}
       </div>
+
+      {mode === "signup" && (
+        <p className="type-meta -mt-1 text-center text-tertiary">
+          O Google confirma seu e-mail automaticamente.
+        </p>
+      )}
 
       <div className="flex items-center gap-3 text-ui text-muted" aria-hidden="true">
         <span className="h-px flex-1 bg-hairline" />

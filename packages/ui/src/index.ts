@@ -75,7 +75,6 @@ export {
   resolveMotionVariant,
   useReducedMotion,
 } from "./motion/media";
-export { FolderMotionProvider, useFolderMotion } from "./motion/FolderMotion";
 export { useEnterOnMount } from "./motion/useEnterOnMount";
 export { useActiveIndicator } from "./motion/useActiveIndicator";
 
@@ -83,12 +82,19 @@ export { AppFrame, EditorialGrid, FrameGutter } from "./components/shell/AppFram
 export type { AppFrameProps } from "./components/shell/AppFrame";
 export { MissingPage } from "./components/shell/MissingPage";
 export type { MissingPageProps } from "./components/shell/MissingPage";
-export { FolderNav, FolderDock, LocalNav } from "./components/shell/FolderNav";
+export { FolderStack } from "./components/shell/FolderStack";
 export type {
-  FolderNavItem,
-  FolderNavProps,
-  NavLinkComponent,
-} from "./components/shell/FolderNav";
+  FolderDefinition,
+  FolderStackProps,
+} from "./components/shell/FolderStack";
+export { FolderSheet } from "./components/shell/FolderSheet";
+export type { FolderSheetProps, FolderTone } from "./components/shell/FolderSheet";
+export { paperSurface, PAPER_TILE } from "./components/shell/FolderPaper";
+export { folderPath, folderShape } from "./components/shell/folder-shape";
+export { FolderDock, LocalNav } from "./components/shell/FolderDock";
+export type { FolderDockItem, FolderDockProps } from "./components/shell/FolderDock";
+export { DefaultNavLink } from "./components/shell/nav-link";
+export type { NavLinkComponent } from "./components/shell/nav-link";
 export { Masthead, SectionIndex, MetaStrip } from "./components/shell/Masthead";
 export type { MastheadProps } from "./components/shell/Masthead";
 

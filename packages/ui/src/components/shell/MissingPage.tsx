@@ -1,20 +1,16 @@
-import type { ReactNode } from "react";
-import { buttonStyles } from "../Button";
-import { AppFrame, type AppFrameProps } from "./AppFrame";
-import type { NavLinkComponent } from "./FolderNav";
+"use client";
 
-const DefaultLink: NavLinkComponent = ({ href, children, ...props }) => (
-  <a href={href} {...props}>
-    {children}
-  </a>
-);
+import { useRef, type ReactNode } from "react";
+import { buttonStyles } from "../Button";
+import { FolderSheet, useFolderWidth, type FolderTone } from "./FolderSheet";
+import { DefaultNavLink, type NavLinkComponent } from "./nav-link";
 
 export interface MissingPageProps {
   brand: ReactNode;
   contextLabel: string;
   homeHref?: string;
   homeLabel: string;
-  tone?: NonNullable<AppFrameProps["tone"]>;
+  tone?: FolderTone;
   linkComponent?: NavLinkComponent;
 }
 
@@ -30,24 +26,43 @@ export function MissingPage({
   homeHref = "/",
   homeLabel,
   tone = "lavender",
-  linkComponent: Link = DefaultLink,
+  linkComponent: Link = DefaultNavLink,
 }: MissingPageProps) {
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const width = useFolderWidth(sheetRef);
+
   return (
-    <AppFrame
-      tone={tone}
-      motionKey="not-found"
-      rail={
-        <header className="flex min-h-13 items-center justify-between gap-4 bg-rail px-5 text-primary sm:rounded-t-xl sm:px-8">
-          <Link
+    /* Uma folha solta sobre a bancada, fora da pilha — que é exatamente o
+       que um 404 é neste produto: uma página que não pertence a pasta
+       nenhuma. Por isso aqui não há abas nem navegação principal. */
+    <div className="flex min-h-dvh flex-col bg-ambient">
+      <header className="mx-auto flex w-full max-w-(--container-workspace) shrink-0 items-center justify-between gap-4 px-5 py-4 text-primary sm:px-[max(1.25rem,6vw)] sm:pt-5 sm:pb-4">
+        <Link
+          href={homeHref}
+          className="touch-target inline-flex items-center rounded-xs"
+        >
+          {brand}
+        </Link>
+        <span className="type-meta text-tertiary">ERRO / 404</span>
+      </header>
+
+      <div className="flex flex-1 flex-col px-0 pb-0 sm:px-[max(1.25rem,6vw)] sm:pb-[max(1.25rem,2.5vh)]">
+        <div
+          ref={sheetRef}
+          className="mx-auto grid w-full max-w-(--container-workspace) flex-1"
+        >
+          <FolderSheet
+            id="not-found"
             href={homeHref}
-            className="touch-target inline-flex items-center rounded-xs"
+            label={homeLabel}
+            tone={tone}
+            active
+            depth={0}
+            zIndex={10}
+            geometry={{ tabX: 0, tabWidth: 0, tabHeight: 0 }}
+            width={width}
+            linkComponent={Link}
           >
-            {brand}
-          </Link>
-          <span className="type-meta text-tertiary">ERRO / 404</span>
-        </header>
-      }
-    >
       <main
         aria-labelledby="missing-page-title"
         className="relative isolate flex min-h-[calc(100dvh-3.25rem)] flex-1 overflow-hidden px-5 py-12 sm:min-h-[calc(100dvh-8rem)] sm:px-8 sm:py-16 lg:px-12 lg:py-20 xl:px-16"
@@ -94,7 +109,10 @@ export function MissingPage({
             </div>
           </aside>
         </div>
-      </main>
-    </AppFrame>
+            </main>
+          </FolderSheet>
+        </div>
+      </div>
+    </div>
   );
 }

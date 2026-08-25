@@ -40,7 +40,7 @@ Nenhum arquivo do produto escreve duração, ease ou amplitude literal.
 | `duration.instant` | 0.12s | press, feedback tátil |
 | `duration.fast` | 0.18s | hover, foco, saída de overlay |
 | `duration.ui` | 0.26s | seleção, indicador, mensagem nova |
-| `duration.folder` | 0.42s | troca de pasta (a mais longa do produto) |
+| `duration.folder` | 0.36s | troca de pasta (a mais longa do produto) |
 | `duration.page` | 0.30s | entrada de conteúdo |
 
 | Ease | Curva | Uso |
@@ -50,9 +50,12 @@ Nenhum arquivo do produto escreve duração, ease ou amplitude literal.
 | `ease.folder` | `power3.inOut` | objeto pesado saindo e voltando ao repouso |
 | `ease.ui` | `power2.out` | microinteração |
 
-`distance` (1/2/4/6/8px), `scale` (0.985–0.995), `stagger` (30–55ms),
-`folderGeometry` (46/38px no trilho, 64/56px na doca) e `layer` (z-index de
-`base` a `toast`) completam o conjunto.
+`distance` (1/2/4/6/8px), `scale` (0.985–0.995), `stagger` (30–55ms) e
+`layer` (z-index de `base` a `toast`) completam o conjunto.
+
+A geometria física da pasta — altura da aba, raios, ombro, degrau da pilha —
+não mora aqui: ela é desenho, não movimento, e vive em
+`packages/ui/src/components/shell/folder-shape.ts`.
 
 Os tokens CSS equivalentes (`--duration-tab`, `--ease-sinapsa`) continuam em
 `packages/ui/src/styles/tokens.css` e governam o que é feito por CSS.
@@ -63,11 +66,11 @@ Os tokens CSS equivalentes (`--duration-tab`, `--ease-sinapsa`) continuam em
 
 ```
 apps/*/src/app/(app)/layout.tsx    shell persistente (não desmonta na troca de rota)
-  └── AppShell                     resolve pathname → pasta ativa + tom
-        └── AppFrame               moldura + folha colorida + corpo da pasta
-              ├── FolderMotionProvider   controlador da transição
-              ├── FolderNav / FolderDock abas (trilho no desktop, doca no mobile)
-              └── [data-folder-body]     onde o conteúdo da rota entra
+  └── AppShell                     resolve pathname → pasta ativa
+        └── AppFrame               a bancada: fundo, cabeçalho, margem negativa
+              ├── FolderStack            a pilha: profundidade, z-index, coreografia
+              │     └── FolderSheet ×4   uma pasta = uma silhueta = aba + corpo
+              └── FolderDock             doca do mobile, abaixo de `sm`
 ```
 
 ```
@@ -75,9 +78,7 @@ packages/ui/src/motion/
 ├── gsap.ts               registro único de plugins (Flip, useGSAP)
 ├── tokens.ts             durações, eases, amplitudes, camadas
 ├── media.ts              desktop | mobile | reduced
-├── folder-motion.ts      timelines de entrada/saída da pasta
-├── tab-motion.ts         abrir e fechar aba
-├── FolderMotion.tsx      provider + contexto + ciclo de vida
+├── stack-motion.ts       coreografia da pilha + entrada do conteúdo
 ├── useLateReveals.ts     conteúdo que chega depois do skeleton
 ├── useActiveIndicator.ts indicador que viaja entre itens (Flip)
 ├── useEnterOnMount.ts    entrada de um elemento novo (mensagem)
@@ -91,59 +92,73 @@ Uma página não importa GSAP. Ela marca blocos com `.reveal` e listas com
 
 ## 4. Ciclo de vida da troca de pasta
 
+A troca é o gesto de puxar uma pasta da pilha para a frente. Como aba, corpo,
+textura, sombra e conteúdo vivem dentro do MESMO elemento (`FolderSheet`), a
+timeline só escreve `y` e `scale` na raiz de cada folha — não existe caminho
+pelo qual a aba possa se descolar do corpo no meio do movimento.
+
 ```
-t = 0     clique na aba
-          ├─ requestFolder(destino): o corpo da pasta atual recua
-          │  (opacity → 0, y +4px, scaleY 0.997, 180ms, power2.in)
-          └─ o router navega em paralelo — nada é adiado
+t = 0     pointerdown na aba
+          └─ a pasta de destino sobe 3px: a intenção, antes da rota
 
-t ≈ 60ms  a rota resolve. Em um layout effect, antes do paint:
-          ├─ a folha assume o tom da nova pasta (troca direta, sem
-          │  interpolação de background)
-          ├─ ABA:  a que sai volta à altura de repouso (power3.inOut, 260ms)
-          │        a que entra cresce de 38 → 46px presa à base
-          │        (power3.out, 360ms) — a aba lidera a troca
-          ├─ OMBROS: os filetes côncavos que costuram aba e folha entram
-          │        em 260ms, depois de a aba já ter subido
-          └─ CORPO: opacity 0 → 1, y 6px → 0, scaleY 0.994 → 1 com
-                   transform-origin no topo (dobradiça), +4px de deriva
-                   lateral no sentido da pasta de destino
+t ≈ 40ms  o router navega. O React comita a rota nova e, no mesmo frame,
+          o z-index e a ordem do DOM já colocam a pasta escolhida na frente
 
-t ≈ 180ms blocos `.reveal` entram com stagger de 55ms
-t ≈ 220ms itens de `data-motion-list`, stagger somando no máximo 200ms
-t ≈ 420ms idle. Todos os inline styles removidos por clearProps.
+          ├─ FASE 1  ela se desprende: y -7px, scale 1.004 (72ms, power2.out)
+          ├─ FASE 2  as demais recuam para seus degraus (238ms, power3.inOut)
+          ├─ FASE 3  ela desce à frente, passando 1.2px do repouso (230ms)
+          └─ FASE 4  assenta o 1.2px de volta (65ms, power2.out) — peso
+
+t ≈ 137ms o conteúdo fica disponível: opacity 0.35 → 1, y 5px → 0
+t ≈ 165ms blocos `.reveal` entram com stagger de 55ms
+t ≈ 180ms itens de `data-motion-list`, stagger somando no máximo 200ms
+t ≈ 360ms idle. Todos os inline styles de transform removidos por clearProps.
 ```
 
-Se a rota não vier (um portão redirecionou, a navegação foi cancelada), um
-temporizador de 900ms devolve o corpo ao repouso. O conteúdo nunca fica preso
-em `opacity: 0`.
+O total fica em ~360ms. Peso não se comunica com duração — se comunica com a
+curva e com o assentamento do fim. Uma pasta que leva meio segundo para
+chegar não parece mais pesada, parece mais lenta, e esta é a interação que
+mais se repete no dia de quem usa o produto.
 
-### Por que o corpo, e não a folha
+### Por que o conteúdo entra depois, e nunca antes
 
-A folha (`sheet`) carrega a cor da pasta e encosta na moldura. Escalá-la
-abriria uma fresta com a cor da mesa aparecendo por meio segundo. O corpo
-(`[data-folder-body]`) é transparente sobre ela: qualquer folga que sua escala
-produza mostra a própria cor da pasta. É o que faz a leitura ser "folha
-assentando sob a aba", e não "div encolhendo".
+O protagonista do movimento é a pasta. Se o texto animasse junto, a leitura
+voltaria a ser "página trocando" — que é exatamente o que a pilha existe para
+não ser. O conteúdo só aparece quando a folha já está quase parada.
 
-### Por que as abas não usam Flip
+### Por que a aba não é animada separadamente
 
-A geometria de repouso das duas posições é conhecida e constante — 46px
-aberta, 38px fechada, `folderGeometry`. Não há o que medir: uma razão entre
-dois números do design system anima sem tocar no layout, sem `position:
-absolute` temporário, e continua correta se a fonte terminar de carregar ou a
-viewport mudar de tamanho no meio do movimento.
+Ela não é um objeto. Não há "abrir a aba": há mover a pasta, e a aba vai
+junto porque está dentro dela.
 
-Flip é usado onde a geometria é de fato desconhecida: **o indicador da
-conversa ativa** (`useActiveIndicator`), que viaja entre itens de alturas
-diferentes ditadas pelo texto.
+A PINTURA da folha, essa sim, são duas peças — por custo, não por forma. A
+faixa de topo tem altura fixa e concentra tudo o que a silhueta tem de
+complicado (aba, ombros côncavos, cantos de cima), recortada por
+`clip-path`; daí para baixo a pasta é um retângulo que um `border-radius`
+resolve. As duas compartilham `paperSurface()`: mesma cor, mesmo recurso de
+ladrilho de granulado, mesmo blend, com a fase vertical deslocada pela altura
+da aba. A junção é invisível porque as duas superfícies são literalmente o
+mesmo papel.
+
+A versão anterior desenhava a folha inteira como um SVG do tamanho da página.
+Era mais simples de explicar e igualmente bonita, mas toda mudança de altura
+do conteúdo mandava rasterizar quatro silhuetas do tamanho do documento —
+justamente no frame em que a troca começava. Medido: quatro frames acima de
+24ms por navegação, o pior em 121ms. Depois da separação, o pior frame ficou
+em 27ms, idêntico ao piso medido com a pintura das pastas desligada.
+
+Flip continua reservado para onde a geometria é de fato desconhecida: **o
+indicador da conversa ativa** (`useActiveIndicator`), que viaja entre itens de
+alturas diferentes ditadas pelo texto.
 
 ### Interrupção
 
 Cliques rápidos não acumulam nada:
 
-- `useGSAP` reverte o contexto anterior antes de montar o próximo — a pasta
-  interrompida volta ao estado de CSS e a nova animação parte dali;
+- cada troca começa matando as tweens das folhas (`gsap.killTweensOf`) e
+  parte da posição em que os objetos estão, não de uma origem imaginária;
+- os deslocamentos da fase 1 são relativos (`y: "-=7"`), o que torna o gesto
+  interrompível sem salto;
 - todas as tweens usam `overwrite: "auto"`;
 - o `clearProps` do fim garante que o DOM não fique dependente de inline
   styles transitórios.

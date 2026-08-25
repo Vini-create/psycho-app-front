@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
 
    Duas vozes, duas naturezas tipográficas — e essa é a decisão inteira:
 
-   - a Sinapsa não tem bolha. O que ela responde é tipografado direto na
+   - a Si não tem bolha. O que ela responde é tipografado direto na
      página, em Newsreader 18–20, na medida de leitura. Texto numa folha.
    - a pessoa escreve num bloco pastel assimétrico, à direita, com no máximo
      72% da coluna no desktop. É um recado colado na página, com matéria.
@@ -79,7 +79,7 @@ export function MessageBubble({
     <li ref={ref} data-message-id={message.id} className="flex flex-col gap-2">
       {/* Sem container, sem filete, sem avatar. A resposta É a página. */}
       <div className="measure font-editorial text-body-l whitespace-pre-wrap text-primary">
-        <span className="sr-only">Sinapsa respondeu:</span>
+        <span className="sr-only">Si respondeu:</span>
         {message.content}
       </div>
 

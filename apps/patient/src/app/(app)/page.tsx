@@ -56,7 +56,7 @@ function Caderno() {
         }
         actions={
           <Link href="/chat" className={buttonStyles({ size: "lg" })}>
-            Conversar com a Sinapsa
+            Conversar com a Si
           </Link>
         }
       >
@@ -64,7 +64,7 @@ function Caderno() {
       </Masthead>
 
       <div className="reveal reveal-1">
-        <PullQuote attribution="Sinapsa">
+        <PullQuote attribution="Si">
           Aqui, sentir não precisa virar desempenho.
         </PullQuote>
       </div>

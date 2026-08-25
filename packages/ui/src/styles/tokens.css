@@ -482,6 +482,115 @@
   color-scheme: light;
 }
 
+/* A pasta escura carrega a paleta do dark consigo — inclusive no tema
+   light. Sem isto, uma folha #2a2826 herdaria o texto escuro da raiz clara
+   e o conteúdo sumiria dentro da própria pasta. */
+[data-folder-tone="dark"] {
+  --surface-page: #2a2826;
+  --surface-raised: #34312c;
+  --surface-sunken: #211f1d;
+  --surface-inset: #3b3833;
+  --surface-inverse: #f1ede5;
+
+  --text-primary: #f1ede5;
+  --text-secondary: #a8a296;
+  --text-tertiary: #9a9387;
+  --text-inverse: #171615;
+  --text-inverse-muted: #5c574e;
+  --text-accent: #c8b9d8;
+
+  --border-hairline: #403c36;
+  --border-strong: #7c776b;
+  --border-control: #888274;
+  --border-focus: #c8b9d8;
+
+  --action-primary: #f1ede5;
+  --action-primary-hover: #ffffff;
+  --action-primary-pressed: #d8d3c8;
+  --text-on-action: #171615;
+  --action-selected: #c8b9d8;
+
+  --panel-lavender: #4f455b;
+  --panel-sage: #465045;
+  --panel-clay: #5a443c;
+  --panel-apricot: #5a472c;
+  --panel-ochre: #595337;
+  --panel-fogblue: #3e4a53;
+  --panel-dustrose: #584149;
+  --surface-message-user: #4f455b;
+
+  --accent-lavender: #c8b9d8;
+  --accent-sage: #aeb9a2;
+  --accent-clay: #d49a82;
+  --accent-apricot: #e0aa69;
+  --accent-ochre: #c5b36c;
+  --accent-fogblue: #aebac5;
+  --accent-dustrose: #c89da5;
+
+  --ink-lavender: #c8b9d8;
+  --ink-sage: #aeb9a2;
+  --ink-clay: #d49a82;
+  --ink-apricot: #e0aa69;
+  --ink-ochre: #c5b36c;
+  --ink-fogblue: #aebac5;
+  --ink-dustrose: #c89da5;
+
+  --text-on-panel: #f1ede5;
+  --text-on-panel-muted: #c2bcb0;
+
+  --status-positive: #aeb9a2;
+  --status-positive-surface: #353d34;
+  --status-notice: #e0aa69;
+  --status-notice-surface: #43351f;
+  --status-info: #aebac5;
+  --status-info-surface: #3e4a53;
+  --status-destructive: #d9a3aa;
+  --status-destructive-surface: #4a3036;
+
+  --shadow-1: 0 8px 24px -10px rgb(0 0 0 / 0.5);
+  --shadow-2: 0 18px 50px -18px rgb(0 0 0 / 0.66);
+
+  --texture-opacity: 0.038;
+  --texture-blend: overlay;
+
+  --scrollbar-thumb: #4a463f;
+  --scrollbar-thumb-hover: #9e88b8;
+
+  /* Alias V1 redeclarado no mesmo escopo — mesma razão do bloco pastel. */
+  --bg-canvas: var(--surface-page);
+  --bg-surface: var(--surface-raised);
+  --bg-card: var(--surface-raised);
+  --bg-subtle: var(--surface-sunken);
+  --bg-elevated: var(--surface-raised);
+  --bg-inverse: var(--surface-inverse);
+  --text-strong: var(--text-primary);
+  --text-brand: var(--text-accent);
+  --text-on-inverse: var(--text-inverse);
+  --text-on-inverse-muted: var(--text-inverse-muted);
+  --border-subtle: var(--border-hairline);
+  --action-on-primary: var(--text-on-action);
+  --surface-brand: var(--panel-lavender);
+  --surface-brand-strong: var(--accent-lavender);
+  --focus-ring: var(--border-focus);
+  --success-fg: var(--status-positive);
+  --success-bg: var(--status-positive-surface);
+  --warning-fg: var(--status-notice);
+  --warning-bg: var(--status-notice-surface);
+  --danger-fg: var(--status-destructive);
+  --danger-bg: var(--status-destructive-surface);
+  --info-fg: var(--status-info);
+  --info-bg: var(--status-info-surface);
+  --overlay-shadow: var(--shadow-2);
+  --chart-1: var(--accent-lavender);
+  --chart-2: var(--accent-fogblue);
+  --chart-3: var(--accent-sage);
+  --chart-4: var(--accent-clay);
+  --chart-track: var(--surface-inset);
+  --chart-muted: var(--border-strong);
+
+  color-scheme: dark;
+}
+
 [data-folder-tone="sage"] {
   --surface-page: #aeb9a2;
   --surface-raised: #c3cbbd;
@@ -831,6 +940,9 @@
   --container-reading: 47.5rem;
   --container-conversation: 47.5rem;
   --container-frame: 92.5rem;
+  /* A bancada de pastas. Mais larga que a moldura antiga: a pilha precisa de
+     horizonte para que quatro abas convivam no mesmo topo (§09). */
+  --container-workspace: 97.5rem;
   --container-institutional: 75rem;
   --container-panel: 92.5rem;
 

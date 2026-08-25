@@ -8,7 +8,6 @@ import {
   AppFrame,
   Button,
   FolderDock,
-  FolderNav,
   Icon,
   IconButton,
   Modal,
@@ -16,7 +15,7 @@ import {
   cx,
   formatDayMark,
   useActiveIndicator,
-  type FolderNavItem,
+  type FolderDefinition,
 } from "@sinapsa/ui";
 import {
   useConversations,
@@ -45,21 +44,24 @@ import { Logo } from "./Logo";
    "Início" existe porque o produto precisa de um motivo de abertura que não
    seja digitar: é o índice do caderno da própria pessoa. Sem ele a rota `/`
    ficaria órfã, alcançável só pelo logotipo. */
-const NAV: FolderNavItem[] = [
-  { href: "/", label: "Início", icon: "context", color: "sage" },
-  { href: "/chat", label: "Conversa", icon: "ai", color: "dark" },
-  { href: "/vinculos", label: "Minha rede", icon: "relation", color: "lavender" },
-  { href: "/conta", label: "Conta", icon: "person", color: "clay" },
+const FOLDERS: FolderDefinition[] = [
+  { id: "/", href: "/", label: "Início", icon: "context", tone: "sage" },
+  { id: "/chat", href: "/chat", label: "Si", icon: "ai", tone: "dark" },
+  {
+    id: "/vinculos",
+    href: "/vinculos",
+    label: "Minha rede",
+    icon: "relation",
+    tone: "lavender",
+  },
+  { id: "/conta", href: "/conta", label: "Conta", icon: "person", tone: "clay" },
 ];
 
-/** Ordem das pastas no trilho — governa o sentido do deslocamento (§12). */
-const FOLDER_ORDER = NAV.map((item) => item.href);
-
-function activeHref(pathname: string): string {
-  const match = NAV.find((item) =>
-    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
+function activeFolder(pathname: string): string {
+  const match = FOLDERS.find((folder) =>
+    folder.id === "/" ? pathname === "/" : pathname.startsWith(folder.id),
   );
-  return match?.href ?? "";
+  return match?.id ?? "/";
 }
 
 /* --------------------------------------------------------------------------
@@ -127,7 +129,7 @@ function ConversationList({
               )}
             >
               {/* Ativo por régua lateral, não por preenchimento: a mesma
-                  gramática de "forma antes de cor" do FolderNav. */}
+                  gramática de "forma antes de cor" da pilha de pastas. */}
               {active && (
                 <span
                   aria-hidden="true"
@@ -313,13 +315,14 @@ function ChatShell({ children }: { children: ReactNode }) {
               WebkitMaskImage: "linear-gradient(to bottom, black, transparent)",
             }}
           />
-          <Link href="/" aria-label="Início da Sinapsa" className="touch-target rounded-xs sm:hidden">
-            <Logo className="text-[1.25rem]" />
-          </Link>
+          {/* A assinatura NÃO se repete aqui. Ela vive na bancada, acima da
+              pilha, e esta barra é local — só abre a lista de conversas.
+              Enquanto o logotipo estava nas duas, o mobile mostrava dois
+              "Sinapsa." empilhados, um preto e um translúcido. */}
           <button
             type="button"
             onClick={() => setListOpen(true)}
-            className="type-ui flex min-h-11 items-center gap-2 text-ui text-secondary transition-colors hover:text-primary sm:mr-auto"
+            className="type-ui mr-auto flex min-h-11 items-center gap-2 text-ui text-secondary transition-colors hover:text-primary"
           >
             <Icon name="context" size={20} />
             Conversas
@@ -344,38 +347,27 @@ function ChatShell({ children }: { children: ReactNode }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const active = activeHref(pathname);
-  const tone = NAV.find((item) => item.href === active)?.color ?? "dark";
+  const active = activeFolder(pathname);
   const isChat = pathname === "/chat";
 
   return (
     <AppFrame
-      tone={tone}
+      folders={FOLDERS}
+      activeId={active}
       motionKey={pathname}
-      folderId={active}
-      folderOrder={FOLDER_ORDER}
+      linkComponent={Link}
       fill={isChat}
-      rail={
-        <FolderNav
-          items={NAV}
-          activeHref={active}
-          linkComponent={Link}
-          leading={
-            <Link href="/" aria-label="Início da Sinapsa" className="touch-target rounded-xs">
-              <Logo className="text-[1.35rem]" />
-            </Link>
-          }
-        />
+      brand={
+        <Link
+          href="/"
+          aria-label="Início da Sinapsa"
+          className="touch-target rounded-xs"
+        >
+          <Logo className="text-[1.35rem]" />
+        </Link>
       }
-      dock={<FolderDock items={NAV} activeHref={active} linkComponent={Link} />}
-      mobileBar={
-        isChat ? undefined : (
-          <div className="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3 sm:hidden">
-            <Link href="/" aria-label="Início da Sinapsa" className="touch-target rounded-xs">
-              <Logo className="text-[1.25rem]" />
-            </Link>
-          </div>
-        )
+      dock={
+        <FolderDock items={FOLDERS} activeId={active} linkComponent={Link} />
       }
     >
       {isChat ? (
@@ -385,7 +377,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ChatShell>{children}</ChatShell>
         </Suspense>
       ) : (
-        <main className="mx-auto w-full max-w-(--container-frame) flex-1 px-5 pt-8 pb-16 sm:px-8 sm:pb-20 lg:px-12 xl:px-16">
+        <main className="mx-auto w-full max-w-(--container-frame) flex-1 px-5 pt-10 pb-16 sm:px-10 sm:pb-20 lg:px-14 xl:px-20">
           {children}
         </main>
       )}

@@ -18,10 +18,10 @@ type GoogleIdentityServices = {
         parent: HTMLElement,
         options: {
           type: "standard";
-          theme: "outline_dark";
+          theme: "filled_black";
           size: "large";
           text: GoogleButtonText;
-          shape: "pill";
+          shape: "rectangular";
           logo_alignment: "left";
           width: number;
           locale: "pt-BR";
@@ -79,10 +79,10 @@ export function GoogleSignInButton({
       });
       window.google.accounts.id.renderButton(container, {
         type: "standard",
-        theme: "outline_dark",
+        theme: "filled_black",
         size: "large",
         text,
-        shape: "pill",
+        shape: "rectangular",
         logo_alignment: "left",
         width: Math.min(Math.max(container.clientWidth, 240), 400),
         locale: "pt-BR",
@@ -118,7 +118,7 @@ export function GoogleSignInButton({
   return (
     <div
       ref={containerRef}
-      className={`flex min-h-11 w-full items-center justify-center overflow-hidden rounded-full ${
+      className={`mx-auto flex min-h-11 w-full max-w-[400px] items-center justify-center overflow-hidden rounded-sm ${
         disabled ? "pointer-events-none opacity-60" : ""
       }`}
     />

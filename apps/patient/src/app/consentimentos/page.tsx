@@ -56,8 +56,8 @@ const CONSENTS: ConsentCopy[] = [
     title: "Conversa com inteligência artificial",
     summary: "Como suas conversas são lidas por um sistema automático.",
     points: [
-      "Você conversa com uma inteligência artificial, não com uma pessoa.",
-      "Ela não faz diagnóstico, não avalia e não substitui acompanhamento profissional.",
+      "Você conversa com Si, uma inteligência artificial, não com uma pessoa.",
+      "Si não faz diagnóstico, não avalia e não substitui acompanhamento profissional.",
       "Uma solicitação profissional não gera nada sozinha; você confirma o período em Minha rede antes do processamento.",
       "O relatório completo existe apenas no app do profissional; seu histórico bruto nunca é compartilhado.",
     ],
