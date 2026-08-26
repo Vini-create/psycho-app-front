@@ -3,14 +3,97 @@
 import {
   useEffect,
   useRef,
+  useState,
   type FormEvent,
   type KeyboardEvent,
   type SVGProps,
 } from "react";
-import { cx } from "@sinapsa/ui";
+import { cx, gsap, useGSAP } from "@sinapsa/ui";
 
 const MAX_LENGTH = 8_000;
 const MAX_ROWS_PX = 168;
+
+const WRITING_HINTS = [
+  "Escreva o que está passando pela sua cabeça…",
+  "Diga o que deseja abordar na próxima sessão…",
+  "Conte algo que ficou ecoando no seu dia…",
+  "Registre uma emoção que apareceu agora…",
+  "Comece por uma situação pequena do seu dia…",
+  "Escreva algo que você ainda não conseguiu entender…",
+] as const;
+
+function RotatingWritingHint() {
+  const root = useRef<HTMLSpanElement>(null);
+  const [index, setIndex] = useState(0);
+  const hint = WRITING_HINTS[index] ?? WRITING_HINTS[0];
+  const words = hint.split(" ");
+
+  useGSAP(
+    () => {
+      const element = root.current;
+      if (!element) return;
+
+      const characters = element.querySelectorAll<HTMLElement>("[data-hint-character]");
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set(characters, { autoAlpha: 1 });
+        return;
+      }
+
+      const timeline = gsap.timeline({
+        onComplete: () =>
+          setIndex((current) => (current + 1) % WRITING_HINTS.length),
+      });
+
+      timeline
+        .set(characters, { autoAlpha: 0, y: 2 })
+        .to(characters, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.025,
+          stagger: 0.035,
+          ease: "none",
+        })
+        .to({}, { duration: 3.4 })
+        .to(characters, {
+          autoAlpha: 0,
+          y: -1,
+          duration: 0.02,
+          stagger: { each: 0.018, from: "end" },
+          ease: "none",
+        });
+
+      return () => timeline.kill();
+    },
+    { scope: root, dependencies: [index], revertOnUpdate: true },
+  );
+
+  return (
+    <span
+      ref={root}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 top-0 py-1 font-editorial text-body-l leading-relaxed text-tertiary"
+    >
+      {words.map((word, wordIndex) => (
+        <span key={`${index}-${wordIndex}`} className="inline-block whitespace-nowrap">
+          {[...word].map((character, characterIndex) => (
+            <span
+              key={`${wordIndex}-${characterIndex}`}
+              data-hint-character
+              className="inline-block opacity-0"
+            >
+              {character}
+            </span>
+          ))}
+          {wordIndex < words.length - 1 && (
+            <span data-hint-character className="inline-block opacity-0">
+              {"\u00a0"}
+            </span>
+          )}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function SendIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -122,23 +205,25 @@ export function Composer({
             <label htmlFor="composer" className="type-meta text-tertiary">
               Mensagem
             </label>
-            <textarea
-              id="composer"
-              ref={textarea}
-              rows={1}
-              value={value}
-              maxLength={MAX_LENGTH}
-              disabled={disabled}
-              aria-describedby="composer-hint"
-              onChange={(event) => onChange(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Escreva o que está passando pela sua cabeça…"
-              className={cx(
-                "min-h-8 min-w-0 resize-none bg-transparent py-1",
-                "font-editorial text-body-l leading-relaxed text-primary outline-none",
-                "placeholder:text-tertiary disabled:opacity-50",
-              )}
-            />
+            <div className="relative min-h-8">
+              {!value && !disabled && <RotatingWritingHint />}
+              <textarea
+                id="composer"
+                ref={textarea}
+                rows={1}
+                value={value}
+                maxLength={MAX_LENGTH}
+                disabled={disabled}
+                aria-describedby="composer-hint"
+                onChange={(event) => onChange(event.target.value)}
+                onKeyDown={handleKeyDown}
+                className={cx(
+                  "relative z-10 block min-h-8 w-full min-w-0 resize-none bg-transparent py-1",
+                  "font-editorial text-body-l leading-relaxed text-primary outline-none",
+                  "disabled:opacity-50",
+                )}
+              />
+            </div>
           </div>
 
           <button
