@@ -41,13 +41,6 @@ const STATUS: Record<string, { label: string; tint: string }> = {
   revoked: { label: "Cancelado", tint: "text-tertiary" },
 };
 
-/** O backend devolve só o token; o link é montado pelo frontend. */
-function inviteLink(token: string): string {
-  const patientAppUrl =
-    process.env.NEXT_PUBLIC_PATIENT_APP_URL ?? "http://localhost:3000";
-  return `${patientAppUrl}/convite/${token}`;
-}
-
 function Convites() {
   const { notify } = useToast();
   const { data, isPending, error } = useInvitations();
@@ -55,17 +48,19 @@ function Convites() {
   const revoke = useRevokeInvitation();
 
   const [email, setEmail] = useState("");
-  const [lastToken, setLastToken] = useState<string | null>(null);
+  const [lastInvitationUrl, setLastInvitationUrl] = useState<string | null>(null);
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
     const invitation = await create.mutateAsync(email.trim());
     setEmail("");
-    if (invitation.invitation_token) setLastToken(invitation.invitation_token);
+    if (invitation.invitation_url) {
+      setLastInvitationUrl(invitation.invitation_url);
+    }
   }
 
-  async function copy(token: string) {
-    await navigator.clipboard.writeText(inviteLink(token));
+  async function copy(invitationUrl: string) {
+    await navigator.clipboard.writeText(invitationUrl);
     // Confirmação leve e reversível: é exatamente o caso de um toast.
     notify("Link copiado.", "success");
   }
@@ -121,18 +116,18 @@ function Convites() {
           </Button>
         </form>
 
-        {lastToken && (
+        {lastInvitationUrl && (
           <div className="flex flex-col gap-3 border-l-2 border-accent-sage pl-5">
             <p className="type-eyebrow text-ink-sage">Convite criado</p>
             <p className="type-meta break-all text-secondary">
-              {inviteLink(lastToken)}
+              {lastInvitationUrl}
             </p>
             <Button
               size="sm"
               variant="secondary"
               className="self-start"
               startIcon={<Icon name="copy" size={16} />}
-              onClick={() => copy(lastToken)}
+              onClick={() => copy(lastInvitationUrl)}
             >
               Copiar link
             </Button>
@@ -189,11 +184,11 @@ function Convites() {
                     actions={
                       invitation.status === "pending" && (
                         <span className="flex flex-wrap items-center gap-1">
-                          {invitation.invitation_token && (
+                          {invitation.invitation_url && (
                             <Button
                               size="sm"
                               variant="text"
-                              onClick={() => copy(invitation.invitation_token!)}
+                              onClick={() => copy(invitation.invitation_url!)}
                             >
                               Copiar link
                             </Button>

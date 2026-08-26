@@ -211,10 +211,12 @@ export function upsertProfile(input: ProfessionalProfile): ProfessionalProfile {
 }
 
 export function createInvitation(email: string): Invitation {
+  const token = nextId("token");
   const invitation: Invitation = {
     id: nextId("inv"),
     email,
-    invitation_token: nextId("token"),
+    invitation_token: token,
+    invitation_url: `http://localhost:3000/convite/${token}`,
     status: "pending",
     expires_at: ago(-7),
     created_at: new Date().toISOString(),

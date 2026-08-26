@@ -159,6 +159,7 @@ export type Invitation = {
   id: string;
   email: string;
   invitation_token?: string;
+  invitation_url?: string;
   status: string;
   expires_at: string;
   created_at: string;
