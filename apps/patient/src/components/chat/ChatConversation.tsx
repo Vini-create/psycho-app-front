@@ -47,6 +47,28 @@ function ConversationLoading() {
   );
 }
 
+/**
+ * Presença da Si enquanto a resposta está sendo preparada. Os pontos se
+ * movem como uma pequena cadência de escrita, mas continuam tipografados
+ * diretamente na página — sem criar uma bolha de mensageiro para a IA.
+ */
+function AssistantThinkingIndicator() {
+  return (
+    <li
+      role="status"
+      aria-live="polite"
+      className="si-thinking-enter type-meta flex min-h-5 items-center gap-3 text-tertiary"
+    >
+      <span aria-hidden="true" className="flex h-4 items-center gap-1.5">
+        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
+        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
+        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
+      </span>
+      <span>Si está pensando…</span>
+    </li>
+  );
+}
+
 export function ChatConversation({ conversationId }: { conversationId: string }) {
   const { data, isPending, error } = useMessages(conversationId);
   const send = useSendMessage(conversationId);
@@ -59,6 +81,7 @@ export function ChatConversation({ conversationId }: { conversationId: string })
   const scrollRef = useRef<HTMLDivElement>(null);
   const positionedConversation = useRef<string | null>(null);
   const messages = useMemo(() => data?.messages ?? [], [data]);
+  const latestContentLength = messages.at(-1)?.content.length ?? 0;
 
   /* Quais mensagens já estavam na tela quando esta conversa abriu.
 
@@ -121,7 +144,14 @@ export function ChatConversation({ conversationId }: { conversationId: string })
       positionedConversation.current === conversationId ? "smooth" : "auto";
     scrollToBottom(behavior);
     positionedConversation.current = conversationId;
-  }, [conversationId, isPending, messages.length, scrollToBottom, send.isPending]);
+  }, [
+    conversationId,
+    isPending,
+    messages.length,
+    latestContentLength,
+    scrollToBottom,
+    send.isPending,
+  ]);
 
   async function handleSend() {
     const content = draft.trim();
@@ -157,11 +187,22 @@ export function ChatConversation({ conversationId }: { conversationId: string })
         (RETRY_WINDOW_MS - (now - Date.parse(message.created_at))) / 1000,
       );
       return remaining > 0
-        ? { canRetry: false, label: `Ainda pensando… (${remaining}s)` }
+        ? null
         : { canRetry: true, label: "Isso está demorando." };
     }
     return null;
   }
+
+  const latestMessage = messages.at(-1);
+  const latestGenerationIsPending =
+    latestMessage?.role === "user" &&
+    latestMessage.generation_status === "pending" &&
+    now - Date.parse(latestMessage.created_at) < RETRY_WINDOW_MS;
+  const assistantIsStreaming =
+    latestMessage?.role === "assistant" &&
+    latestMessage.generation_status === "pending";
+  const assistantIsThinking =
+    (send.isPending || latestGenerationIsPending) && !assistantIsStreaming;
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
@@ -226,17 +267,7 @@ export function ChatConversation({ conversationId }: { conversationId: string })
                 );
               })}
 
-              {send.isPending && (
-                <li className="type-meta flex items-center gap-3 text-tertiary">
-                  {/* Três pontos estáticos: presença sem espetáculo (§27). */}
-                  <span aria-hidden="true" className="flex gap-1">
-                    <span className="size-1 rounded-full bg-accent-lavender" />
-                    <span className="size-1 rounded-full bg-accent-lavender" />
-                    <span className="size-1 rounded-full bg-accent-lavender" />
-                  </span>
-                  Si está lendo…
-                </li>
-              )}
+              {assistantIsThinking && <AssistantThinkingIndicator />}
             </ul>
           )}
 

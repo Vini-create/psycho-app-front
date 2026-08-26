@@ -81,6 +81,9 @@ export function MessageBubble({
       <div className="measure font-editorial text-body-l whitespace-pre-wrap text-primary">
         <span className="sr-only">Si respondeu:</span>
         {message.content}
+        {message.generation_status === "pending" && (
+          <span aria-hidden="true" className="si-stream-caret ml-1 inline-block h-[1em] w-px bg-accent-lavender align-[-0.12em]" />
+        )}
       </div>
 
       {(showTime || footer) && (

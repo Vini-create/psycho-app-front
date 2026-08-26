@@ -145,7 +145,47 @@ export function useSendMessage(conversationId: string) {
     }: {
       content: string;
       idempotencyKey: string;
-    }) => appApi.sendMessage(conversationId, content, idempotencyKey),
+    }) =>
+      appApi.sendMessageStream(
+        conversationId,
+        content,
+        idempotencyKey,
+        (delta) => {
+          const queryKey = keys.messages(conversationId);
+          const streamId = `stream-${idempotencyKey}`;
+          queryClient.setQueryData<MessageList>(queryKey, (current) => {
+            const messages = current?.messages ?? [];
+            const existing = messages.find((message) => message.id === streamId);
+            if (existing) {
+              return {
+                messages: messages.map((message) =>
+                  message.id === streamId
+                    ? { ...message, content: message.content + delta }
+                    : message,
+                ),
+              };
+            }
+            const userSequence =
+              messages.find(
+                (message) => message.id === `optimistic-${idempotencyKey}`,
+              )?.sequence ?? (messages.at(-1)?.sequence ?? 0);
+            return {
+              messages: [
+                ...messages,
+                {
+                  id: streamId,
+                  conversation_id: conversationId,
+                  sequence: userSequence + 1,
+                  role: "assistant",
+                  content: delta,
+                  generation_status: "pending",
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            };
+          });
+        },
+      ),
     onMutate: async ({ content, idempotencyKey }) => {
       const queryKey = keys.messages(conversationId);
       await queryClient.cancelQueries({ queryKey });
@@ -177,7 +217,9 @@ export function useSendMessage(conversationId: string) {
           ].filter(Boolean));
           const reconciled = (current?.messages ?? []).filter(
             (message) =>
-              message.id !== context?.optimisticId && !serverIds.has(message.id),
+              message.id !== context?.optimisticId &&
+              message.id !== `stream-${_variables.idempotencyKey}` &&
+              !serverIds.has(message.id),
           );
           reconciled.push(response.user_message);
           if (response.assistant_message) reconciled.push(response.assistant_message);

@@ -239,8 +239,34 @@ export function createApiClient({
     return JSON.parse(text) as T;
   }
 
+  /**
+   * Abre uma resposta incremental usando a mesma sessão, renovação
+   * single-flight e tradução de erros das requisições JSON comuns. O corpo
+   * fica sob responsabilidade do endpoint que conhece o protocolo do stream.
+   */
+  async function openStream(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<Response> {
+    if (!options.skipAuth && accessToken && isExpired()) {
+      await refresh();
+    }
+
+    let response = await send(path, options);
+    if (response.status === 401 && !options.skipAuth) {
+      const error = await toApiError(response.clone());
+      if (error.code !== "invalid_access_token") throw error;
+      const renewed = await refresh();
+      if (!renewed) throw error;
+      response = await send(path, options);
+    }
+    if (!response.ok) throw await toApiError(response);
+    return response;
+  }
+
   return {
     request,
+    openStream,
     refresh,
     setSession,
     clearSession,

@@ -634,10 +634,25 @@ retornam `404` sem revelar a existência da conversa.
 
 `POST /v1/app/conversations/{conversationID}/messages`
 
-O transporte atual é request/response JSON, não SSE: o serviço Go aguarda a
-resposta completa do companion antes de concluir o HTTP. Enquanto streaming
-end-to-end não existir no companion e nesta rota, o frontend insere a mensagem
-do usuário de forma otimista e a reconcilia com `user_message` na resposta.
+O transporte preferencial é SSE sobre `fetch` autenticado. Envie
+`Accept: text/event-stream`; a mesma rota continua aceitando request/response
+JSON quando esse header não estiver presente. O serviço de IA libera deltas em
+limites validados, o Go os repassa imediatamente e só emite a conclusão depois
+de persistir a mensagem final.
+
+Eventos do stream:
+
+- `assistant.started`: conexão aberta; a Si ainda pode estar moderando ou
+  classificando a entrada.
+- `assistant.delta`: `{ "delta": "fragmento validado" }`.
+- `assistant.completed`: mesmo objeto `SendMessageResponse` da resposta JSON.
+- `assistant.error`: a geração foi interrompida; descarte o texto parcial e
+  reconcilie a lista de mensagens com o servidor.
+
+Comentários SSE `: keep-alive` podem aparecer entre eventos e devem ser
+ignorados. O frontend insere a mensagem do usuário de forma otimista, cria uma
+única mensagem temporária da assistente no primeiro delta e a substitui pela
+mensagem persistida em `assistant.completed`.
 
 Header obrigatório:
 

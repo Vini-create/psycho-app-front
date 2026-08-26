@@ -5,3 +5,73 @@
 
 /* O Tailwind precisa enxergar as classes usadas dentro do design system. */
 @source "../../../../packages/ui/src";
+
+/* Indicador editorial da Si: três marcas em cadência, como uma frase sendo
+   composta. O deslocamento é curto para sugerir atividade sem virar bounce. */
+@keyframes si-thinking-dot {
+  0%,
+  64%,
+  100% {
+    opacity: 0.34;
+    transform: translateY(0) scale(0.78);
+  }
+
+  32% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1);
+  }
+}
+
+@keyframes si-thinking-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes si-stream-caret {
+  0%,
+  45% {
+    opacity: 0.9;
+  }
+  55%,
+  100% {
+    opacity: 0.18;
+  }
+}
+
+.si-thinking-dot {
+  animation: si-thinking-dot 1.15s var(--ease-sinapsa) infinite;
+  transform-origin: center;
+}
+
+.si-thinking-dot:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+.si-thinking-dot:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+.si-thinking-enter {
+  animation: si-thinking-enter 180ms var(--ease-sinapsa) both;
+}
+
+.si-stream-caret {
+  animation: si-stream-caret 850ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .si-thinking-dot,
+  .si-thinking-enter,
+  .si-stream-caret {
+    animation: none;
+    opacity: 0.65;
+    transform: none;
+  }
+}

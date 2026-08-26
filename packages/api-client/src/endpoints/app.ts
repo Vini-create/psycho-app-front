@@ -1,4 +1,5 @@
 import type { ApiClient } from "../client";
+import { ApiError } from "../errors";
 import type {
   Connection,
   Consent,
@@ -90,6 +91,64 @@ export function appEndpoints(client: ApiClient) {
       );
     },
 
+    /** Stream SSE autenticado; `onDelta` recebe somente texto validado. */
+    async sendMessageStream(
+      conversationId: string,
+      content: string,
+      idempotencyKey: string,
+      onDelta: (delta: string) => void,
+    ): Promise<SendMessageResponse> {
+      const response = await client.openStream(
+        `/v1/app/conversations/${conversationId}/messages`,
+        {
+          method: "POST",
+          headers: { Accept: "text/event-stream" },
+          body: { content },
+          idempotencyKey,
+        },
+      );
+      if (!response.body) {
+        throw streamError("A resposta incremental não possui um corpo legível.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          buffer += decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary >= 0) {
+            const block = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+            const event = parseSSEBlock(block);
+            if (event?.name === "assistant.delta") {
+              const payload = parseStreamJSON<{ delta?: unknown }>(event.data);
+              if (typeof payload.delta !== "string" || payload.delta.length === 0) {
+                throw streamError("O servidor enviou um fragmento inválido.");
+              }
+              onDelta(payload.delta);
+            }
+            if (event?.name === "assistant.error") {
+              throw streamError("A geração foi interrompida antes de terminar.");
+            }
+            if (event?.name === "assistant.completed") {
+              return parseStreamJSON<SendMessageResponse>(event.data);
+            }
+            boundary = buffer.indexOf("\n\n");
+          }
+          if (done) break;
+        }
+      } catch (error) {
+        if (error instanceof ApiError) throw error;
+        throw streamError("A conexão incremental foi interrompida.");
+      } finally {
+        reader.releaseLock();
+      }
+      throw streamError("A conexão terminou antes da resposta completa.");
+    },
+
     /** Só com id de mensagem `role=user`, e só após 60s de `pending`. */
     retryMessage(userMessageId: string) {
       return client.request<SendMessageResponse>(
@@ -156,4 +215,27 @@ export function appEndpoints(client: ApiClient) {
     },
 
   };
+}
+
+function parseSSEBlock(block: string): { name: string; data: string } | null {
+  let name = "message";
+  const data: string[] = [];
+  for (const line of block.split("\n")) {
+    if (line.startsWith(":")) continue;
+    if (line.startsWith("event:")) name = line.slice(6).trim();
+    if (line.startsWith("data:")) data.push(line.slice(5).trimStart());
+  }
+  return data.length > 0 ? { name, data: data.join("\n") } : null;
+}
+
+function parseStreamJSON<T>(value: string): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    throw streamError("O servidor enviou um evento inválido.");
+  }
+}
+
+function streamError(message: string): ApiError {
+  return new ApiError({ code: "network_error", message, status: 0 });
 }
