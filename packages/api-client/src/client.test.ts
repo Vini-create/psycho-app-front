@@ -150,6 +150,15 @@ describe("resolveApiBaseUrl", () => {
     );
   });
 
+  it("rejeita localhost e HTTP em produção", () => {
+    expect(() =>
+      resolveApiBaseUrl("https://localhost:8080", "production"),
+    ).toThrow("cannot point to localhost in production");
+    expect(() =>
+      resolveApiBaseUrl("http://api.sinapsa.test", "production"),
+    ).toThrow("must use HTTPS in production");
+  });
+
   it("rejeita URL com path para não montar rotas duplicadas", () => {
     expect(() =>
       resolveApiBaseUrl("https://api.sinapsa.test/v1", "production"),

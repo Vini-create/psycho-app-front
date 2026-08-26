@@ -49,6 +49,17 @@ export function resolveApiBaseUrl(
     throw new Error("NEXT_PUBLIC_API_URL must be an HTTP(S) origin without path, query, or credentials");
   }
 
+  if (environment === "production") {
+    const hostname = parsed.hostname.toLowerCase();
+    const localHostnames = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
+    if (parsed.protocol !== "https:") {
+      throw new Error("NEXT_PUBLIC_API_URL must use HTTPS in production");
+    }
+    if (localHostnames.has(hostname) || hostname.endsWith(".localhost")) {
+      throw new Error("NEXT_PUBLIC_API_URL cannot point to localhost in production");
+    }
+  }
+
   return parsed.origin;
 }
 

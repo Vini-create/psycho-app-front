@@ -348,14 +348,16 @@ function Paciente({ connectionId }: { connectionId: string }) {
               <Skeleton className="h-40" aria-label="Carregando check-ins recebidos" />
             )}
 
-            {!checkinCollections.isPending && checkins.length === 0 && (
+            {!checkinCollections.isPending &&
+              !checkinCollections.error &&
+              checkins.length === 0 && (
               <div className="flex flex-col gap-2 py-6">
                 <h2 className="font-editorial text-h3 text-primary">Nenhuma coleta recebida.</h2>
                 <p className="text-body text-secondary">
                   Solicite uma coleta no bloco de check-ins para receber as médias autorizadas.
                 </p>
               </div>
-            )}
+              )}
 
             {checkins.length > 0 && (
               <EditorialList as="ul" className="border-t-0">
