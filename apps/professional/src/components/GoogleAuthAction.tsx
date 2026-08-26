@@ -7,6 +7,7 @@ import { Alert, GoogleSignInButton } from "@sinapsa/ui";
 import {
   describeError,
   type GoogleChallenge,
+  type PasskeyCeremony,
   type ProfessionalLoginResponse,
 } from "@sinapsa/api-client";
 import { auth, pro } from "@/lib/api";
@@ -17,9 +18,11 @@ const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "";
 export function GoogleAuthAction({
   mode,
   disabled = false,
+  onPasskeyRequired,
 }: {
   mode: "signin" | "signup";
   disabled?: boolean;
+  onPasskeyRequired?: (ceremony: PasskeyCeremony) => void;
 }) {
   const router = useRouter();
   const { establish } = useSession();
@@ -65,6 +68,10 @@ export function GoogleAuthAction({
 
   async function completePrimaryLogin(response: ProfessionalLoginResponse) {
     if (response.passkey_required) {
+      if (onPasskeyRequired) {
+        onPasskeyRequired(response.passkey_ceremony);
+        return;
+      }
       const credential = await startAuthentication({
         optionsJSON: response.passkey_ceremony.public_key as never,
       });

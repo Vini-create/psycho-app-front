@@ -64,7 +64,26 @@ export type PasskeyCeremony = {
   ceremony_token: string;
   /** Payload opaco produzido pelo backend; entregar direto ao WebAuthn. */
   public_key: Record<string, unknown>;
+  /** Tokens opacos e efêmeros. O scan_token vai apenas no QR; o poll_token fica em memória no desktop. */
+  device_authorization?: DeviceAuthorizationChallenge;
 };
+
+export type DeviceAuthorizationChallenge = {
+  scan_token: string;
+  poll_token: string;
+  confirmation_code: string;
+  expires_at: string;
+};
+
+export type DeviceAuthorizationPreview = {
+  public_key: Record<string, unknown>;
+  confirmation_code: string;
+  expires_at: string;
+};
+
+export type DeviceAuthorizationPollResponse =
+  | { status: "pending" }
+  | IssuedToken;
 
 export type Passkey = {
   id: string;

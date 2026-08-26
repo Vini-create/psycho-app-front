@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startAuthentication } from "@simplewebauthn/browser";
@@ -14,6 +14,7 @@ import { auth, pro } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { AuthCard } from "@/components/AuthCard";
 import { GoogleAuthAction } from "@/components/GoogleAuthAction";
+import { DeviceAuthorizationChallenge } from "@/components/DeviceAuthorizationChallenge";
 
 export default function EntrarPage() {
   const router = useRouter();
@@ -28,6 +29,11 @@ export default function EntrarPage() {
   const [usingRecovery, setUsingRecovery] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState("");
 
+  const finishLogin = useCallback(async (tokens: Parameters<typeof establish>[0]) => {
+    await establish(tokens);
+    router.replace("/");
+  }, [establish, router]);
+
   async function runPasskeyCeremony(pending: PasskeyCeremony) {
     // O payload é opaco: entregamos ao WebAuthn como veio. Biometria, PIN,
     // chave física ou aprovação no celular são decisão do sistema operacional.
@@ -38,8 +44,7 @@ export default function EntrarPage() {
       ceremony_token: pending.ceremony_token,
       credential,
     });
-    await establish(tokens);
-    router.replace("/");
+    await finishLogin(tokens);
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -69,7 +74,6 @@ export default function EntrarPage() {
   async function completePrimaryLogin(response: ProfessionalLoginResponse) {
     if (response.passkey_required) {
       setCeremony(response.passkey_ceremony);
-      await runPasskeyCeremony(response.passkey_ceremony);
       return;
     }
     // Este token tem mfa=false: serve só para cadastrar a primeira passkey.
@@ -127,6 +131,31 @@ export default function EntrarPage() {
     );
   }
 
+  if (ceremony) {
+    return (
+      <AuthCard
+        overline="Verificação em duas etapas"
+        title="Confirme esta entrada."
+        description="Autorize pelo celular onde sua chave de acesso está salva ou use uma alternativa segura."
+      >
+        {error && <Alert tone="danger">{error}</Alert>}
+        <DeviceAuthorizationChallenge
+          ceremony={ceremony}
+          busy={submitting}
+          onAuthorized={finishLogin}
+          onUseThisDevice={() => {
+            setError(null);
+            setSubmitting(true);
+            void runPasskeyCeremony(ceremony)
+              .catch((caught) => setError(describeError(caught).message))
+              .finally(() => setSubmitting(false));
+          }}
+          onUseRecovery={() => setUsingRecovery(true)}
+        />
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard
       overline="Área do profissional"
@@ -144,7 +173,14 @@ export default function EntrarPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         {error && <Alert tone="danger">{error}</Alert>}
 
-        <GoogleAuthAction mode="signin" disabled={submitting} />
+        <GoogleAuthAction
+          mode="signin"
+          disabled={submitting}
+          onPasskeyRequired={(pending) => {
+            setError(null);
+            setCeremony(pending);
+          }}
+        />
 
         <TextField
           label="E-mail"
@@ -167,28 +203,6 @@ export default function EntrarPage() {
         <Button type="submit" size="lg" fullWidth loading={submitting}>
           Entrar
         </Button>
-
-        {/* Só oferecemos recuperação depois que o backend pediu passkey. */}
-        {ceremony && (
-          <div className="flex flex-col gap-3 border-t border-hairline pt-5">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => runPasskeyCeremony(ceremony).catch((caught) =>
-                setError(describeError(caught).message),
-              )}
-            >
-              Tentar a chave de acesso de novo
-            </Button>
-            <Button
-              type="button"
-              variant="text"
-              onClick={() => setUsingRecovery(true)}
-            >
-              Não consigo usar minha chave
-            </Button>
-          </div>
-        )}
 
         <Link
           href="/recuperar-senha"

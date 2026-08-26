@@ -10,6 +10,8 @@ import type {
   ProfessionalProfile,
   ProfessionalProfileInput,
   IssuedToken,
+  DeviceAuthorizationPollResponse,
+  DeviceAuthorizationPreview,
 } from "../types";
 
 /**
@@ -65,6 +67,30 @@ export function professionalEndpoints(client: ApiClient) {
       return client.request<IssuedToken>(
         `${passkeyBase}/authentication/recovery`,
         { method: "POST", body: input, skipAuth: true },
+      );
+    },
+
+    previewDeviceAuthorization(scanToken: string) {
+      return client.request<DeviceAuthorizationPreview>(
+        "/v1/professional/auth/device-authorizations/preview",
+        { method: "POST", body: { scan_token: scanToken }, skipAuth: true },
+      );
+    },
+
+    approveDeviceAuthorization(input: {
+      scan_token: string;
+      credential: unknown;
+    }) {
+      return client.request<void>(
+        "/v1/professional/auth/device-authorizations/approve",
+        { method: "POST", body: input, skipAuth: true },
+      );
+    },
+
+    consumeDeviceAuthorization(pollToken: string) {
+      return client.request<DeviceAuthorizationPollResponse>(
+        "/v1/professional/auth/device-authorizations/consume",
+        { method: "POST", body: { poll_token: pollToken }, skipAuth: true },
       );
     },
 
