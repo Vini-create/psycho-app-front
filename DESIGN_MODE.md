@@ -34,10 +34,22 @@ Os fixtures foram montados para cobrir estados, não só o caminho feliz:
 - solicitação de relatório pendente em Minha rede, com período fechado e envio
   explícito pelo paciente;
 - convites aceito / pendente / expirado; acompanhamento encerrado.
+- **check-in diário** em todos os estados: dois check-ins ativos de
+  profissionais diferentes (Rui e Marta — é o que torna visível o rótulo com
+  o nome e o seletor da colheita), o dia de hoje sempre em aberto na tela
+  inicial, três semanas de série com queda no meio e dias sem resposta, um
+  check-in **pendente de aceite** em Minha rede, um pedido de colheita
+  aguardando decisão e um retrato já entregue no painel profissional.
 
 O estado é mutável em memória: enviar mensagem, renomear conversa, solicitar e
-enviar relatório, criar convite e encerrar vínculo mudam as telas. Recarregar
+enviar relatório, criar convite, encerrar vínculo, responder check-in, aceitar
+ou recusar um check-in novo e autorizar a colheita mudam as telas. Recarregar
 a página zera tudo.
+
+As médias, o melhor e o pior dia do check-in são calculados pelo mock com a
+mesma conta do backend (`buildCollection` em `packages/mocks/src/store.ts`).
+No produto real esse cálculo nunca acontece no cliente — o mock só o repete
+para o modo de desenho ver números coerentes com a série das respostas.
 
 ### Forçar o estado da assinatura
 

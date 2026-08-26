@@ -18,6 +18,13 @@ import {
   type ContextReportRequestStatus,
 } from "@sinapsa/api-client";
 import {
+  ActiveCheckins,
+  CheckinCollectionRequests,
+  PendingCheckinInvites,
+} from "@/components/checkin/ConnectionCheckins";
+import {
+  useCheckinAssignments,
+  useCheckinCollectionRequests,
   useConnections,
   useContextReportRequests,
   useSendRequestedContextReport,
@@ -47,6 +54,12 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
   const connections = useConnections();
   const requests = useContextReportRequests(connectionId);
   const send = useSendRequestedContextReport(connectionId);
+  /* As mesmas consultas que os painéis de check-in fazem — o TanStack resolve
+     cada chave uma vez só. Aqui elas servem apenas para saber quais seções
+     existem antes de numerá-las. */
+  const checkinInvites = useCheckinAssignments(connectionId, ["pending"]);
+  const activeCheckins = useCheckinAssignments(connectionId, ["active"]);
+  const collectionRequests = useCheckinCollectionRequests(connectionId);
   const [sentId, setSentId] = useState<string | null>(null);
 
   const connection = connections.data?.connections.find(
@@ -76,6 +89,30 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
   const items = requests.data?.requests ?? [];
   const pendingItems = items.filter((item) => item.status === "pending");
   const history = items.filter((item) => item.status !== "pending");
+
+  /* A numeração das seções é contínua, e cada uma delas some quando não tem
+     conteúdo. Calcular os índices aqui — em vez de fixá-los no JSX — é o que
+     evita uma tela que abre em "01, 03, 04". A ordem deste array é a ordem
+     visual; mudar uma sem a outra quebra a numeração em silêncio. */
+  const showsReportRequests = pendingItems.length > 0 && active;
+  const showsCheckinInvites =
+    active && (checkinInvites.data?.assignments.length ?? 0) > 0;
+  const showsCollectionRequests =
+    active &&
+    (collectionRequests.data?.requests.some((item) => item.status === "pending") ??
+      false);
+  const showsActiveCheckins =
+    active && (activeCheckins.data?.assignments.length ?? 0) > 0;
+
+  const sections = [
+    showsReportRequests ? "report-requests" : null,
+    showsCheckinInvites ? "checkin-invites" : null,
+    showsCollectionRequests ? "checkin-collection" : null,
+    showsActiveCheckins ? "checkin-active" : null,
+    "history",
+  ].filter((section): section is string => section !== null);
+  const sectionIndex = (name: string) =>
+    String(sections.indexOf(name) + 1).padStart(2, "0");
 
   return (
     <div className="flex flex-col gap-12 sm:gap-16">
@@ -126,9 +163,9 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
       )}
 
       {/* Decisão pendente — o único bloco com peso na tela. */}
-      {pendingItems.length > 0 && active && (
+      {showsReportRequests && (
         <section className="reveal reveal-1 flex flex-col gap-6">
-          <SectionIndex index="01" meta="depende de você">
+          <SectionIndex index={sectionIndex("report-requests")} meta="depende de você">
             Períodos solicitados
           </SectionIndex>
 
@@ -176,9 +213,29 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
         </section>
       )}
 
-      <section className="reveal reveal-2 flex flex-col gap-4">
+      {/* Aceitar um check-in é combinar de responder algo todo dia; aceitar a
+          colheita é entregar o que já foi respondido. São dois consentimentos
+          diferentes, e por isso dois painéis. */}
+      {active && (
+        <div className="reveal reveal-2 flex flex-col gap-12 sm:gap-16">
+          <PendingCheckinInvites
+            connectionId={connectionId}
+            index={sectionIndex("checkin-invites")}
+          />
+          <CheckinCollectionRequests
+            connectionId={connectionId}
+            index={sectionIndex("checkin-collection")}
+          />
+          <ActiveCheckins
+            connectionId={connectionId}
+            index={sectionIndex("checkin-active")}
+          />
+        </div>
+      )}
+
+      <section className="reveal reveal-3 flex flex-col gap-4">
         <SectionIndex
-          index={pendingItems.length > 0 && active ? "02" : "01"}
+          index={sectionIndex("history")}
           meta="do mais recente ao mais antigo"
         >
           Histórico de solicitações

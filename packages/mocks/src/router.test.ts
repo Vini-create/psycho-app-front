@@ -153,3 +153,157 @@ describe("gestão da conta", () => {
     ).toMatchObject({ status: 204 });
   });
 });
+
+describe("check-in diário", () => {
+  beforeEach(resetState);
+
+  const url = (path: string) => new URL(`http://sinapsa.local${path}`);
+
+  it("entrega ao paciente só os check-ins ativos, com o estado do dia", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const result = resolve("GET", url(`/v1/app/checkins?date=${today}`), {});
+    const checkins = (result.body as { checkins: { id: string; answered_days: number }[] })
+      .checkins;
+
+    expect(result.status).toBe(200);
+    // O pendente não aparece: aceitar é o primeiro dos dois consentimentos.
+    expect(checkins.map((item) => item.id)).toEqual([
+      "assign-rui-humor",
+      "assign-marta-sono",
+    ]);
+    expect(checkins[0]!.answered_days).toBeGreaterThan(0);
+  });
+
+  it("recusa resposta com alternativa de outra pergunta", () => {
+    const result = resolve(
+      "POST",
+      url("/v1/app/checkins/assign-rui-humor/entries"),
+      {
+        entry_date: new Date().toISOString().slice(0, 10),
+        answers: [
+          { question_id: "q-humor", option_id: "o-sono-3" },
+          { question_id: "q-sono", option_id: "o-sono-3" },
+          { question_id: "q-energia", option_id: "o-energia-3" },
+          { question_id: "q-calma", option_id: "o-calma-3" },
+        ],
+      },
+    );
+
+    expect(result).toMatchObject({
+      status: 422,
+      body: { error: { code: "validation_failed" } },
+    });
+  });
+
+  it("responder o mesmo dia corrige em vez de duplicar", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const answers = [
+      { question_id: "q-humor", option_id: "o-humor-5" },
+      { question_id: "q-sono", option_id: "o-sono-4" },
+      { question_id: "q-energia", option_id: "o-energia-5" },
+      { question_id: "q-calma", option_id: "o-calma-4" },
+    ];
+    const before = state.checkinEntries["assign-rui-humor"]!.length;
+
+    resolve("POST", url("/v1/app/checkins/assign-rui-humor/entries"), {
+      entry_date: today,
+      answers,
+    });
+    resolve("POST", url("/v1/app/checkins/assign-rui-humor/entries"), {
+      entry_date: today,
+      answers,
+    });
+
+    const entries = state.checkinEntries["assign-rui-humor"]!;
+    expect(entries.filter((entry) => entry.entry_date === today)).toHaveLength(1);
+    expect(entries).toHaveLength(before + 1);
+  });
+
+  it("só entrega ao profissional os check-ins que o paciente escolheu", () => {
+    const result = resolve(
+      "POST",
+      url("/v1/app/checkin-collection-requests/checkin-request-pendente/send"),
+      { assignment_ids: ["assign-rui-humor"] },
+    );
+
+    expect(result).toMatchObject({ status: 200, body: { checkin_count: 1 } });
+
+    const collections = (
+      resolve("GET", url("/v1/professional/patients/conn-rui/checkin-collections"), {})
+        .body as { collections: { checkins: { assignment_id: string }[] }[] }
+    ).collections;
+    const shared = collections[0]!.checkins;
+
+    expect(shared).toHaveLength(1);
+    expect(shared[0]!.assignment_id).toBe("assign-rui-humor");
+  });
+
+  it("recusa um segundo envio do mesmo pedido", () => {
+    const send = () =>
+      resolve(
+        "POST",
+        url("/v1/app/checkin-collection-requests/checkin-request-pendente/send"),
+        { assignment_ids: ["assign-rui-humor"] },
+      );
+    send();
+
+    expect(send()).toMatchObject({
+      status: 409,
+      body: { error: { code: "checkin_request_resolved" } },
+    });
+  });
+
+  it("recusa um segundo pedido de colheita aberto no mesmo vínculo", () => {
+    expect(
+      resolve(
+        "POST",
+        url("/v1/professional/patients/conn-rui/checkin-collection-requests"),
+        { period_start: "2026-08-01", period_end: "2026-08-14" },
+      ),
+    ).toMatchObject({
+      status: 409,
+      body: { error: { code: "checkin_conflict" } },
+    });
+  });
+
+  it("recusa edição de modelo publicado", () => {
+    expect(
+      resolve("PUT", url("/v1/professional/checkin-templates/tpl-humor"), {
+        title: "Outro título",
+        legend: "",
+        questions: [
+          {
+            prompt: "Pergunta nova",
+            legend: "",
+            options: [
+              { label: "Nunca" },
+              { label: "Raramente" },
+              { label: "Às vezes" },
+              { label: "Quase sempre" },
+              { label: "Sempre" },
+            ],
+          },
+        ],
+      }),
+    ).toMatchObject({
+      status: 409,
+      body: { error: { code: "checkin_template_published" } },
+    });
+  });
+
+  it("revogar tira o check-in do aparelho do paciente", () => {
+    resolve(
+      "DELETE",
+      url("/v1/professional/patients/conn-rui/checkin-assignments/assign-rui-humor"),
+      {},
+    );
+
+    const checkins = (
+      resolve("GET", url("/v1/app/checkins"), {}).body as {
+        checkins: { id: string }[];
+      }
+    ).checkins;
+
+    expect(checkins.map((item) => item.id)).not.toContain("assign-rui-humor");
+  });
+});

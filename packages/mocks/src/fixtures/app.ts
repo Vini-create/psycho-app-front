@@ -171,6 +171,20 @@ export const connections: Connection[] = [
     ended_at: null,
     created_at: ago(92),
   },
+  {
+    // Segundo vínculo: é o que torna visível a necessidade do rótulo com o
+    // nome do profissional em cada check-in, e do seletor na colheita.
+    id: "conn-marta",
+    connection_id: "conn-marta",
+    status: "active",
+    organization_name: "Clínica Nogueira",
+    professional_display_name: "Marta Nogueira",
+    profession_type: "psychiatrist",
+    consent_scopes: ["summaries"],
+    activated_at: ago(40),
+    ended_at: null,
+    created_at: ago(41),
+  },
 ];
 
 export const contextReportRequests: ContextReportRequest[] = [

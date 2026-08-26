@@ -17,6 +17,7 @@ type Result = { status: number; body?: unknown };
 type Route = [method: string, pattern: string, handler: (ctx: Ctx) => Result];
 
 const MAX_REPORT_PERIOD_MS = 31 * 86_400_000;
+const MAX_CHECKIN_PERIOD_MS = 92 * 86_400_000;
 
 const ok = (body?: unknown): Result => ({ status: body ? 200 : 204, body });
 const created = (body: unknown): Result => ({ status: 201, body });
@@ -314,6 +315,185 @@ const routes: Route[] = [
     store.endPatient(params.id!);
     return noContent();
   }],
+
+  /* -------------------------------------------------------- check-ins */
+  ["GET", "/v1/professional/checkin-templates", () =>
+    ok({ templates: store.state.checkinTemplates }),
+  ],
+  ["POST", "/v1/professional/checkin-templates", ({ body }) =>
+    created(store.createCheckinTemplate(body as never)),
+  ],
+  ["GET", "/v1/professional/checkin-templates/:id", ({ params }) => {
+    const template = store.state.checkinTemplates.find((item) => item.id === params.id);
+    return template ? ok(template) : fail(404, "not_found", "modelo não encontrado");
+  }],
+  ["PUT", "/v1/professional/checkin-templates/:id", ({ params, body }) => {
+    const template = store.updateCheckinTemplate(params.id!, body as never);
+    // Publicado é imutável: já pode existir dia respondido contra ele.
+    return template
+      ? ok(template)
+      : fail(409, "checkin_template_published", "modelo publicado não pode ser editado");
+  }],
+  ["DELETE", "/v1/professional/checkin-templates/:id", ({ params }) => {
+    store.archiveCheckinTemplate(params.id!);
+    return noContent();
+  }],
+  ["GET", "/v1/professional/patients/:id/checkin-assignments", ({ params }) =>
+    ok({
+      assignments: store.state.checkinAssignments.filter(
+        (item) => item.connection_id === params.id,
+      ),
+    }),
+  ],
+  ["POST", "/v1/professional/patients/:id/checkin-assignments", ({ params, body }) => {
+    const planStatus = store.state.profile?.plan?.status;
+    if (planStatus !== "active" && planStatus !== "trialing") {
+      return fail(402, "subscription_required", "assinatura profissional necessária");
+    }
+    const open = store.state.checkinAssignments.filter(
+      (item) =>
+        item.connection_id === params.id &&
+        (item.status === "pending" || item.status === "active"),
+    );
+    if (open.length >= 5) {
+      return fail(409, "checkin_limit_reached", "limite de check-ins abertos atingido");
+    }
+    const assignment = store.createCheckinAssignment(
+      params.id!,
+      String(body.template_id ?? ""),
+    );
+    return assignment
+      ? created(assignment)
+      : fail(404, "not_found", "modelo não encontrado");
+  }],
+  ["DELETE", "/v1/professional/patients/:id/checkin-assignments/:assignmentId", ({ params }) => {
+    const assignment = store.closeCheckinAssignment(params.assignmentId!, "revoked");
+    return assignment ? noContent() : fail(404, "not_found", "check-in não encontrado");
+  }],
+  ["GET", "/v1/professional/patients/:id/checkin-collection-requests", ({ params }) =>
+    ok({
+      requests: store.state.checkinCollectionRequests.filter(
+        (item) => item.connection_id === params.id,
+      ),
+    }),
+  ],
+  ["POST", "/v1/professional/patients/:id/checkin-collection-requests", ({ params, body }) => {
+    const planStatus = store.state.profile?.plan?.status;
+    if (planStatus !== "active" && planStatus !== "trialing") {
+      return fail(402, "subscription_required", "assinatura profissional necessária");
+    }
+    const periodStart = String(body.period_start ?? "");
+    const periodEnd = String(body.period_end ?? "");
+    const span = Date.parse(periodEnd) - Date.parse(periodStart);
+    if (Number.isNaN(span) || span < 0 || span > MAX_CHECKIN_PERIOD_MS) {
+      return fail(422, "validation_failed", "período de colheita inválido");
+    }
+    // Um pedido aberto por vínculo: o paciente não acumula fila de decisões.
+    if (
+      store.state.checkinCollectionRequests.some(
+        (item) => item.connection_id === params.id && item.status === "pending",
+      )
+    ) {
+      return fail(409, "checkin_conflict", "já existe um pedido aberto");
+    }
+    return created(
+      store.createCheckinCollectionRequest(params.id!, periodStart, periodEnd),
+    );
+  }],
+  ["GET", "/v1/professional/patients/:id/checkin-collections", ({ params }) =>
+    ok({
+      collections: store.state.checkinCollections.filter(
+        (item) => item.connection_id === params.id,
+      ),
+    }),
+  ],
+
+  ["GET", "/v1/app/checkins", ({ url }) => {
+    const today = url.searchParams.get("date") ?? new Date().toISOString().slice(0, 10);
+    return ok({
+      checkins: store.state.checkinAssignments
+        .filter((item) => item.status === "active")
+        .map((item) => store.checkinForApp(item, today)),
+    });
+  }],
+  ["POST", "/v1/app/checkins/:id/entries", ({ params, body }) => {
+    const entry = store.submitCheckinEntry(
+      params.id!,
+      String(body.entry_date ?? new Date().toISOString().slice(0, 10)),
+      (body.answers ?? []) as never,
+    );
+    return entry
+      ? created(entry)
+      : fail(422, "validation_failed", "respostas inválidas para este check-in");
+  }],
+  ["GET", "/v1/app/checkins/:id/entries", ({ params, url }) => {
+    const from = url.searchParams.get("from") ?? "";
+    const to = url.searchParams.get("to") ?? "9999-12-31";
+    return ok({
+      entries: (store.state.checkinEntries[params.id!] ?? []).filter(
+        (entry) => entry.entry_date >= from && entry.entry_date <= to,
+      ),
+    });
+  }],
+  ["GET", "/v1/app/connections/:id/checkin-assignments", ({ params, url }) => {
+    const statuses = (url.searchParams.get("status") ?? "pending,active").split(",");
+    const today = url.searchParams.get("date") ?? new Date().toISOString().slice(0, 10);
+    return ok({
+      assignments: store.state.checkinAssignments
+        .filter(
+          (item) =>
+            item.connection_id === params.id && statuses.includes(item.status),
+        )
+        .map((item) => store.checkinForApp(item, today)),
+    });
+  }],
+  ["POST", "/v1/app/checkin-assignments/:id/accept", ({ params }) => {
+    const assignment = store.respondCheckinAssignment(params.id!, true);
+    return assignment
+      ? noContent()
+      : fail(409, "checkin_request_resolved", "este check-in já foi respondido");
+  }],
+  ["POST", "/v1/app/checkin-assignments/:id/decline", ({ params }) => {
+    const assignment = store.respondCheckinAssignment(params.id!, false);
+    return assignment
+      ? noContent()
+      : fail(409, "checkin_request_resolved", "este check-in já foi respondido");
+  }],
+  ["DELETE", "/v1/app/checkin-assignments/:id", ({ params }) => {
+    const assignment = store.closeCheckinAssignment(params.id!, "ended");
+    return assignment ? noContent() : fail(404, "not_found", "check-in não encontrado");
+  }],
+  ["GET", "/v1/app/connections/:id/checkin-collection-requests", ({ params }) =>
+    ok({
+      requests: store.state.checkinCollectionRequests.filter(
+        (item) => item.connection_id === params.id,
+      ),
+    }),
+  ],
+  ["POST", "/v1/app/checkin-collection-requests/:id/send", ({ params, body }) => {
+    const assignmentIds = (body.assignment_ids ?? []) as string[];
+    if (assignmentIds.length === 0) {
+      return fail(422, "validation_failed", "escolha ao menos um check-in");
+    }
+    const collection = store.sendCheckinCollection(params.id!, assignmentIds);
+    if (!collection) {
+      return fail(409, "checkin_request_resolved", "este pedido já foi respondido");
+    }
+    if (collection.checkins.every((item) => item.answered_day_count === 0)) {
+      return fail(422, "checkin_no_entries", "nenhum dia respondido no período");
+    }
+    return ok({
+      request_id: params.id,
+      status: "sent",
+      checkin_count: collection.checkins.length,
+    });
+  }],
+  ["POST", "/v1/app/checkin-collection-requests/:id/decline", ({ params }) =>
+    store.declineCheckinCollectionRequest(params.id!)
+      ? noContent()
+      : fail(409, "checkin_request_resolved", "este pedido já foi respondido"),
+  ],
+
   ["GET", "/v1/professional/patients/:id", ({ params }) => {
     const patient = store.state.patients.find(
       (p) => p.id === params.id || p.connection_id === params.id,

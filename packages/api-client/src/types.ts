@@ -340,3 +340,183 @@ export type ContextReportRequest = {
   requested_at: string;
   sent_at: string | null;
 };
+
+/* ------------------------------------------------------------- check-ins */
+
+/**
+ * Check-in diário. O profissional autora uma escala; o paciente responde um
+ * dia por vez. Datas de check-in são dia local (`YYYY-MM-DD`), nunca
+ * timestamp: o dia é do paciente, e o fuso de quem lê não pode deslocá-lo.
+ */
+export type CheckinOption = {
+  id: string;
+  position: number;
+  label: string;
+  score: number;
+};
+
+export type CheckinQuestion = {
+  id: string;
+  position: number;
+  prompt: string;
+  /** Texto de apoio que o paciente lê na hora de responder. */
+  legend?: string;
+  options: CheckinOption[];
+};
+
+export type CheckinTemplateStatus = "draft" | "published" | "archived";
+
+export type CheckinTemplate = {
+  id: string;
+  title: string;
+  legend?: string;
+  status: CheckinTemplateStatus;
+  questions: CheckinQuestion[];
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * Corpo de criação/edição. Só rascunho aceita edição.
+ *
+ * A escala é fixa: exatamente cinco alternativas por pergunta. A nota não vai
+ * no corpo — ela é a posição do rótulo, então a ordem importa: o primeiro é o
+ * extremo mais baixo, o quinto é o mais alto.
+ */
+export const CHECKIN_OPTIONS_PER_QUESTION = 5;
+
+export type CheckinTemplateInput = {
+  title: string;
+  legend: string;
+  questions: {
+    prompt: string;
+    legend: string;
+    options: { label: string }[];
+  }[];
+};
+
+export type CheckinAssignmentStatus =
+  | "pending"
+  | "active"
+  | "declined"
+  | "revoked"
+  | "ended";
+
+export type CheckinAnswer = {
+  question_id: string;
+  option_id: string;
+  score: number;
+};
+
+export type CheckinEntry = {
+  id: string;
+  assignment_id: string;
+  /** `YYYY-MM-DD` no dia local de quem respondeu. */
+  entry_date: string;
+  answers: CheckinAnswer[];
+  submitted_at: string;
+  updated_at: string;
+};
+
+/**
+ * O check-in entregue a um vínculo. `professional_display_name` é o rótulo
+ * obrigatório na interface do paciente: ele pode ter vários check-ins ativos,
+ * de profissionais diferentes, e precisa saber para quem responde cada um.
+ *
+ * Os campos de resposta (`answered_today`, `today_entry`, `answered_days`)
+ * chegam apenas ao paciente. O profissional nunca lê resposta fora de uma
+ * colheita autorizada.
+ */
+export type CheckinAssignment = {
+  id: string;
+  connection_id: string;
+  status: CheckinAssignmentStatus;
+  professional_display_name?: string;
+  patient_display_name?: string;
+  template: CheckinTemplate;
+  requested_at: string;
+  responded_at?: string;
+  ended_at?: string;
+  answered_today: boolean;
+  today_entry?: CheckinEntry;
+  last_entry_date?: string;
+  answered_days: number;
+};
+
+export type CheckinCollectionRequestStatus =
+  | "pending"
+  | "sent"
+  | "declined"
+  | "expired";
+
+export type CheckinCollectionRequest = {
+  id: string;
+  connection_id: string;
+  professional_display_name?: string;
+  patient_display_name?: string;
+  period_start: string;
+  period_end: string;
+  status: CheckinCollectionRequestStatus;
+  requested_at: string;
+  responded_at?: string;
+};
+
+/**
+ * `normalized` (0 a 1) existe porque escalas diferentes não dividem um mesmo
+ * radar sem serem trazidas à mesma régua. Desenhe pelo `normalized`; rotule
+ * com `average` e os limites da escala.
+ */
+export type CheckinQuestionAggregate = {
+  question_id: string;
+  prompt: string;
+  position: number;
+  average: number;
+  normalized: number;
+  score_min: number;
+  score_max: number;
+  answer_count: number;
+};
+
+export type CheckinDayScore = {
+  date: string;
+  average: number;
+  normalized: number;
+  answer_count: number;
+};
+
+/**
+ * Todo número aqui já vem calculado pelo backend. A UI desenha, não deriva.
+ * `authored_by_you` distingue o check-in que este profissional mandou; quem
+ * autorou um check-in de outro vínculo nunca é nomeado.
+ */
+export type CheckinCollectionCheckin = {
+  assignment_id: string;
+  title: string;
+  legend?: string;
+  authored_by_you: boolean;
+  period_day_count: number;
+  answered_day_count: number;
+  average: number;
+  normalized: number;
+  questions: CheckinQuestionAggregate[];
+  days: CheckinDayScore[];
+  best_day?: CheckinDayScore;
+  worst_day?: CheckinDayScore;
+};
+
+export type CheckinCollection = {
+  id: string;
+  connection_id: string;
+  request_id: string;
+  period_start: string;
+  period_end: string;
+  shared_at: string;
+  checkins: CheckinCollectionCheckin[];
+};
+
+export type SendCheckinCollectionResult = {
+  request_id: string;
+  status: string;
+  checkin_count: number;
+};

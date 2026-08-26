@@ -16,11 +16,16 @@ TanStack Query · Vitest.
 
 ## Superfícies do produto
 
-- **Paciente:** workspace único da Sinapsa em `/chat`, Minha rede e conta.
-- **Profissional:** pacientes, dashboards, métricas, relatórios e tendências de
-  humor relatado.
+- **Paciente:** workspace único da Sinapsa em `/chat`, check-in diário na tela
+  inicial, Minha rede e conta.
+- **Profissional:** pacientes, dashboards, métricas, relatórios, check-in diário
+  e tendências de humor relatado.
 - O paciente recebe apenas solicitações com profissional e período. Ao confirmar
   o envio em Minha rede, o relatório é gerado e entregue somente ao profissional.
+- O check-in diário é escrito pelo profissional (cinco alternativas por
+  pergunta, de 1 a 5) e exige dois aceites do paciente, em momentos diferentes:
+  um para passar a responder, outro para entregar as respostas de um período.
+  Médias, melhor e pior dia são calculados no backend e congelados no aceite.
 
 ## Rodar
 

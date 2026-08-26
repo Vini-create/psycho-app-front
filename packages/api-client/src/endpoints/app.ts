@@ -1,6 +1,10 @@
 import type { ApiClient } from "../client";
 import { ApiError } from "../errors";
 import type {
+  CheckinAssignment,
+  CheckinAssignmentStatus,
+  CheckinCollectionRequest,
+  CheckinEntry,
   Connection,
   Consent,
   ConsentScope,
@@ -9,6 +13,7 @@ import type {
   Conversation,
   InvitationPreview,
   Message,
+  SendCheckinCollectionResult,
   SendMessageResponse,
 } from "../types";
 
@@ -210,6 +215,99 @@ export function appEndpoints(client: ApiClient) {
     sendRequestedContextReport(requestId: string) {
       return client.request<{ request_id: string; status: string }>(
         `/v1/app/context-report-requests/${requestId}/send`,
+        { method: "POST" },
+      );
+    },
+
+    /* ------------------------------------------------------------ check-ins */
+
+    /**
+     * Os check-ins ativos de todos os vínculos, com o estado do dia já
+     * resolvido pelo servidor. `localDate` é o dia do aparelho: sem ele o
+     * backend usa o dia UTC, que pode não ser o dia de quem responde.
+     */
+    listCheckins(localDate: string) {
+      return client.request<{ checkins: CheckinAssignment[] }>(
+        `/v1/app/checkins?date=${encodeURIComponent(localDate)}`,
+      );
+    },
+
+    listCheckinAssignments(
+      connectionId: string,
+      statuses: CheckinAssignmentStatus[],
+    ) {
+      const query = new URLSearchParams({ status: statuses.join(",") });
+      return client.request<{ assignments: CheckinAssignment[] }>(
+        `/v1/app/connections/${connectionId}/checkin-assignments?${query}`,
+      );
+    },
+
+    acceptCheckinAssignment(assignmentId: string) {
+      return client.request<void>(
+        `/v1/app/checkin-assignments/${assignmentId}/accept`,
+        { method: "POST" },
+      );
+    },
+
+    declineCheckinAssignment(assignmentId: string) {
+      return client.request<void>(
+        `/v1/app/checkin-assignments/${assignmentId}/decline`,
+        { method: "POST" },
+      );
+    },
+
+    /** O paciente para de responder quando quiser. */
+    endCheckinAssignment(assignmentId: string) {
+      return client.request<void>(
+        `/v1/app/checkin-assignments/${assignmentId}`,
+        { method: "DELETE" },
+      );
+    },
+
+    /**
+     * Um dia inteiro de uma vez: todas as perguntas do modelo. Reenviar o
+     * mesmo dia corrige a resposta, não duplica.
+     */
+    submitCheckinEntry(
+      assignmentId: string,
+      entryDate: string,
+      answers: { question_id: string; option_id: string }[],
+      idempotencyKey: string,
+    ) {
+      return client.request<CheckinEntry>(
+        `/v1/app/checkins/${assignmentId}/entries`,
+        {
+          method: "POST",
+          body: { entry_date: entryDate, answers },
+          idempotencyKey,
+        },
+      );
+    },
+
+    listCheckinEntries(assignmentId: string, from: string, to: string) {
+      const query = new URLSearchParams({ from, to });
+      return client.request<{ entries: CheckinEntry[] }>(
+        `/v1/app/checkins/${assignmentId}/entries?${query}`,
+      );
+    },
+
+    listCheckinCollectionRequests(connectionId: string) {
+      return client.request<{ requests: CheckinCollectionRequest[] }>(
+        `/v1/app/connections/${connectionId}/checkin-collection-requests`,
+      );
+    },
+
+    /** O paciente escolhe quais check-ins entram na colheita. */
+    sendCheckinCollection(requestId: string, assignmentIds: string[]) {
+      return client.request<SendCheckinCollectionResult>(
+        `/v1/app/checkin-collection-requests/${requestId}/send`,
+        { method: "POST", body: { assignment_ids: assignmentIds } },
+      );
+    },
+
+    declineCheckinCollectionRequest(requestId: string) {
+      return client.request<void>(
+        `/v1/app/checkin-collection-requests/${requestId}/decline`,
         { method: "POST" },
       );
     },

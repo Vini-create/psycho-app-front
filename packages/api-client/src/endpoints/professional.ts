@@ -1,5 +1,10 @@
 import type { ApiClient } from "../client";
 import type {
+  CheckinAssignment,
+  CheckinCollection,
+  CheckinCollectionRequest,
+  CheckinTemplate,
+  CheckinTemplateInput,
   Connection,
   ContextReport,
   ContextReportRequest,
@@ -193,6 +198,81 @@ export function professionalEndpoints(client: ApiClient) {
     listPatientContexts(connectionId: string) {
       return client.request<{ contexts: ContextReport[] }>(
         `/v1/professional/patients/${connectionId}/contexts`,
+      );
+    },
+
+    /* ------------------------------------------------------------ check-ins */
+
+    listCheckinTemplates() {
+      return client.request<{ templates: CheckinTemplate[] }>(
+        "/v1/professional/checkin-templates",
+      );
+    },
+
+    createCheckinTemplate(input: CheckinTemplateInput) {
+      return client.request<CheckinTemplate>("/v1/professional/checkin-templates", {
+        method: "POST",
+        body: input,
+      });
+    },
+
+    /** Só rascunho aceita edição: publicado é imutável por decisão de domínio. */
+    updateCheckinTemplate(templateId: string, input: CheckinTemplateInput) {
+      return client.request<CheckinTemplate>(
+        `/v1/professional/checkin-templates/${templateId}`,
+        { method: "PUT", body: input },
+      );
+    },
+
+    archiveCheckinTemplate(templateId: string) {
+      return client.request<void>(
+        `/v1/professional/checkin-templates/${templateId}`,
+        { method: "DELETE" },
+      );
+    },
+
+    listCheckinAssignments(connectionId: string) {
+      return client.request<{ assignments: CheckinAssignment[] }>(
+        `/v1/professional/patients/${connectionId}/checkin-assignments`,
+      );
+    },
+
+    /** Enviar publica o modelo. A partir daí ele não muda mais. */
+    createCheckinAssignment(connectionId: string, templateId: string) {
+      return client.request<CheckinAssignment>(
+        `/v1/professional/patients/${connectionId}/checkin-assignments`,
+        { method: "POST", body: { template_id: templateId } },
+      );
+    },
+
+    /** Revogar tira o check-in do aparelho do paciente na mesma hora. */
+    revokeCheckinAssignment(connectionId: string, assignmentId: string) {
+      return client.request<void>(
+        `/v1/professional/patients/${connectionId}/checkin-assignments/${assignmentId}`,
+        { method: "DELETE" },
+      );
+    },
+
+    listCheckinCollectionRequests(connectionId: string) {
+      return client.request<{ requests: CheckinCollectionRequest[] }>(
+        `/v1/professional/patients/${connectionId}/checkin-collection-requests`,
+      );
+    },
+
+    createCheckinCollectionRequest(
+      connectionId: string,
+      period: { period_start: string; period_end: string },
+    ) {
+      return client.request<CheckinCollectionRequest>(
+        `/v1/professional/patients/${connectionId}/checkin-collection-requests`,
+        { method: "POST", body: period },
+      );
+    },
+
+    /** Retratos já autorizados pelo paciente, com os números prontos. */
+    listCheckinCollections(connectionId: string) {
+      return client.request<{ collections: CheckinCollection[] }>(
+        `/v1/professional/patients/${connectionId}/checkin-collections`,
       );
     },
   };

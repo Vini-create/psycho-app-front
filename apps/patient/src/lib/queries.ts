@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import {
   newIdempotencyKey,
+  type CheckinAssignmentStatus,
   type ConsentScope,
   type ConsentType,
   type Message,
@@ -22,7 +23,22 @@ export const keys = {
   contextRequests: (connectionId: string) =>
     ["context-report-requests", connectionId] as const,
   invitation: (token: string) => ["invitation", token] as const,
+  checkins: (day: string) => ["checkins", day] as const,
+  checkinAssignments: (connectionId: string) =>
+    ["checkin-assignments", connectionId] as const,
+  checkinCollectionRequests: (connectionId: string) =>
+    ["checkin-collection-requests", connectionId] as const,
 };
+
+/**
+ * O dia local de quem responde. O servidor aceita apenas um dia de distância
+ * do agora em UTC — o suficiente para qualquer fuso, sem deixar o cliente
+ * escolher livremente a data de um registro diário.
+ */
+export function localDay(date = new Date()): string {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
 
 /* -------------------------------------------------------- consentimentos */
 
@@ -331,6 +347,123 @@ export function useSendRequestedContextReport(connectionId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: keys.contextRequests(connectionId),
+      });
+    },
+  });
+}
+
+/* ---------------------------------------------------------------- check-ins */
+
+export function useCheckins(day: string) {
+  return useQuery({
+    queryKey: keys.checkins(day),
+    queryFn: () => appApi.listCheckins(day),
+  });
+}
+
+export function useCheckinAssignments(
+  connectionId: string,
+  statuses: CheckinAssignmentStatus[],
+) {
+  return useQuery({
+    queryKey: [...keys.checkinAssignments(connectionId), ...statuses],
+    queryFn: () => appApi.listCheckinAssignments(connectionId, statuses),
+  });
+}
+
+/**
+ * Responder invalida as duas listas: a do vínculo, onde o pedido estava, e a
+ * da tela inicial, onde o check-in aceito passa a aparecer.
+ */
+export function useRespondToCheckinAssignment(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      assignmentId,
+      accepted,
+    }: {
+      assignmentId: string;
+      accepted: boolean;
+    }) =>
+      accepted
+        ? appApi.acceptCheckinAssignment(assignmentId)
+        : appApi.declineCheckinAssignment(assignmentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinAssignments(connectionId),
+      });
+      void queryClient.invalidateQueries({ queryKey: ["checkins"] });
+    },
+  });
+}
+
+export function useEndCheckinAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (assignmentId: string) =>
+      appApi.endCheckinAssignment(assignmentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["checkins"] });
+      void queryClient.invalidateQueries({ queryKey: ["checkin-assignments"] });
+    },
+  });
+}
+
+export function useSubmitCheckinEntry(day: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      assignmentId,
+      answers,
+    }: {
+      assignmentId: string;
+      answers: { question_id: string; option_id: string }[];
+    }) =>
+      appApi.submitCheckinEntry(
+        assignmentId,
+        day,
+        answers,
+        newIdempotencyKey(),
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.checkins(day) });
+    },
+  });
+}
+
+export function useCheckinCollectionRequests(connectionId: string) {
+  return useQuery({
+    queryKey: keys.checkinCollectionRequests(connectionId),
+    queryFn: () => appApi.listCheckinCollectionRequests(connectionId),
+  });
+}
+
+export function useSendCheckinCollection(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      requestId,
+      assignmentIds,
+    }: {
+      requestId: string;
+      assignmentIds: string[];
+    }) => appApi.sendCheckinCollection(requestId, assignmentIds),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinCollectionRequests(connectionId),
+      });
+    },
+  });
+}
+
+export function useDeclineCheckinCollectionRequest(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId: string) =>
+      appApi.declineCheckinCollectionRequest(requestId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinCollectionRequests(connectionId),
       });
     },
   });

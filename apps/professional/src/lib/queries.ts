@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import {
   hasCode,
+  type CheckinTemplateInput,
   type ProfessionalProfile,
   type ProfessionalProfileInput,
 } from "@sinapsa/api-client";
@@ -23,6 +24,13 @@ export const keys = {
   contexts: (connectionId: string) => ["contexts", connectionId] as const,
   contextRequests: (connectionId: string) =>
     ["context-report-requests", connectionId] as const,
+  checkinTemplates: ["checkin-templates"] as const,
+  checkinAssignments: (connectionId: string) =>
+    ["checkin-assignments", connectionId] as const,
+  checkinCollectionRequests: (connectionId: string) =>
+    ["checkin-collection-requests", connectionId] as const,
+  checkinCollections: (connectionId: string) =>
+    ["checkin-collections", connectionId] as const,
 };
 
 export function isProfessionalProfileComplete(
@@ -236,4 +244,121 @@ export function useSubscription() {
     subscription: subscriptionOf(profile.data),
     isPending: profile.isPending,
   };
+}
+
+/* ---------------------------------------------------------------- check-ins */
+
+export function useCheckinTemplates() {
+  return useQuery({
+    queryKey: keys.checkinTemplates,
+    queryFn: () => pro.listCheckinTemplates(),
+  });
+}
+
+export function useCreateCheckinTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CheckinTemplateInput) => pro.createCheckinTemplate(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.checkinTemplates });
+    },
+  });
+}
+
+export function useUpdateCheckinTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      templateId,
+      input,
+    }: {
+      templateId: string;
+      input: CheckinTemplateInput;
+    }) => pro.updateCheckinTemplate(templateId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.checkinTemplates });
+    },
+  });
+}
+
+export function useArchiveCheckinTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templateId: string) => pro.archiveCheckinTemplate(templateId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.checkinTemplates });
+    },
+  });
+}
+
+export function useCheckinAssignments(connectionId: string) {
+  return useQuery({
+    queryKey: keys.checkinAssignments(connectionId),
+    queryFn: () => pro.listCheckinAssignments(connectionId),
+    // Enquanto houver um convite na mão do paciente, a tela precisa
+    // perceber a resposta sem que o profissional recarregue.
+    refetchInterval: (query) =>
+      query.state.data?.assignments.some((item) => item.status === "pending")
+        ? 15_000
+        : false,
+  });
+}
+
+export function useCreateCheckinAssignment(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (templateId: string) =>
+      pro.createCheckinAssignment(connectionId, templateId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinAssignments(connectionId),
+      });
+      // Enviar publica o modelo: a biblioteca muda de estado junto.
+      void queryClient.invalidateQueries({ queryKey: keys.checkinTemplates });
+    },
+  });
+}
+
+export function useRevokeCheckinAssignment(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (assignmentId: string) =>
+      pro.revokeCheckinAssignment(connectionId, assignmentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinAssignments(connectionId),
+      });
+    },
+  });
+}
+
+export function useCheckinCollectionRequests(connectionId: string) {
+  return useQuery({
+    queryKey: keys.checkinCollectionRequests(connectionId),
+    queryFn: () => pro.listCheckinCollectionRequests(connectionId),
+    refetchInterval: (query) =>
+      query.state.data?.requests.some((item) => item.status === "pending")
+        ? 15_000
+        : false,
+  });
+}
+
+export function useCreateCheckinCollectionRequest(connectionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (period: { period_start: string; period_end: string }) =>
+      pro.createCheckinCollectionRequest(connectionId, period),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: keys.checkinCollectionRequests(connectionId),
+      });
+    },
+  });
+}
+
+export function useCheckinCollections(connectionId: string) {
+  return useQuery({
+    queryKey: keys.checkinCollections(connectionId),
+    queryFn: () => pro.listCheckinCollections(connectionId),
+  });
 }

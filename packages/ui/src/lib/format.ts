@@ -43,6 +43,54 @@ export function formatPeriod(startIso: string, endIso: string): string {
   return `${formatDateShort(startIso)} ${formatDate(endIso)}`;
 }
 
+/**
+ * Dia local ("2026-08-26"), não instante.
+ *
+ * `new Date("2026-08-26")` é meia-noite UTC, e formatar isso em qualquer fuso
+ * a oeste devolve o dia anterior. O dia de um check-in é o dia de quem
+ * respondeu; ele não pode andar para trás por causa do fuso de quem lê — daí
+ * a construção pelas partes, que fixa a data no calendário local.
+ */
+function localDate(day: string): Date {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(year ?? 1970, (month ?? 1) - 1, date ?? 1);
+}
+
+export function formatDay(day: string): string {
+  return DATE.format(localDate(day));
+}
+
+export function formatDayShort(day: string): string {
+  return DATE_SHORT.format(localDate(day));
+}
+
+export function formatDayPeriod(startDay: string, endDay: string): string {
+  return `${formatDayShort(startDay)} ${formatDay(endDay)}`;
+}
+
+/** Quantidade de dias entre dois dias locais, inclusive as duas pontas. */
+export function daysBetween(startDay: string, endDay: string): number {
+  const start = localDate(startDay).getTime();
+  const end = localDate(endDay).getTime();
+  return Math.round((end - start) / 86_400_000) + 1;
+}
+
+/** A sequência de dias de um período, para desenhar o calendário com buracos. */
+export function eachDay(startDay: string, endDay: string): string[] {
+  const days: string[] = [];
+  const cursor = localDate(startDay);
+  const end = localDate(endDay);
+  while (cursor <= end) {
+    days.push(
+      `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(
+        cursor.getDate(),
+      ).padStart(2, "0")}`,
+    );
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return days;
+}
+
 /** Rótulo de dia para separar mensagens numa conversa. */
 export function formatDayLabel(iso: string): string {
   const date = new Date(iso);

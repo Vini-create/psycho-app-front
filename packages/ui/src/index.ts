@@ -3,11 +3,16 @@ export { describeDevice } from "./lib/device";
 export type { DeviceDescription } from "./lib/device";
 export type { ClassValue } from "./lib/cx";
 export {
+  daysBetween,
+  eachDay,
   formatDate,
   formatDateShort,
   formatDateTime,
+  formatDay,
   formatDayLabel,
   formatDayMark,
+  formatDayPeriod,
+  formatDayShort,
   formatPeriod,
   formatTime,
   pluralize,
@@ -111,3 +116,5 @@ export type { TimelineMarker } from "./components/editorial/Timeline";
 export { EditorialList, EditorialRow } from "./components/editorial/Row";
 export type { EditorialRowProps } from "./components/editorial/Row";
 export { BarStrip, ComparisonNote, StatBlock } from "./components/editorial/Data";
+export { RadarChart, ScaleRow } from "./components/editorial/Radar";
+export type { RadarAxis } from "./components/editorial/Radar";

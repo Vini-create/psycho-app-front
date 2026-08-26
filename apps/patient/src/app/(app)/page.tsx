@@ -15,7 +15,8 @@ import {
   pluralize,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
-import { useConversations } from "@/lib/queries";
+import { TodayCheckins } from "@/components/checkin/TodayCheckins";
+import { localDay, useCheckins, useConversations } from "@/lib/queries";
 import { useSession } from "@/lib/session";
 
 /* Brand Book V2 §08, §14 e §17.
@@ -37,9 +38,13 @@ import { useSession } from "@/lib/session";
 function Caderno() {
   const { account } = useSession();
   const { data, isPending, error } = useConversations();
+  // A mesma consulta da seção de check-in; o TanStack resolve as duas com uma
+  // requisição. Aqui ela serve só para numerar as seções na ordem certa.
+  const checkins = useCheckins(localDay());
 
   const conversations = data?.conversations ?? [];
   const firstName = account?.display_name.split(" ")[0];
+  const hasCheckins = (checkins.data?.checkins.length ?? 0) > 0;
 
   return (
     <div className="flex flex-col gap-14 sm:gap-20">
@@ -71,9 +76,13 @@ function Caderno() {
 
       {error && <Alert tone="danger">{describeError(error).message}</Alert>}
 
-      <section className="reveal reveal-2 flex flex-col gap-2">
+      <div className="reveal reveal-2">
+        <TodayCheckins index="01" />
+      </div>
+
+      <section className="reveal reveal-3 flex flex-col gap-2">
         <SectionIndex
-          index="01"
+          index={hasCheckins ? "02" : "01"}
           meta={
             conversations.length > 0
               ? pluralize(conversations.length, "registro", "registros")
