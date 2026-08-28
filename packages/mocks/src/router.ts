@@ -227,7 +227,7 @@ const routes: Route[] = [
     if (!forced) return ok(store.state.profile);
     return ok({
       ...store.state.profile,
-      plan: { code: "single", status: forced },
+      plan: { code: "pro", status: forced },
     });
   }],
   ["PUT", "/v1/professional/profile", ({ body }) =>

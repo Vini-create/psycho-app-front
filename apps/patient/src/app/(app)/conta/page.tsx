@@ -14,11 +14,13 @@ import {
   Masthead,
   MetaStrip,
   Modal,
+  PlanCatalog,
   SectionIndex,
   Skeleton,
   TextField,
   describeDevice,
   formatDateTime,
+  type PlanOption,
 } from "@sinapsa/ui";
 import { describeError, hasCode } from "@sinapsa/api-client";
 import { auth } from "@/lib/api";
@@ -26,6 +28,25 @@ import { useSession } from "@/lib/session";
 
 const MIN_PASSWORD = 12;
 const MAX_PASSWORD = 128;
+
+const PATIENT_PLANS: PlanOption[] = [
+  {
+    code: "free",
+    name: "Free",
+    price: "R$ 0",
+    limit: "Até 30 mensagens por dia",
+    features: ["Conversas com a Si", "Histórico e vínculos preservados"],
+  },
+  {
+    code: "plus",
+    name: "Plus",
+    price: "R$ 14,90",
+    cadence: "por mês",
+    limit: "Até 120 mensagens por dia",
+    features: ["Mais espaço diário para conversar", "Histórico e vínculos preservados"],
+    featured: true,
+  },
+];
 
 function accountStatusLabel(status: string | undefined) {
   if (status === "active") return "Conta ativa";
@@ -35,7 +56,7 @@ function accountStatusLabel(status: string | undefined) {
 }
 
 function planLabel(plan: string | undefined) {
-  if (plan === "pro") return "Plano Pro";
+  if (plan === "plus" || plan === "pro") return "Plano Plus";
   if (plan === "free") return "Plano gratuito";
   return "Plano não informado";
 }
@@ -275,7 +296,24 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-5">
-        <SectionIndex index="02" meta="proteção da entrada">
+        <SectionIndex index="02" meta="escolha o espaço que combina com seu ritmo">
+          Planos
+        </SectionIndex>
+        <div className="flex flex-col gap-4">
+          <PlanCatalog
+            plans={PATIENT_PLANS}
+            currentPlan={account?.plan === "pro" ? "plus" : account?.plan}
+            className="xl:grid-cols-2"
+          />
+          <p className="metadata max-w-none text-secondary">
+            A contratação do Plus será liberada com a integração de pagamentos.
+            Até lá, sua conta continua no Free e nada do seu histórico é perdido.
+          </p>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <SectionIndex index="03" meta="proteção da entrada">
           Senha e acesso
         </SectionIndex>
 
@@ -361,7 +399,7 @@ function Conta() {
 
       <section className="flex flex-col gap-5">
         <SectionIndex
-          index="03"
+          index="04"
           meta={`${activeSessions.length} ${activeSessions.length === 1 ? "acesso ativo" : "acessos ativos"}`}
         >
           Dispositivos conectados
@@ -442,7 +480,7 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-5">
-        <SectionIndex index="04">Encerrar sessão</SectionIndex>
+        <SectionIndex index="05">Encerrar sessão</SectionIndex>
         <Card variant="standard" className="sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           <div className="flex flex-col gap-2">
             <CardTitle as="h3">Você controla onde sua conta fica aberta.</CardTitle>

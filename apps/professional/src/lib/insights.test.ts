@@ -99,13 +99,13 @@ describe("engagementOf", () => {
 
 describe("subscriptionOf", () => {
   it("trata trial como assinatura vigente", () => {
-    expect(subscriptionOf({ plan: { code: "single", status: "trialing" } } as never).active).toBe(true);
-    expect(subscriptionOf({ plan: { code: "single", status: "active" } } as never).active).toBe(true);
+    expect(subscriptionOf({ plan: { code: "pro", status: "trialing" } } as never).active).toBe(true);
+    expect(subscriptionOf({ plan: { code: "pro", status: "active" } } as never).active).toBe(true);
   });
 
   it("bloqueia quando não há assinatura vigente", () => {
     for (const status of ["past_due", "canceled", "none"]) {
-      expect(subscriptionOf({ plan: { code: "single", status } } as never).active).toBe(false);
+      expect(subscriptionOf({ plan: { code: "pro", status } } as never).active).toBe(false);
     }
     expect(subscriptionOf(null).active).toBe(false);
     expect(subscriptionOf(undefined).active).toBe(false);
@@ -114,7 +114,7 @@ describe("subscriptionOf", () => {
 
 describe("attentionItems", () => {
   const activeSub = subscriptionOf({
-    plan: { code: "single", status: "active" },
+    plan: { code: "pro", status: "active" },
   } as never);
 
   it("põe a assinatura inativa em primeiro lugar", () => {

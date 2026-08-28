@@ -51,6 +51,8 @@ export { TextureLayer } from "./components/TextureLayer";
 export type { TextureVariant } from "./components/TextureLayer";
 export { ThemeToggle } from "./components/ThemeToggle";
 export { GoogleSignInButton } from "./components/GoogleSignInButton";
+export { PlanCatalog } from "./components/PlanCatalog";
+export type { PlanOption } from "./components/PlanCatalog";
 export { ToastProvider, useToast } from "./components/Toast";
 export { Metadata, Overline, PageTitle, Prose } from "./components/Typography";
 export { VisuallyHidden } from "./components/VisuallyHidden";

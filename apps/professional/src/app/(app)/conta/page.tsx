@@ -15,15 +15,18 @@ import {
   CardTitle,
   Modal,
   Masthead,
+  PlanCatalog,
   SectionIndex,
   Skeleton,
   buttonStyles,
   formatDateTime,
+  type PlanOption,
 } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
 import { auth } from "@/lib/api";
 import {
   usePasskeys,
+  useProfile,
   useRegenerateRecoveryCodes,
   useRemovePasskey,
 } from "@/lib/queries";
@@ -31,11 +34,62 @@ import { useSession } from "@/lib/session";
 
 const MAX_PASSKEYS = 10;
 
+const PROFESSIONAL_PLANS: PlanOption[] = [
+  {
+    code: "free",
+    name: "Free",
+    price: "R$ 0",
+    limit: "Até 2 conexões",
+    features: ["Acesso à área profissional", "Sem relatórios e check-ins"],
+  },
+  {
+    code: "plus",
+    name: "Plus",
+    price: "R$ 64,90",
+    cadence: "por mês",
+    limit: "Até 7 pacientes",
+    features: ["Relatórios de período", "Criação, envio e coleta de check-ins"],
+  },
+  {
+    code: "pro",
+    name: "Pro",
+    price: "R$ 129,90",
+    cadence: "por mês",
+    limit: "Até 20 pacientes",
+    features: ["Acesso profissional completo", "Relatórios e check-ins"],
+    featured: true,
+  },
+  {
+    code: "consultorio",
+    name: "Consultório",
+    price: "R$ 199,90",
+    cadence: "por mês",
+    limit: "Até 45 pacientes",
+    features: ["Para profissional com agenda cheia", "Relatórios e check-ins"],
+  },
+  {
+    code: "team",
+    name: "Team",
+    price: "R$ 679,90",
+    cadence: "por mês",
+    limit: "4 profissionais e até 180 pacientes",
+    features: ["Acesso completo para a equipe", "Gestão compartilhada da organização"],
+  },
+  {
+    code: "clinic",
+    name: "Clinic",
+    price: "Sob orçamento",
+    limit: "Capacidade personalizada",
+    features: ["Profissionais e pacientes sob medida", "Implantação comercial assistida"],
+  },
+];
+
 function Conta() {
   const { account, signOut } = useSession();
   const queryClient = useQueryClient();
 
   const passkeys = usePasskeys();
+  const profile = useProfile();
   const removePasskey = useRemovePasskey();
   const regenerate = useRegenerateRecoveryCodes();
 
@@ -84,7 +138,24 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionIndex index="02" meta="entrada sem senha">Chaves de acesso</SectionIndex>
+        <SectionIndex index="02" meta="catálogo da primeira versão">
+          Planos
+        </SectionIndex>
+        <div className="flex flex-col gap-4">
+          <PlanCatalog
+            plans={PROFESSIONAL_PLANS}
+            currentPlan={profile.data?.plan?.code ?? account?.plan}
+          />
+          <p className="metadata max-w-none text-secondary">
+            Durante a validação inicial, todas as contas profissionais recebem o
+            Pro sem cobrança. A troca e a contratação online serão liberadas com
+            a integração de pagamentos.
+          </p>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <SectionIndex index="03" meta="entrada sem senha">Chaves de acesso</SectionIndex>
 
         {passkeys.error && (
           <Alert tone="danger">{describeError(passkeys.error).message}</Alert>
@@ -179,7 +250,7 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionIndex index="03" meta="você pode encerrar qualquer uma">Sessões ativas</SectionIndex>
+        <SectionIndex index="04" meta="você pode encerrar qualquer uma">Sessões ativas</SectionIndex>
 
         {sessions.isPending && (
           <Skeleton className="h-32" aria-label="Carregando sessões" />
@@ -242,7 +313,7 @@ function Conta() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionIndex index="04">Sair</SectionIndex>
+        <SectionIndex index="05">Sair</SectionIndex>
         <div className="flex flex-wrap gap-3">
           <Button variant="secondary" onClick={signOut}>
             Sair desta sessão

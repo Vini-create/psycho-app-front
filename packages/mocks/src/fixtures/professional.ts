@@ -21,7 +21,7 @@ export const profile: ProfessionalProfile = {
   ],
   organization: { id: "org-1", name: "Consultório Rui Andrade" },
   membership: { role: "owner" },
-  plan: { code: "single", status: "trialing" },
+  plan: { code: "pro", status: "active" },
 };
 
 /**

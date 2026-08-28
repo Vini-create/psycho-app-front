@@ -41,6 +41,7 @@ export const professionalAccount: Account = {
   mfa_verified: true,
   created_at: ago(300),
   updated_at: ago(6),
+  plan: "pro",
   google_connected: false,
 };
 

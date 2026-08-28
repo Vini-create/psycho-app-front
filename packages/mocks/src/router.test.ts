@@ -35,7 +35,7 @@ describe("solicitação profissional de relatório", () => {
   });
 
   it("recusa solicitação sem assinatura profissional vigente", () => {
-    state.profile!.plan = { code: "single", status: "canceled" };
+    state.profile!.plan = { code: "pro", status: "canceled" };
 
     expect(request("conn-rui")).toMatchObject({
       status: 402,
@@ -112,7 +112,7 @@ describe("envio autorizado pelo paciente", () => {
   });
 
   it("revalida a assinatura antes de gerar e enviar", () => {
-    state.profile!.plan = { code: "single", status: "canceled" };
+    state.profile!.plan = { code: "pro", status: "canceled" };
 
     expect(
       resolve(
