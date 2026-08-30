@@ -71,7 +71,7 @@ function RotatingWritingHint() {
     <span
       ref={root}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-0 py-1 font-editorial text-body-l leading-relaxed text-tertiary"
+      className="pointer-events-none absolute inset-x-0 top-0 block overflow-hidden text-ellipsis whitespace-nowrap py-1 font-editorial text-body-l leading-relaxed text-tertiary"
     >
       {words.map((word, wordIndex) => (
         <span key={`${index}-${wordIndex}`} className="inline-block whitespace-nowrap">
@@ -202,10 +202,7 @@ export function Composer({
           }}
         >
           <div className="flex min-w-0 flex-1 flex-col px-1 py-0.5">
-            <label htmlFor="composer" className="type-meta text-tertiary">
-              Mensagem
-            </label>
-            <div className="relative min-h-8">
+            <div className="relative min-h-8 min-w-0 overflow-hidden">
               {!value && !disabled && <RotatingWritingHint />}
               <textarea
                 id="composer"
@@ -214,6 +211,7 @@ export function Composer({
                 value={value}
                 maxLength={MAX_LENGTH}
                 disabled={disabled}
+                aria-label="Mensagem"
                 aria-describedby="composer-hint"
                 onChange={(event) => onChange(event.target.value)}
                 onKeyDown={handleKeyDown}
