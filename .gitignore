@@ -1,15 +1,64 @@
+# Environment
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Secrets and certificates
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+.dev.vars
+
+# Dependencies
 node_modules/
+
+# Build output
 .next/
 .open-next/
 out/
 dist/
 build/
+
+# Cache and coverage
+.cache/
+.turbo/
+.wrangler/
+.eslintcache
+.vitest/
 *.tsbuildinfo
-.env
-.env.local
-.env*.local
 coverage/
-.DS_Store
-.vscode/
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and local tooling
 .idea/
-brandbook/__pycache__/
+.vscode/
+.agents/
+.codex/
+.claude/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Internal and superseded documentation kept locally
+/AI_ARCHITECTURE.md
+/DESIGN_MODE.md
+/FRONTEND_API_CONTRACT.md
+/PROJECT_CONTEXT.md
+/STRIPE_INTEGRATION_CHECKLIST.md
+/design.md
+/SINAPSA_BRANDBOOK_DESIGN_SYSTEM_V2.docx
+/brandbook/

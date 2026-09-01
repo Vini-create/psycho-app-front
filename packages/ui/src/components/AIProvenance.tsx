@@ -18,7 +18,7 @@ const COMPLETENESS_LABEL: Record<string, string> = {
 };
 
 /**
- * design.md §4 — conteúdo gerado por IA exibe origem, período e acesso às
+ * Brand Book V2 §31 — conteúdo gerado por IA exibe origem, período e acesso às
  * fontes. Aqui "fontes" é a cobertura declarada: quantas conversas e dias o
  * relatório de fato observou, e o que ele reconhece não cobrir.
  *

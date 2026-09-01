@@ -7,7 +7,6 @@ import {
 } from "react";
 import { cx } from "../lib/cx";
 
-/* Altura mínima 48px, raio 12px, borda de controle acessível — design.md §8. */
 /* Brand Book V2 §15 — "TextField: label acima; 44–48px; border 1px;
    background paper."
 

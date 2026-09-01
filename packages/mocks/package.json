@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "//": "TEMPORÁRIO — modo de desenho. Remover junto com o comando dev:design quando o backend entrar. Ver DESIGN_MODE.md.",
+  "//": "Transporte em memória exclusivo do modo de desenho. A arquitetura do preview está documentada no README.",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"

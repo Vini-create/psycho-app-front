@@ -154,7 +154,7 @@ function Consentimentos() {
         >
           Aceitar e continuar
         </Button>
-        {/* `disabled` não substitui explicação (design.md §8). */}
+        {/* `disabled` não substitui explicação (Brand Book V2 §15). */}
         {!allAccepted && (
           <p className="metadata max-w-none text-secondary">
             Marque os três itens acima para continuar.

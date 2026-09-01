@@ -1,166 +1,244 @@
-# Sinapsa — Frontend
+# Sinapsa
 
-Monorepo com os dois aplicativos da plataforma, consumindo a API Go em
-[`anamnesys-app-back`](../anamnesys-app-back).
+Sinapsa is a privacy-conscious mental-health companion interface that helps patients record day-to-day context and lets authorized professionals review structured, traceable summaries between sessions.
 
-```text
-apps/patient          Next 16 · porta 3000 · mobile-first · o companion
-apps/professional     Next 16 · porta 3001 · desktop-first · o painel
-packages/ui           design system: tokens, tema, primitivos
-packages/api-client    client tipado, token em memória, refresh single-flight
-packages/config        eslint compartilhado
+This repository contains the complete frontend monorepo: a mobile-first patient experience, a professional workspace, a shared API client, and an editorial design system. The backend and AI inference services are separate systems and are not included here.
+
+## Overview
+
+Important context is often lost between appointments: events are forgotten, patterns are difficult to reconstruct, and the next conversation depends on what a person can recall in the moment. Sinapsa provides a voluntary space for patients to write, complete professional-authored check-ins, and explicitly control what is shared with each professional relationship.
+
+The product has two complementary surfaces:
+
+| Surface | Purpose |
+| --- | --- |
+| Patient app | Conversational journal, daily check-ins, consent management, professional relationships, and account security. |
+| Professional app | Patient overview, invitations, report requests, longitudinal context reading, check-in authoring, and access management. |
+
+The interface deliberately describes reported information without presenting automated output as diagnosis or clinical judgment.
+
+## Key features
+
+### Patient experience
+
+- Streaming conversations with optimistic messages, retry states, and conversation history management.
+- Daily check-ins authored by connected professionals, with explicit acceptance and revocation flows.
+- Invitation acceptance and per-relationship sharing scopes.
+- Patient-controlled delivery of requested context reports and check-in collections.
+- Account, password, session, consent, and connected-device management.
+- Installable PWA experience with Android/Chrome prompts and iOS home-screen guidance.
+
+### Professional experience
+
+- Professional onboarding and profile management.
+- Patient invitations and relationship lifecycle management.
+- Context report requests with fixed periods and patient authorization.
+- Longitudinal report reading with coverage, timeline, provenance, evidence strength, and stated limitations.
+- Check-in template authoring, assignment, collection requests, and normalized aggregate views.
+- Passkey-based MFA, recovery codes, and cross-device authorization through QR handoff.
+
+### Shared platform
+
+- A typed API client shared by both applications.
+- A reusable editorial design system with semantic tokens, responsive folder navigation, accessible primitives, and coordinated motion.
+- A development-only in-memory API transport for reviewing complete flows without the backend.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Patient["Patient app<br/>Next.js · port 3000"]
+  Professional["Professional app<br/>Next.js · port 3001"]
+  PatientState["Patient query hooks<br/>TanStack Query"]
+  ProfessionalState["Professional query hooks<br/>TanStack Query"]
+  Client["@sinapsa/api-client<br/>auth · errors · typed endpoints"]
+  UI["@sinapsa/ui<br/>tokens · components · motion"]
+  Mock["@sinapsa/mocks<br/>development transport"]
+  API["External Go API<br/>not included in this repository"]
+
+  Patient --> PatientState --> Client
+  Professional --> ProfessionalState --> Client
+  UI --> Patient
+  UI --> Professional
+  Mock -. "fetch injection in design mode" .-> Client
+  Client -->|"HTTPS · JSON · SSE"| API
 ```
 
-Stack: Next 16 (App Router) · React 19 · TypeScript · Tailwind v4 · GSAP ·
-TanStack Query · Vitest.
+Both applications use the Next.js App Router. Session and UI providers wrap route groups, while app-specific hooks translate server state into TanStack Query caches and mutations. Shared packages are consumed as TypeScript source through the workspace and transpiled by Next.js.
 
-## Superfícies do produto
+The mock package replaces only the API client's `fetch` implementation. Pages, authentication gates, query hooks, and components remain unchanged, so the preview mode exercises the same UI paths as the connected application. Production builds alias the mock package to an empty stub and reject `NEXT_PUBLIC_DESIGN_MOCK=true`.
 
-- **Paciente:** workspace único da Sinapsa em `/chat`, check-in diário na tela
-  inicial, Minha rede e conta.
-- **Profissional:** pacientes, dashboards, métricas, relatórios, check-in diário
-  e tendências de humor relatado.
-- O paciente recebe apenas solicitações com profissional e período. Ao confirmar
-  o envio em Minha rede, o relatório é gerado e entregue somente ao profissional.
-- O check-in diário é escrito pelo profissional (cinco alternativas por
-  pergunta, de 1 a 5) e exige dois aceites do paciente, em momentos diferentes:
-  um para passar a responder, outro para entregar as respostas de um período.
-  Médias, melhor e pior dia são calculados no backend e congelados no aceite.
+## AI boundary
 
-## Rodar
+This frontend consumes AI-assisted results but does not run models, agents, prompts, RAG, embeddings, training, or inference.
+
+The implemented client responsibilities are:
+
+- parse authenticated Server-Sent Events and validate stream event shapes;
+- reconcile streamed assistant text with optimistic patient messages;
+- represent generation state without branching on provider or model names;
+- display report provenance, covered periods, limitations, and evidence strength;
+- keep clinical interpretation with the professional through descriptive language and explicit uncertainty.
+
+Provider, model, prompt, graph, and schema versions are accepted as traceability metadata from the API. The server-side implementation that produces them is outside this repository.
+
+## Engineering highlights
+
+### Session security
+
+Access tokens live only in the API client's in-memory closure. They are not written to `localStorage`, `sessionStorage`, or JavaScript-managed cookies. The opaque refresh token is expected in an `HttpOnly` cookie and is sent with `credentials: "include"`. Concurrent authorization failures share one refresh request through a single-flight promise.
+
+The professional surface adds WebAuthn passkeys, mandatory MFA gates, one-time recovery-code handling, and a QR-based flow for authorizing another device.
+
+### Resilient API integration
+
+- Production API origins are validated at build time and must use HTTPS.
+- UI behavior is driven by stable API error codes instead of server messages.
+- Network and API failures map to safe, user-facing descriptions.
+- Message sends use one idempotency key per user action and preserve it across retries.
+- SSE frames are parsed incrementally; malformed or incomplete streams fail explicitly.
+
+### Consent-aware data flows
+
+The types and screens distinguish metadata visible to patients from generated reports visible to professionals. A professional creates a request for a fixed period; only the patient's explicit send action can start delivery. Check-in responses follow a separate request-and-authorization flow.
+
+### Design system and accessibility
+
+The shared UI package implements semantic color tokens, curated icon concepts, responsive editorial layouts, and a persistent “Folder Frame” navigation model. Motion is centralized, limited to transform and opacity, and reduced to non-spatial transitions when `prefers-reduced-motion` is enabled. Navigation remains link-based, focus states are visible, touch targets are at least 44 px, and state is never communicated by color alone.
+
+### Testable domain presentation
+
+Pure report analytics and dashboard insight derivation are separated from React views. The test suite covers API URL validation, authentication refresh behavior, endpoint contracts, SSE parsing, error mapping, report analytics, mock workflows, and date formatting.
+
+## Tech stack
+
+| Area | Technologies |
+| --- | --- |
+| Frontend | Next.js 16, React 19, TypeScript 5.9, Tailwind CSS 4 |
+| Server state | TanStack Query 5 |
+| Authentication | WebAuthn / `@simplewebauthn/browser`, Google Identity Services, cookie-backed refresh sessions |
+| UI and motion | Shared semantic-token design system, GSAP 3, Lucide, React QR Code |
+| PWA | Web App Manifest and a network-first service worker for the patient app |
+| Testing and quality | Vitest, ESLint 9, strict TypeScript, custom WCAG contrast checks |
+| Deployment | OpenNext for Cloudflare, Cloudflare Workers, Wrangler |
+| Workspace | pnpm workspaces |
+
+There is no database, migration system, model runtime, or container configuration in this frontend repository.
+
+## Repository structure
+
+```text
+apps/
+├── patient/          # Mobile-first patient application and PWA
+└── professional/     # Professional dashboard and passkey flows
+packages/
+├── api-client/       # Session lifecycle, typed endpoints, SSE, error policy
+├── mocks/            # Development-only in-memory API transport and fixtures
+├── ui/               # Components, tokens, responsive shell, motion, formatting
+└── config/           # Shared lint configuration
+scripts/
+└── check-contrast.mjs
+```
+
+Two implementation documents remain public because they describe code that is actively enforced:
+
+- [Brand Book / Design System V2](SINAPSA_BRANDBOOK_DESIGN_SYSTEM_V2.md)
+- [Motion system](MOTION.md)
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20.9 or newer
+- pnpm 11.22.0
+
+### Explore without the backend
+
+The design mode is the fastest reproducible way to inspect both products. It uses fictional, in-memory data and resets on page reload.
 
 ```bash
-# 1. backend
-cd ../anamnesys-app-back && docker compose up -d
-curl -s localhost:8080/health          # {"status":"ok"}
-
-# 2. frontend
+git clone https://github.com/Vini-create/psycho-app-front.git
+cd psycho-app-front
 pnpm install
+pnpm dev:design
+```
+
+Open:
+
+- Patient app: <http://localhost:3000>
+- Professional app: <http://localhost:3001>
+
+### Run against the API
+
+```bash
 cp apps/patient/.env.example apps/patient/.env.local
 cp apps/professional/.env.example apps/professional/.env.local
-pnpm dev                               # sobe os dois apps
+pnpm dev
 ```
 
-O backend precisa aceitar as duas origens:
+By default, both applications expect the API at `http://localhost:8080`. The external API must allow `http://localhost:3000` and `http://localhost:3001` as browser origins and provide the endpoint contracts represented in `packages/api-client/src/endpoints/`.
+
+Individual applications can be started with:
 
 ```bash
-AUTH_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
-AUTH_WEBAUTHN_ORIGINS=http://localhost:3001
-AUTH_WEBAUTHN_RP_ID=localhost
-AUTH_COOKIE_SECURE=false
+pnpm dev:patient
+pnpm dev:professional
 ```
 
-Só o app profissional usa WebAuthn. O RP ID ignora porta, então `localhost`
-serve para os dois; as origens é que precisam bater exatamente.
+## Environment variables
 
-## Verificação
+All frontend variables are embedded into the browser bundle. They must never contain private keys or server-side secrets.
+
+| Variable | Apps | Required | Description |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | Both | Production | Absolute API origin. Production builds require HTTPS and reject credentials, paths, queries, and localhost. |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Both | No | Public Google OAuth web client ID used by Google Identity Services. |
+| `NEXT_PUBLIC_DESIGN_MOCK` | Both | Development only | Enables the in-memory transport. Production builds reject `true`. |
+| `NEXT_PUBLIC_DESIGN_PREVIEW` | Patient | No | Enables the internal `/design-system` review route. |
+
+Safe templates are available in each application:
+
+- `apps/patient/.env.example`
+- `apps/patient/.env.production.example`
+- `apps/professional/.env.example`
+- `apps/professional/.env.production.example`
+
+## Quality checks
+
+Run the complete workspace checks from the repository root:
 
 ```bash
-pnpm test        # Vitest
+pnpm test
 pnpm lint
 pnpm typecheck
-pnpm build
-pnpm contrast    # valida os pares de cor contra WCAG 2.2 AA
+pnpm contrast
 ```
 
-Revisão visual do design system: <http://localhost:3000/design-system>
-(exige `NEXT_PUBLIC_DESIGN_PREVIEW=true`).
-
-## Configuração de deploy
-
-As variáveis `NEXT_PUBLIC_*` são embutidas no bundle no momento do build. Use
-[`apps/patient/.env.production.example`](apps/patient/.env.production.example)
-e
-[`apps/professional/.env.production.example`](apps/professional/.env.production.example)
-como referência e configure os valores na plataforma antes de executar
-`pnpm build`. O build falha se `NEXT_PUBLIC_API_URL` estiver ausente ou se os
-mocks estiverem ligados em produção.
-
-### Cloudflare Workers
-
-O monorepo usa dois Workers independentes, empacotados com OpenNext. No painel
-da Cloudflare, mantenha `Root directory` como `/` para que o pnpm encontre os
-pacotes compartilhados.
-
-Paciente (`sinapsa-patient`):
-
-```text
-Build command:   pnpm --filter @sinapsa/patient cf:build
-Deploy command:  pnpm --filter @sinapsa/patient cf:deploy
-Version command: pnpm --filter @sinapsa/patient cf:version
-Root directory:  /
-```
-
-Profissional (`sinapsa-professional`):
-
-```text
-Build command:   pnpm --filter @sinapsa/professional cf:build
-Deploy command:  pnpm --filter @sinapsa/professional cf:deploy
-Version command: pnpm --filter @sinapsa/professional cf:version
-Root directory:  /
-```
-
-As variáveis `NEXT_PUBLIC_*` devem ser cadastradas como build variables antes
-do build; elas são incorporadas ao bundle pelo Next.js.
-
-No backend, configure no mínimo:
+Production builds require an HTTPS API origin. Configure the production templates or provide a safe origin for local verification:
 
 ```bash
-APP_ENV=production
-AUTH_ALLOWED_ORIGINS=https://app.example.com,https://pro.example.com
-AUTH_COOKIE_SECURE=true
-AUTH_WEBAUTHN_RP_ID=pro.example.com
-AUTH_WEBAUTHN_ORIGINS=https://pro.example.com
-COMPANION_ENABLED=true
-COMPANION_BASE_URL=https://ai-internal.example.com
-AI_CONTEXT_WORKER_ENABLED=true
-AI_PROVIDER=openai
-AUTH_GOOGLE_CLIENT_ID=replace-with-google-web-client-id.apps.googleusercontent.com
-EMAIL_PROVIDER=brevo
-EMAIL_BREVO_API_KEY=replace-with-brevo-api-key
-EMAIL_FROM_NAME=Sinapsa
-EMAIL_FROM_ADDRESS=contato@example.com
-EMAIL_PATIENT_APP_URL=https://app.example.com
-EMAIL_PROFESSIONAL_APP_URL=https://pro.example.com
-EMAIL_WORKER_ENABLED=true
+NEXT_PUBLIC_API_URL=https://api.example.com pnpm build
 ```
 
-`AI_OPENAI_API_KEY`, `COMPANION_API_KEY`, chaves de JWT/cifra e credenciais do
-PostgreSQL devem vir do secret manager. Frontends e API devem permanecer sob o
-mesmo site registrável (por exemplo `app.example.com`, `pro.example.com` e
-`api.example.com`) para o refresh cookie `SameSite=Lax` funcionar no navegador.
-Nos dois builds Next, configure também `NEXT_PUBLIC_GOOGLE_CLIENT_ID` com o mesmo
-Web Client ID autorizado no Google Cloud para as origens dos dois aplicativos.
+## Deployment
 
-Sistema de movimento — princípios, tokens e o ciclo de vida da troca de
-pasta: [MOTION.md](MOTION.md).
+Each application is configured as an independent Cloudflare Worker through OpenNext:
 
-## Decisões que não são negociáveis
+```bash
+pnpm --filter @sinapsa/patient cf:build
+pnpm --filter @sinapsa/professional cf:build
+```
 
-Estas vieram do contrato da API e do [design.md](design.md); mexer nelas quebra
-segurança ou acessibilidade, não só estilo.
+Worker names, compatibility flags, static asset bindings, and observability are defined in each app's `wrangler.jsonc`. Deployment credentials belong in the platform secret store, never in this repository.
 
-- **O access token vive só em memória.** Nada de `localStorage`,
-  `sessionStorage` ou cookie criado por JavaScript. O refresh token é opaco e
-  `HttpOnly` — o JS nunca o lê, só manda `credentials: "include"`.
-- **Refresh é single-flight.** Vários `401` simultâneos disparam uma única
-  chamada a `/refresh`.
-- **Fluxo se decide por `error.code`**, nunca comparando `error.message`. O
-  mapa fica em [`packages/api-client/src/errors.ts`](packages/api-client/src/errors.ts).
-- **A UI do chat se guia por `assistant_status`**, nunca por `ai_model` ou
-  `ai_provider` — esses existem só para rastreabilidade.
-- **O rascunho do chat sobrevive a falhas de envio.**
-- **Uma `Idempotency-Key` por ação de envio**, reusada nos retries de rede.
-- **Componentes consomem só tokens semânticos.** Nunca um hex, nunca um
-  primitivo (`paper-*`, `ink-*`, `purple-*`) direto.
-- **Estado nunca depende só de cor** — sempre cor + rótulo + forma.
-- **Conteúdo crítico não vive só em toast.** Para isso existe o `<Alert>`.
-- **Sombra só em superfície flutuante** (modal, drawer, menu).
-- **Motion é do sistema, não da tela.** Páginas marcam `.reveal` e
-  `data-motion-list`; quem anima é o shell. Nada de `gsap` solto em página,
-  nada de duração ou ease literal fora de
-  [`packages/ui/src/motion/tokens.ts`](packages/ui/src/motion/tokens.ts).
-- **Relatório exige solicitação profissional e confirmação do paciente.** A
-  solicitação fixa o período e exige vínculo, escopo e assinatura vigentes.
-  Somente a confirmação em Minha rede inicia a geração; o conteúdo fica apenas
-  no workspace do profissional solicitante.
+## Current limitations
+
+- The external Go API and AI inference services are required for connected operation and are not included here.
+- The mock transport is an interface review tool, not an end-to-end or backend integration environment.
+- Plan catalogs are implemented, but checkout and subscription management are not connected in the frontend yet.
+- Automated tests focus on the API client, mock workflows, and pure presentation logic; browser-level end-to-end coverage is not present.
+- No CI workflow or public live deployment is currently included in this repository.
+
+## Author
+
+Vinicius França — [GitHub](https://github.com/Vini-create)

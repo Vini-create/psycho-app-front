@@ -1,5 +1,5 @@
 /**
- * Tipos do contrato v1 (FRONTEND_API_CONTRACT.md).
+ * Tipos consumidos do contrato v1 da API.
  * JSON é snake_case e o backend REJEITA campos desconhecidos — por isso
  * nunca espalhe (`...`) um objeto de resposta dentro de um corpo de request.
  */
@@ -103,7 +103,7 @@ export type PasskeyRegistrationResult = {
 
 /**
  * Login profissional é uma união de estados, não um objeto fixo.
- * Ver FRONTEND_API_CONTRACT.md §"Passkeys dos profissionais".
+ * O chamador precisa tratar a cerimônia de passkey antes de acessar tokens.
  */
 export type ProfessionalLoginResponse =
   | {

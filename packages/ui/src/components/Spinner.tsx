@@ -3,7 +3,7 @@ import { cx } from "../lib/cx";
 /**
  * Indicador de progresso indeterminado.
  * `aria-hidden` por padrão: quem comunica o estado é o texto ao redor,
- * não o desenho — design.md §10, estado nunca depende só de um sinal visual.
+ * não o desenho — Brand Book V2 §29, estado nunca depende só de um sinal visual.
  */
 export function Spinner({
   className,

@@ -8,7 +8,7 @@ export type CardVariant =
   | "interactive"
   | "inverse";
 
-/* design.md §8 — cada variação existe porque muda a intenção, não a aparência. */
+/* Brand Book V2 §13 — cada variação existe porque muda a intenção, não a aparência. */
 const VARIANTS: Record<CardVariant, string> = {
   compact: "min-h-24 gap-2 rounded-lg p-4 bg-raised",
   standard: "min-h-36 gap-3 rounded-lg p-6 bg-raised",

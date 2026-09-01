@@ -19,7 +19,7 @@ const baseUrl = resolveApiBaseUrl(
  * dados que viriam da rota substituídos por fixtures.
  *
  * Em build de produção a flag vira `false` na compilação e o pacote de mocks
- * é removido do bundle. Ver DESIGN_MODE.md.
+ * é removido do bundle. A arquitetura do preview está documentada no README.
  */
 const designMock = process.env.NEXT_PUBLIC_DESIGN_MOCK === "true";
 

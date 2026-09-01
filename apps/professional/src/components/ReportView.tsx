@@ -33,7 +33,7 @@ import { ReportSignals } from "./ReportSignals";
    caixas que o §13 manda evitar. Agora a linha ancora os acontecimentos e
    os pontos são histórias separadas por divisor.
 
-   §28 continua valendo aqui com força total: tudo nesta tela foi organizado
+   §31 continua valendo aqui com força total: tudo nesta tela foi organizado
    por modelo a partir de relatos, e a interface diz isso em cada bloco. */
 
 const KIND_FAMILY: Record<string, TagFamily> = {
@@ -158,7 +158,7 @@ export function ReportView({
                   <span className="mt-2 block text-tertiary">{item.impact}</span>
                 )}
 
-                {/* Limitações preservadas — parte do §28: o que o modelo NÃO
+                {/* Limitações preservadas — parte do §31: o que o modelo NÃO
                     pôde afirmar é informação clínica tanto quanto o resto. */}
                 {item.limitations.length > 0 && (
                   <span className="mt-3 block border-l-2 border-accent-fogblue pl-4">
