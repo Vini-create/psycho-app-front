@@ -23,6 +23,20 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@sinapsa/ui", "@sinapsa/api-client", "@sinapsa/mocks"],
   reactStrictMode: true,
   reactCompiler: true,
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
   turbopack: {
     resolveAlias: mocksAlias,
   },

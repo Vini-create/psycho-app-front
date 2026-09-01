@@ -41,6 +41,23 @@ export const metadata: Metadata = {
   title: "Sinapsa.",
   description:
     "Um espaço para conversar sobre o seu dia a dia, no seu ritmo.",
+  applicationName: "Sinapsa",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/sinapsa-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/sinapsa-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Sinapsa",
+  },
 };
 
 export const viewport: Viewport = {

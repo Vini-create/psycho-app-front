@@ -24,6 +24,7 @@ import {
   useRenameConversation,
 } from "@/lib/queries";
 import { Logo } from "./Logo";
+import { InstallAppButton } from "./InstallAppButton";
 
 /* Brand Book V2 §09 e §30.
 
@@ -327,6 +328,7 @@ function ChatShell({ children }: { children: ReactNode }) {
             <Icon name="context" size={20} />
             Conversas
           </button>
+          <InstallAppButton className="sm:hidden" />
         </div>
 
         <div className="min-h-0 flex-1">{children}</div>
@@ -366,6 +368,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Logo className="text-[1.35rem]" />
         </Link>
       }
+      account={<InstallAppButton />}
       dock={
         <FolderDock items={FOLDERS} activeId={active} linkComponent={Link} />
       }
