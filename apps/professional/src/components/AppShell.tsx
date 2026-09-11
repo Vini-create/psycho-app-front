@@ -68,10 +68,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       brand={
         <Link
           href="/"
-          aria-label="Painel profissional da Sinapsa"
+          aria-label="Painel profissional da Siouve"
           className="touch-target rounded-xs"
         >
-          <Logo className="text-[1.35rem]" />
+          <Logo className="text-[1.6rem]" />
         </Link>
       }
       account={

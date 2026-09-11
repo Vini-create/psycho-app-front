@@ -25,7 +25,7 @@ const designMock = process.env.NEXT_PUBLIC_DESIGN_MOCK === "true";
 
 if (designMock && typeof window !== "undefined") {
   console.info(
-    "%cSinapsa · modo de desenho",
+    "%cSiouve · modo de desenho",
     "font-weight:bold",
     "dados mocados, sem backend. Nenhuma alteração visual em relação ao original.",
   );

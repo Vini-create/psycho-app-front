@@ -37,7 +37,7 @@ const CONSENTS: ConsentCopy[] = [
     title: "Termos de uso",
     summary: "Como funciona a plataforma e o que ela não é.",
     points: [
-      "A Sinapsa é um espaço de registro e acompanhamento, não um serviço de emergência.",
+      "A Siouve é um espaço de registro e acompanhamento, não um serviço de emergência.",
       "Em situação de risco imediato, procure atendimento presencial ou os serviços de emergência.",
     ],
   },

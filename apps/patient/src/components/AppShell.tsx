@@ -319,7 +319,7 @@ function ChatShell({ children }: { children: ReactNode }) {
           {/* A assinatura NÃO se repete aqui. Ela vive na bancada, acima da
               pilha, e esta barra é local — só abre a lista de conversas.
               Enquanto o logotipo estava nas duas, o mobile mostrava dois
-              "Sinapsa." empilhados, um preto e um translúcido. */}
+              "Siouve" empilhados, um preto e um translúcido. */}
           <button
             type="button"
             onClick={() => setListOpen(true)}
@@ -362,10 +362,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       brand={
         <Link
           href="/"
-          aria-label="Início da Sinapsa"
+          aria-label="Início da Siouve"
           className="touch-target rounded-xs"
         >
-          <Logo className="text-[1.35rem]" />
+          <Logo className="text-[1.6rem]" />
         </Link>
       }
       account={<InstallAppButton />}

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { Icon, type IconName } from "../../icons";
 
-/* Brand Book V2 §20 — "A feature mais visualmente própria do Sinapsa."
+/* Brand Book V2 §20 — "A feature mais visualmente própria do Siouve."
 
    Princípio que dita o desenho: o evento NÃO é um card autônomo. Ele se
    ancora à linha por data/índice. Uma lista de cards desconectados é

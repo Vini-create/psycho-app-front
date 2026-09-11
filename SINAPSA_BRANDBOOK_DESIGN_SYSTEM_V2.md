@@ -1,19 +1,50 @@
 > Um produto de acompanhamento contínuo que deve ser sentido como uma publicação viva: íntima para o paciente, precisa para o profissional, sofisticada em cada detalhe.
 
-Este documento redefine a identidade visual do Sinapsa para abandonar a aparência de SaaS genérico. A nova linguagem combina editorial contemporâneo, memória analógica, grid de publicação, microtipografia técnica e uma paleta pastel curada. A estética não é decoração: ela organiza informação, marca passagem do tempo e transforma leitura em experiência.
+Este documento redefine a identidade visual do Siouve para abandonar a aparência de SaaS genérico. A nova linguagem combina editorial contemporâneo, memória analógica, grid de publicação, microtipografia técnica e uma paleta pastel curada. A estética não é decoração: ela organiza informação, marca passagem do tempo e transforma leitura em experiência.
 
 `STATUS: DIREÇÃO OFICIAL PROPOSTA / 22 AGO 2026`
 
-# SINAPSA — BRAND BOOK / DESIGN SYSTEM V2
+# SIOUVE — BRAND BOOK / DESIGN SYSTEM V2
 Editorial Clinical Modernism
 
+
+---
+
+## Identidade oficial — Siouve · 11 set. 2026
+
+A plataforma se chama **Siouve**. A assinatura visual é **Siouve.™**, com o símbolo vetorial à direita. O ponto final faz parte da assinatura; em textos corridos e no nome do aplicativo, usar “Siouve”. Esta identidade substitui a marca Sinapsa.
+
+| Elemento | Especificação aprovada |
+|---|---|
+| Componente compartilhado | `BrandLogo`, exportado de `@sinapsa/ui`; utilizado nas duas interfaces |
+| Palavra | `Siouve.`, `font-editorial` (Newsreader), peso 400, tracking `-0.04em` |
+| Tamanho | `1.6rem` na navegação, `1.85rem` na autenticação; padrão do componente `1.75rem` |
+| ™ | Sobrescrito depois do ponto, fonte sans, `0.6em`, entrelinha 1; posição absoluta `top: 0.15em`, `right: -0.95em` |
+| Símbolo | À direita, caixa de `1.4em × 1.4em`, distância da palavra `0.6em` |
+| Desenho | Contorno vetorizado da referência aprovada; preservar pontas, orientação e proporções |
+| Espessura | Preenchimento e contorno da mesma cor, `stroke-width="24"`, junções arredondadas no `viewBox="0 0 1254 1254"`; reforço visual de aproximadamente 2× |
+| Cor na interface | `currentColor`, herdando `text-primary` para acompanhar o tema |
+| SVG independente | Símbolo em `#FCF8ED`, fundo transparente |
+| Favicon | Somente o símbolo espesso, sem palavra ou ™, fundo transparente; SVG adapta a cor ao tema do navegador |
+| Instalação | PNGs de 192/512 px, Apple de 180 px e versões maskable com fundo `#141312`; não usar esses arquivos como favicon |
+
+Usar o componente existente para manter a composição consistente. Não inverter a ordem, remover o ponto, reduzir o ™ à versão anterior, esticar o símbolo ou voltar aos traços finos. Mudanças na marca devem atualizar juntos o componente, os SVGs e os PNGs derivados. Ao trocar favicons, atualizar seus endereços nos metadados para evitar versões antigas em cache.
+
+Fontes no repositório:
+
+- Componente: `packages/ui/src/components/BrandLogo.tsx`.
+- SVG: `apps/patient/public/siouve-logo.svg` e `apps/professional/public/siouve-logo.svg`.
+- Favicons em uso: `apps/{patient,professional}/public/icons/siouve-favicon-v3.{svg,png}`.
+- Demonstração interativa: `/design-system`, seção “Identidade Siouve”.
+
+Os nomes internos de pacotes `@sinapsa/*` permanecem identificadores técnicos e não definem o nome público da plataforma. Exportações antigas em PDF/DOCX são históricas; esta seção e o componente representam a identidade atual.
 
 ---
 
 # 01. A nova tese visual
 Da plataforma bonita para um produto com autoria.
 
-> Sinapsa não deve parecer um dashboard de psicologia. Deve parecer um artefato editorial digital construído para guardar, organizar e revelar contexto humano.
+> Siouve não deve parecer um dashboard de psicologia. Deve parecer um artefato editorial digital construído para guardar, organizar e revelar contexto humano.
 
 ### Objetivo perceptivo
 A interface precisa transmitir simultaneamente sofisticação, intimidade, precisão, silêncio e continuidade. O usuário deve perceber que há design autoral antes mesmo de compreender todas as funcionalidades.
@@ -40,7 +71,7 @@ A interface precisa transmitir simultaneamente sofisticação, intimidade, preci
 # 02. Leitura das referências
 O que absorver — e o que deixar de fora.
 
-As referências fornecidas apontam para três famílias complementares: editorial tipográfico, system UI técnico e modularidade pastel. A identidade do Sinapsa nasce da combinação controlada dessas três famílias, com a linguagem editorial como dominante.
+As referências fornecidas apontam para três famílias complementares: editorial tipográfico, system UI técnico e modularidade pastel. A identidade do Siouve nasce da combinação controlada dessas três famílias, com a linguagem editorial como dominante.
 
 Referências visuais do usuário: Identifont, dashboards system, pastel modular, interface editorial e technical UI.
 ### Extração objetiva
@@ -57,9 +88,9 @@ Referências visuais do usuário: Identifont, dashboards system, pastel modular,
 ---
 
 # 03. Personalidade da marca
-Como o Sinapsa deve parecer e se comportar.
+Como o Siouve deve parecer e se comportar.
 
-| Eixo | Sinapsa é | Sinapsa não é |
+| Eixo | Siouve é | Siouve não é |
 | --- | --- | --- |
 | Sofisticação | Contida, culta, editorial | Luxo ostensivo |
 | Humanidade | Calma, próxima, íntima | Infantil ou terapêutica demais |
@@ -82,7 +113,7 @@ Como o Sinapsa deve parecer e se comportar.
 - rastreável
 
 ### Teste da substituição de logo
-Se uma tela continuar parecendo completamente natural depois de trocar “Sinapsa” pelo nome de uma fintech, CRM ou app de produtividade, a tela ainda está genérica. A identidade precisa sobreviver além da cor e do logotipo.
+Se uma tela continuar parecendo completamente natural depois de trocar “Siouve” pelo nome de uma fintech, CRM ou app de produtividade, a tela ainda está genérica. A identidade precisa sobreviver além da cor e do logotipo.
 
 
 ---
@@ -221,7 +252,7 @@ Use base de 4 px. Espaçamentos principais: 4, 8, 12, 16, 24, 32, 48, 64, 96, 12
 # 08. Preenchimento de tela
 Cheio não é o mesmo que ocupado.
 
-> O Sinapsa deve usar o espaço como revista: grandes áreas vazias são intencionais; grandes áreas mortas são erro de composição.
+> O Siouve deve usar o espaço como revista: grandes áreas vazias são intencionais; grandes áreas mortas são erro de composição.
 
 ### Regras para desktop
 - A primeira dobra deve ter pelo menos 65% da largura útil ocupada por conteúdo ou estrutura visual intencional.
@@ -306,7 +337,7 @@ Use Lucide ou Phosphor como biblioteca de base e aplique uma camada de curadoria
 | Relação profissional | dois nós conectados |
 | Privacidade | escudo/lock simples |
 | Fonte / rastreabilidade | link / quote / page |
-| IA | asterisco de 4 pontas ou marca Sinapsa — evitar robô |
+| IA | asterisco de 4 pontas ou marca Siouve — evitar robô |
 | Busca semântica | search + small nodes |
 
 ### Não usar
@@ -454,7 +485,7 @@ Tags descrevem natureza do conteúdo (trabalho, sono, família, marcado para ses
 ---
 
 # 17. StoryBlock, PaperPanel e PatientRow
-A unidade principal do Sinapsa deve ser uma história, não um card.
+A unidade principal do Siouve deve ser uma história, não um card.
 
 ### StoryBlock
 Componente editorial para acontecimentos e contexto. Anatomia: índice/data → título narrativo → trecho descritivo → metadata → fonte/ação. Pode ocupar de 4 a 8 colunas e geralmente usa divisor inferior em vez de caixa.
@@ -519,7 +550,7 @@ Após mensagens relevantes, ações silenciosas podem aparecer: “Guardar”, �
 ---
 
 # 20. Timeline e memória longitudinal
-A feature mais visualmente própria do Sinapsa.
+A feature mais visualmente própria do Siouve.
 
 ### TimelineRail
 Uma linha vertical ou horizontal fina conecta eventos. O evento não deve ser um card autônomo; ele se ancora à linha por data/índice. Períodos de recorrência podem aparecer como faixas, não como dezenas de pontos.
@@ -540,7 +571,7 @@ Quando a timeline é visível ao paciente, permitir corrigir, ocultar ou marcar 
 ---
 
 # 21. Painel do profissional
-Abrir o Sinapsa deve parecer abrir a edição do dia.
+Abrir o Siouve deve parecer abrir a edição do dia.
 
 ### Primeira dobra
 | Área | Conteúdo | Peso |
@@ -619,7 +650,7 @@ Poucos gráficos, escolhidos por pergunta.
 ---
 
 # 25. Empty, loading, erro e feedback
-Estados secundários também precisam parecer Sinapsa.
+Estados secundários também precisam parecer Siouve.
 
 | Estado | Tratamento |
 | --- | --- |
@@ -820,7 +851,7 @@ Nenhum componente entra no sistema sem passar por isto.
 | Cor é semântica? | Nunca é única fonte de significado. |
 | Há fonte/rastreabilidade? | Quando conteúdo é gerado/agregado. |
 | Tem conteúdo longo? | Teste com 2–3× o texto esperado. |
-| Parece Sinapsa sem logo? | Se não, revisar linguagem. |
+| Parece Siouve sem logo? | Se não, revisar linguagem. |
 
 
 ---
@@ -884,7 +915,7 @@ Uma tela só está pronta quando funciona sem textura, continua clara em graysca
 # 37. Manifesto final
 Editorial. Humano. Preciso. Memorável.
 
-> Sinapsa é um arquivo vivo de contexto humano. A interface deve se comportar como uma publicação que se reescreve com o tempo — páginas para ler, marcas para lembrar, fontes para conferir, espaços para respirar.
+> Siouve é um arquivo vivo de contexto humano. A interface deve se comportar como uma publicação que se reescreve com o tempo — páginas para ler, marcas para lembrar, fontes para conferir, espaços para respirar.
 
 A linguagem dominante é editorial: grande tipografia, grid, divisórias, ritmo, índices e narrativa. A tecnologia aparece como precisão: metadata, rastreabilidade, filtros, estados e instrumentos. A expressão vem da paleta pastel curada e da matéria: papel, carvão, ruído fino e superfícies com peso. O resultado deve ser sofisticado sem ser frio, artístico sem ser ornamental e funcional sem parecer template.
 

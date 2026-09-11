@@ -35,7 +35,7 @@ export function AuthCard({
       <TextureLayer />
 
       <div className="relative mx-auto flex w-full max-w-(--container-frame) flex-col gap-12 lg:gap-16">
-        <Logo className="text-[1.6rem]" />
+        <Logo className="text-[1.85rem]" />
 
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           {/* Coluna do fluxo — 7 de 12. Assimetria em vez de centro. */}
@@ -65,7 +65,7 @@ export function AuthCard({
 
           {/* A tese do produto. Silenciosa, e só onde há espaço para ela. */}
           <aside className="hidden lg:col-span-4 lg:col-start-9 lg:flex lg:flex-col lg:gap-6 lg:border-l lg:border-hairline lg:pl-8">
-            <p className="type-eyebrow text-tertiary">O que é a Sinapsa</p>
+            <p className="type-eyebrow text-tertiary">O que é a Siouve</p>
             <p className="measure-narrow font-editorial text-body-l text-primary">
               Contexto contínuo entre uma sessão e outra, organizado a partir
               do que a própria pessoa relatou. O sistema descreve; a leitura

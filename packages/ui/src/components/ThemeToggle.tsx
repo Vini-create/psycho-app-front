@@ -24,7 +24,7 @@ function SunIcon({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** Lua Sinapsa: crescente aberto com uma pequena estrela de quatro pontas. */
+/** Lua Siouve: crescente aberto com uma pequena estrela de quatro pontas. */
 function MoonIcon({ compact = false }: { compact?: boolean }) {
   return (
     <svg

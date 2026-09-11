@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Sinapsa — camada de curadoria de ícones
+   Siouve — camada de curadoria de ícones
    Brand Book V2 §10.
 
    Lucide é a base; esta camada é o que impede a sensação de "ícones
@@ -126,7 +126,7 @@ type Glyph = ComponentType<LucideProps> | ComponentType<SVGProps<SVGSVGElement>>
    A chave descreve o que a coisa significa no produto; o valor é o desenho.
    -------------------------------------------------------------------------- */
 const REGISTRY = {
-  // Conceitos centrais do Sinapsa — §10, "famílias de símbolos"
+  // Conceitos centrais do Siouve — §10, "famílias de símbolos"
   context: Layers,
   timeline: TimelineMark,
   "for-session": Bookmark,

@@ -4,6 +4,7 @@ import {
   Alert,
   Badge,
   BarStrip,
+  BrandLogo,
   Button,
   ComparisonNote,
   EditorialList,
@@ -33,7 +34,7 @@ import {
   type Tone,
 } from "@sinapsa/ui";
 
-/* Especificação viva do Sinapsa Design System V2.
+/* Especificação viva do Siouve Design System V2.
 
    Esta página não é vitrine: é o lugar onde as regras do brandbook ficam
    verificáveis a olho nu, lado a lado, no tema atual. Se uma decisão de
@@ -120,7 +121,7 @@ export default function DesignSystemPage() {
     <div className="min-h-dvh bg-page px-5 py-12 sm:px-8 lg:px-12">
       <div className="mx-auto flex w-full max-w-(--container-frame) flex-col gap-16">
         <Masthead
-          eyebrow="Sinapsa / Design System V2"
+          eyebrow="Siouve / Design System V2"
           tone="display"
           size="lg"
           deck="Editorial Clinical Modernism. Cada bloco abaixo existe para tornar uma regra do brandbook verificável em light, em dark e em 390px."
@@ -128,6 +129,28 @@ export default function DesignSystemPage() {
         >
           Especificação
         </Masthead>
+
+        <Spec index="00" title="Identidade Siouve" rule="Identidade aprovada · 11 set. 2026">
+          <div className="flex flex-wrap items-center gap-10 rounded-md border border-hairline bg-raised p-8">
+            <BrandLogo className="text-[1.6rem]" />
+            <BrandLogo className="text-[1.85rem]" />
+          </div>
+          <p className="measure text-body text-secondary">
+            Siouve. com ponto final, ™ sobrescrito e símbolo à direita. A marca
+            usa Newsreader 400 e acompanha a cor do tema. O símbolo mantém o
+            contorno original com traços reforçados em aproximadamente 2×.
+          </p>
+          <p className="measure text-body text-secondary">
+            Navegação: 1.6rem. Autenticação: 1.85rem. Símbolo: 1.4em.
+            ™: 0.6em. Usar sempre o componente BrandLogo compartilhado.
+            O favicon usa apenas o símbolo, com fundo transparente; os ícones
+            de instalação possuem fundo próprio.
+          </p>
+          <div className="flex flex-wrap gap-6 type-ui text-ui-sm">
+            <a href="/siouve-logo.svg" className="underline underline-offset-4">Abrir símbolo em SVG</a>
+            <a href="/icons/siouve-favicon-v3.svg" className="underline underline-offset-4">Abrir favicon transparente</a>
+          </div>
+        </Spec>
 
         {/* ---------------------------------------------------------------- */}
         <Spec index="01" title="Superfícies" rule="§04 base neutra em 55–70% da tela">
@@ -272,7 +295,7 @@ export default function DesignSystemPage() {
           </div>
         </Spec>
 
-        <Spec index="08" title="Feedback" rule="§25 estados secundários também são Sinapsa">
+        <Spec index="08" title="Feedback" rule="§25 estados secundários também são Siouve">
           <div className="flex flex-col gap-4 lg:max-w-2xl">
             <Alert tone="danger" title="Não foi possível carregar">
               Não conseguimos carregar este período. Tente novamente.

@@ -235,7 +235,7 @@ function Conta() {
                   setProfileSaved(false);
                 }}
                 error={nameInvalid ? "Informe um nome entre 1 e 120 caracteres." : undefined}
-                help="É assim que vamos chamar você dentro da Sinapsa."
+                help="É assim que vamos chamar você dentro da Siouve."
               />
               <TextField
                 label="E-mail"

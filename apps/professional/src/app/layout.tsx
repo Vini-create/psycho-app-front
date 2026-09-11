@@ -38,7 +38,17 @@ const plexMono = IBM_Plex_Mono({
 
 
 export const metadata: Metadata = {
-  title: "Sinapsa. Profissional",
+  title: "Siouve · Profissional",
+  applicationName: "Siouve",
+  icons: {
+    icon: [
+      { url: "/icons/siouve-favicon-v3.svg", sizes: "any", type: "image/svg+xml" },
+      { url: "/icons/siouve-favicon-v3.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   description:
     "Contexto organizado sobre o que seus pacientes relataram entre as sessões.",
 };

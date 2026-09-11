@@ -157,7 +157,7 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
       {send.error && <Alert tone="danger">{describeError(send.error).message}</Alert>}
       {sentId && (
         <Alert tone="success" title="Envio autorizado">
-          A Sinapsa está preparando o período solicitado. Quando terminar, o
+          A Siouve está preparando o período solicitado. Quando terminar, o
           contexto será entregue somente a este profissional.
         </Alert>
       )}
@@ -179,7 +179,7 @@ function ProfessionalConnection({ connectionId }: { connectionId: string }) {
                 footer={
                   <div className="flex flex-col gap-4">
                     <p className="measure text-body">
-                      Se você enviar, a Sinapsa prepara um contexto desse
+                      Se você enviar, a Siouve prepara um contexto desse
                       período e entrega apenas a{" "}
                       {request.professional_display_name ??
                         connection.professional_display_name ??

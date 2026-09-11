@@ -28,7 +28,7 @@ import {
   recentlyGenerated,
 } from "@/lib/insights";
 
-/* Brand Book V2 §21 — "Abrir o Sinapsa deve parecer abrir a edição do dia."
+/* Brand Book V2 §21 — "Abrir o Siouve deve parecer abrir a edição do dia."
 
    O que mudou em relação ao painel V1, e por quê:
 

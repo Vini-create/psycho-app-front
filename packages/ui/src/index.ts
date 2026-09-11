@@ -1,3 +1,4 @@
+export { BrandLogo } from "./components/BrandLogo";
 export { cx } from "./lib/cx";
 export { describeDevice } from "./lib/device";
 export type { DeviceDescription } from "./lib/device";

@@ -1,12 +1,12 @@
-# Sinapsa
+# Siouve
 
-Sinapsa is a privacy-conscious mental-health companion interface that helps patients record day-to-day context and lets authorized professionals review structured, traceable summaries between sessions.
+Siouve is a privacy-conscious mental-health companion interface that helps patients record day-to-day context and lets authorized professionals review structured, traceable summaries between sessions.
 
 This repository contains the complete frontend monorepo: a mobile-first patient experience, a professional workspace, a shared API client, and an editorial design system. The backend and AI inference services are separate systems and are not included here.
 
 ## Overview
 
-Important context is often lost between appointments: events are forgotten, patterns are difficult to reconstruct, and the next conversation depends on what a person can recall in the moment. Sinapsa provides a voluntary space for patients to write, complete professional-authored check-ins, and explicitly control what is shared with each professional relationship.
+Important context is often lost between appointments: events are forgotten, patterns are difficult to reconstruct, and the next conversation depends on what a person can recall in the moment. Siouve provides a voluntary space for patients to write, complete professional-authored check-ins, and explicitly control what is shared with each professional relationship.
 
 The product has two complementary surfaces:
 

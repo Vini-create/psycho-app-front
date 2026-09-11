@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { Icon } from "../../icons";
 
-/* Brand Book V2 §17 — "A unidade principal do Sinapsa deve ser uma história,
+/* Brand Book V2 §17 — "A unidade principal do Siouve deve ser uma história,
    não um card."
 
    Anatomia: índice/data → título narrativo → trecho → metadata → fonte.

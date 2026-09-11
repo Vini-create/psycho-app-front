@@ -21,7 +21,7 @@ import { useSession } from "@/lib/session";
 
 /* Brand Book V2 §08, §14 e §17.
 
-   Esta é a página que dá ao paciente um motivo de abrir o Sinapsa além de
+   Esta é a página que dá ao paciente um motivo de abrir o Siouve além de
    digitar no chat: o índice do próprio caderno. Ela responde "o que eu já
    escrevi e onde parei", que é uma pergunta diferente de "o que eu quero
    escrever agora".

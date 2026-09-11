@@ -170,7 +170,7 @@ export function InstallAppButton({
         open={chromeConfirmationOpen}
         onClose={() => setChromeConfirmationOpen(false)}
         title="Abrir no Chrome?"
-        description="No Android, a instalação da Sinapsa é feita pelo Chrome. Vamos abrir esta mesma página por lá."
+        description="No Android, a instalação da Siouve é feita pelo Chrome. Vamos abrir esta mesma página por lá."
         footer={
           <>
             <Button variant="text" onClick={() => setChromeConfirmationOpen(false)}>
@@ -184,7 +184,7 @@ export function InstallAppButton({
       <Modal
         open={iosInstructionsOpen}
         onClose={() => setIosInstructionsOpen(false)}
-        title="Coloque a Sinapsa na tela inicial"
+        title="Coloque a Siouve na tela inicial"
         description="No iPhone ou iPad, a instalação é concluída pelo menu de compartilhamento do navegador."
         footer={
           <Button onClick={() => setIosInstructionsOpen(false)}>Entendi</Button>
@@ -212,7 +212,7 @@ export function InstallAppButton({
       <Modal
         open={androidInstructionsOpen}
         onClose={() => setAndroidInstructionsOpen(false)}
-        title="Instale a Sinapsa pelo Chrome"
+        title="Instale a Siouve pelo Chrome"
         description="Se a confirmação automática ainda não apareceu, conclua pelo menu do Chrome."
         footer={
           <Button onClick={() => setAndroidInstructionsOpen(false)}>Entendi</Button>

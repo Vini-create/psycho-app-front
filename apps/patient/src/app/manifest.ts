@@ -5,8 +5,8 @@ export const dynamic = "force-static";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Sinapsa",
-    short_name: "Sinapsa",
+    name: "Siouve",
+    short_name: "Siouve",
     description: "Um espaço para conversar sobre o seu dia a dia, no seu ritmo.",
     start_url: "/",
     scope: "/",
@@ -16,25 +16,25 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait-primary",
     icons: [
       {
-        src: "/icons/sinapsa-192.png",
+        src: "/icons/siouve-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/sinapsa-512.png",
+        src: "/icons/siouve-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/sinapsa-maskable-192.png",
+        src: "/icons/siouve-maskable-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/icons/sinapsa-maskable-512.png",
+        src: "/icons/siouve-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
