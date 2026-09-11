@@ -34,6 +34,11 @@ const PROFESSIONS: { value: ProfessionType; label: string }[] = [
 
 const MAX_BIO = 2_000;
 const MAX_CERTIFICATIONS = 50;
+const PROFESSIONS_REQUIRING_REGISTRATION: ProfessionType[] = [
+  "psychologist",
+  "psychiatrist",
+  "occupational_therapist",
+];
 
 /**
  * O formulário só monta depois que o perfil chega.
@@ -70,11 +75,12 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
   );
   const countryInvalid = country.trim().length !== 2;
   const regionMissing = region.trim() === "";
+  const registrationRequired = PROFESSIONS_REQUIRING_REGISTRATION.includes(professionType);
   const numberMissing = number.trim() === "";
   const profileInvalid =
     countryInvalid ||
     regionMissing ||
-    numberMissing ||
+    (registrationRequired && numberMissing) ||
     tooManyCertifications ||
     certificationTooLong;
 
@@ -155,9 +161,18 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
           label="Número de registro"
           value={number}
           onChange={(event) => setNumber(event.target.value)}
-          required
+          required={registrationRequired}
           placeholder="06/123456"
-          error={numberMissing ? "Informe o número do registro profissional." : undefined}
+          help={
+            registrationRequired
+              ? "Obrigatório para esta profissão."
+              : "Opcional para esta profissão."
+          }
+          error={
+            registrationRequired && numberMissing
+              ? "Informe o número do registro profissional."
+              : undefined
+          }
         />
 
         <TextAreaField

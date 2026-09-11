@@ -91,15 +91,25 @@ function CadastrarPasskey() {
   if (recoveryCodes) {
     return (
       <AuthCard
-        overline="Guarde agora"
+        overline="Etapa essencial de segurança"
         title="Seus códigos de recuperação."
-        description="Eles são a única forma de entrar se você perder o acesso à sua chave. Não vamos mostrá-los de novo."
+        description="Salve estes códigos em um gerenciador de senhas antes de continuar. Eles permitem recuperar o acesso se você perder sua chave de acesso, inclusive ao trocar de celular."
       >
         <div className="flex flex-col gap-6">
-          <Alert tone="warning" title="Mostrados uma única vez">
-            Guarde-os fora deste aplicativo, num gerenciador de senhas ou
-            impressos em lugar seguro.
+          <Alert tone="warning" title="Sem a chave e sem os códigos, você pode perder o acesso à conta">
+            Guardar estes códigos é essencial. Se você perder o acesso à sua
+            chave e não tiver os códigos, pode não ser possível recuperar sua
+            conta. Eles são mostrados uma única vez: salve-os em um gerenciador
+            de senhas ao qual consiga acessar mesmo sem este celular. Não
+            compartilhe seus códigos com outras pessoas.
           </Alert>
+
+          <p className="text-body text-secondary">
+            Você não precisa decorar estes códigos nem usá-los a cada entrada.
+            No dia a dia, continue usando sua chave de acesso com a digital,
+            o rosto ou o bloqueio de tela do aparelho. Os códigos são uma
+            alternativa de emergência.
+          </p>
 
           <Card variant="standard">
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -121,7 +131,7 @@ function CadastrarPasskey() {
           <Checkbox
             checked={savedConfirmed}
             onChange={(event) => setSavedConfirmed(event.target.checked)}
-            label="Guardei meus códigos em um lugar seguro."
+            label="Salvei meus códigos em um gerenciador de senhas ou outro local seguro e entendo que, sem eles e sem minha chave, posso perder o acesso à conta."
           />
 
           <Button
@@ -133,7 +143,7 @@ function CadastrarPasskey() {
           </Button>
           {!savedConfirmed && (
             <p className="metadata max-w-none text-secondary">
-              Confirme que guardou os códigos para seguir.
+              Salve os códigos e confirme acima para continuar.
             </p>
           )}
         </div>
