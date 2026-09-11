@@ -8,7 +8,9 @@
   },
   "scripts": {
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
-    "dev:design": "pnpm --parallel --filter \"./apps/*\" dev:design",
+    "dev:design": "pnpm -w run --parallel \"/^dev:design:/\"",
+    "dev:design:apps": "pnpm --parallel --filter \"./apps/*\" dev:design",
+    "dev:design:landing": "node landing/scripts/dev.mjs",
     "dev:patient": "pnpm --filter @sinapsa/patient dev",
     "dev:professional": "pnpm --filter @sinapsa/professional dev",
     "build": "pnpm -r build",

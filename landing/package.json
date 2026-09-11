@@ -1,0 +1,35 @@
+{
+  "name": "siouve-landing",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Landing page da Siouve — siouve.com",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "fonts": "node scripts/fonts.mjs",
+    "cf:deploy": "npm run build && wrangler deploy",
+    "cf:version": "npm run build && wrangler versions upload",
+    "cf:preview": "npm run build && wrangler dev"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@types/three": "^0.182.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "wrangler": "^4.125.0"
+  }
+}

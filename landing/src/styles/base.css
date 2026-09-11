@@ -1,0 +1,246 @@
+/* ==========================================================================
+   Siouve — camada base da landing
+
+   Regras globais que não pertencem a um componente. Espelha
+   `packages/ui/src/styles/base.css` no que continua valendo fora do produto.
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ambient);
+    color: var(--color-primary);
+    /* §05: o corpo é UI sans. A serif é escolha explícita de narrativa. */
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    line-height: 1.45;
+    /* Nenhuma tela pode quebrar em 320 CSS px. */
+    min-width: 320px;
+    /* O WebGL fica em posição fixa atrás de tudo; sem isto, qualquer
+       elemento que estoure a largura cria scroll horizontal sobre ele. */
+    overflow-x: hidden;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #4a463f transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    min-height: 40px;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-color: #4a463f;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent-lavender);
+  }
+
+  /* §09 e §15 — foco nunca removido sem substituição. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-lavender);
+    color: var(--color-ink-100);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Medida de leitura 55–70 caracteres — §29. */
+  p {
+    max-width: 68ch;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    max-width: none;
+    text-wrap: balance;
+  }
+
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* §27 — movimento reduzido sem exceção. O JS também consulta esta
+     preferência e desliga as timelines; isto aqui é a rede de segurança
+     para tudo que é feito em CSS. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* §11 — a textura é acabamento. Some quando o usuário pede menos
+     transparência ou mais contraste, e a página precisa continuar inteira
+     sem ela. */
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    [data-texture] {
+      display: none !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* ------------------------------------------------------------------
+     Microtipografia — uma das assinaturas do sistema, §16.
+     ------------------------------------------------------------------ */
+
+  .type-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Caixa alta é permitida em eyebrow e índice — nunca em título narrativo. */
+  .type-eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type-editorial {
+    font-family: var(--font-editorial);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .measure {
+    max-width: 68ch;
+  }
+
+  .measure-narrow {
+    max-width: 54ch;
+  }
+
+  /* Alvo de toque de 44px sem inflar o visual do controle — §29. */
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* A moldura da página. Uma medida só, usada por todas as seções, para
+     que as divisórias hairline se alinhem de cima a baixo. */
+  .frame {
+    width: 100%;
+    max-width: var(--container-frame);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* Fio de 1px que não engorda em telas densas. */
+  .hairline-t {
+    border-top: 1px solid var(--color-hairline);
+  }
+  .hairline-b {
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .hairline-l {
+    border-left: 1px solid var(--color-hairline);
+  }
+
+  /* Condutor pontilhado das referências técnicas: liga rótulo e valor sem
+     desenhar uma tabela. */
+  .leader {
+    flex: 1 1 auto;
+    min-width: 1.5rem;
+    align-self: center;
+    border-bottom: 1px dotted var(--color-hairline-strong);
+    opacity: 0.7;
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------------
+     Estado de repouso das revelações.
+
+     MOTION.md §6: "Repouso é CSS." Sem JavaScript, com JS lento, ou sob
+     `prefers-reduced-motion`, tudo isto precisa estar legível. Por isso o
+     estado inicial escondido é aplicado por `[data-anim="ready"]`, um
+     atributo que só o JS escreve — e só depois de confirmar que vai animar.
+     Nenhum texto desta página depende de JavaScript para existir.
+     ------------------------------------------------------------------ */
+  [data-anim="ready"] .reveal {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+
+  [data-anim="ready"] .reveal-line {
+    opacity: 0;
+  }
+
+  /* Bloco de texto com fio à esquerda — a "régua" editorial do §12. */
+  .rule-l {
+    border-left: 1px solid var(--color-hairline);
+    padding-left: clamp(1rem, 2.5vw, 2rem);
+  }
+}

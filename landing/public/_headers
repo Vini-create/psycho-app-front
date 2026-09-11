@@ -1,0 +1,22 @@
+# Cabeçalhos servidos pelo runtime de assets da Cloudflare.
+#
+# O JS e o CSS não aparecem aqui de propósito: o Vite carimba um hash no nome
+# deles, e o runtime já os marca como imutáveis sozinho.
+#
+# As fontes têm nome estável, então não podem ser imutáveis por um ano — um
+# `npm run fonts` reescreveria o conteúdo sob o mesmo nome e o navegador
+# continuaria com a versão velha. Uma semana com revalidação é o meio-termo:
+# rápido no dia a dia, corrigível numa semana.
+/fonts/*
+  Cache-Control: public, max-age=604800, must-revalidate
+
+/og.jpg
+  Cache-Control: public, max-age=86400
+
+/favicon.svg
+  Cache-Control: public, max-age=86400
+
+# A página em si nunca fica em cache do navegador: é ela que aponta para os
+# assets com hash, e um index velho serviria um bundle que não existe mais.
+/
+  Cache-Control: public, max-age=0, must-revalidate

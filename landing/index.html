@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#141312" />
+
+    <title>Siouve — o que acontece entre uma sessão e outra</title>
+    <meta
+      name="description"
+      content="A Siouve é um espaço para registrar o que você viveu, conversar com a Si e decidir o que segue para quem acompanha você. Contexto contínuo entre paciente e profissional."
+    />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href="https://siouve.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Siouve" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="https://siouve.com/" />
+    <meta property="og:title" content="Siouve — o que acontece entre uma sessão e outra" />
+    <meta
+      property="og:description"
+      content="Um espaço para registrar o que você viveu, conversar com a Si e decidir o que segue para quem acompanha você."
+    />
+    <!-- O card é gerado a partir de `scripts/og.html` — ver README. JPEG e
+         não PNG: o gradiente escuro custa 395kB em PNG e 67kB em JPEG 92,
+         sem banding visível numa arte que não tem borda dura. -->
+    <meta property="og:image" content="https://siouve.com/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Siouve. — O que acontece entre uma sessão e outra."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://siouve.com/og.jpg" />
+
+    <!-- As fontes são auto-hospedadas em `public/fonts` e declaradas em
+         `src/styles/fonts.css`. Nenhuma requisição a CDN em runtime.
+
+         O preload cobre só os quatro arquivos `latin` que a primeira dobra
+         desenha: a manchete é metade Archivo e metade Newsreader itálica, e
+         deixar uma das duas chegar por swap parte o título ao meio no meio
+         do carregamento. `latin-ext` continua sob demanda, pelo
+         unicode-range. -->
+    <link rel="preload" href="/fonts/archivo-normal-400-900-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/newsreader-italic-300-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/newsreader-normal-300-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/instrument-sans-normal-400-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- A tela de abertura mora no HTML estático, e não no React, porque é
+         ela que precisa ser o PRIMEIRO paint. Montada pelo React, existiria
+         uma janela entre o HTML chegar e o bundle executar — exatamente o
+         intervalo em que a página aparecia crua e travada.
+
+         O CSS dela é embutido pelo mesmo motivo: esperar o arquivo de
+         estilos seria esperar justamente o que ela existe para cobrir. -->
+    <style>
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 2rem;
+        padding: clamp(1.25rem, 4vw, 3.5rem);
+        background: #141312;
+        color: #f1ede5;
+      }
+      #preloader[hidden] { display: none; }
+      /* Trava a rolagem enquanto a cortina está no ar: rolar por baixo dela
+         deixaria o leitor no meio da página quando ela saísse. */
+      html:has(#preloader:not([hidden])) { overflow: hidden; }
+      .pl-word {
+        font-family: Newsreader, Georgia, "Times New Roman", serif;
+        font-size: clamp(2.5rem, 9vw, 6rem);
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        position: relative;
+        display: inline-block;
+      }
+      .pl-word sup {
+        position: absolute;
+        top: 0.15em;
+        right: -0.95em;
+        font-family: "Instrument Sans", system-ui, sans-serif;
+        font-size: 0.6em;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+      .pl-foot {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1.5rem;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #7d776c;
+      }
+      .pl-rule {
+        position: relative;
+        height: 1px;
+        background: #332f2a;
+        overflow: hidden;
+      }
+      .pl-rule span {
+        position: absolute;
+        inset: 0 100% 0 0;
+        background: #c8b9d8;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pl-rule span { transition: none; }
+      }
+    </style>
+
+    <!-- Sem JavaScript, ninguém levanta a cortina — e ela cobriria a página
+         inteira para sempre. A página toda funciona sem JS por princípio
+         (MOTION.md §6); seria perverso que justamente a tela de carregamento
+         quebrasse essa garantia. -->
+    <noscript>
+      <style>
+        #preloader { display: none !important; }
+        html { overflow: auto !important; }
+        .noscript-page {
+          max-width: 44rem;
+          margin: 0 auto;
+          padding: clamp(2rem, 8vw, 6rem) 1.25rem;
+          color: #f1ede5;
+          font-family: "Instrument Sans", system-ui, sans-serif;
+          line-height: 1.5;
+        }
+        .noscript-page h1 {
+          font-family: Newsreader, Georgia, serif;
+          font-size: clamp(2rem, 6vw, 3rem);
+          font-weight: 500;
+          letter-spacing: -0.025em;
+          margin: 2rem 0 1rem;
+        }
+        .noscript-page p { color: #a8a296; margin: 0 0 1rem; }
+        .noscript-page ul { list-style: none; padding: 0; margin: 2rem 0 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+        .noscript-page a {
+          display: inline-block;
+          padding: 0.75rem 1.25rem;
+          border: 1px solid #888274;
+          border-radius: 0.5rem;
+          color: #f1ede5;
+          text-decoration: none;
+          font-weight: 600;
+        }
+        .noscript-page li:first-child a { background: #f1ede5; color: #171615; border-color: #f1ede5; }
+        .noscript-page small { display: block; margin-top: 2.5rem; color: #7d776c; }
+      </style>
+    </noscript>
+
+    <!-- E um seguro contra o caso em que o JS existe mas o bundle não chega:
+         rede caindo no meio, CDN fora, erro de execução antes do React
+         montar. Este script é inline, então roda mesmo que o módulo falhe, e
+         o teto é generoso o bastante para nunca competir com o carregamento
+         normal — quem some antes é sempre o `Preloader`. -->
+    <script>
+      setTimeout(function () {
+        var el = document.getElementById("preloader");
+        if (el && !el.hidden) el.hidden = true;
+      }, 8000);
+    </script>
+
+  </head>
+  <body>
+    <div id="preloader" role="status" aria-live="polite" aria-label="Carregando a Siouve">
+      <div style="margin-top: auto">
+        <span class="pl-word">Siouve.<sup>&#8482;</sup></span>
+      </div>
+      <div>
+        <div class="pl-rule"><span id="preloader-bar"></span></div>
+        <p class="pl-foot">
+          <span>Contexto contínuo entre sessões</span>
+          <span id="preloader-count" data-numeric>000</span>
+        </p>
+      </div>
+    </div>
+
+    <div id="root"></div>
+
+    <!-- A landing é renderizada no cliente, então sem JavaScript o `#root`
+         fica vazio. O que NÃO pode ficar vazio é a função da página: ela é a
+         porta de entrada dos dois aplicativos, e "Entrar" e "Sou
+         profissional" são links comuns que funcionam sem script nenhum.
+         Quem chega sem JS ainda precisa conseguir entrar — e precisa ver o
+         aviso de limite, que é obrigação e não depende de enfeite. -->
+    <noscript>
+      <div class="noscript-page">
+        <span style="font-family: Newsreader, Georgia, serif; font-size: 1.6rem">Siouve.</span>
+        <h1>O que acontece entre uma sessão e outra.</h1>
+        <p>
+          A Siouve é um espaço para registrar o que você viveu, conversar com a
+          Si e decidir o que segue para quem acompanha você.
+        </p>
+        <p>
+          Esta página precisa de JavaScript para ser exibida por completo, mas
+          o acesso à plataforma não:
+        </p>
+        <ul>
+          <li><a href="https://app.siouve.com">Entrar</a></li>
+          <li><a href="https://pro.siouve.com">Sou profissional</a></li>
+        </ul>
+        <small>
+          A Siouve não é terapia e não substitui acompanhamento profissional. A
+          plataforma não atende emergências — em situação de risco, procure
+          atendimento imediato nos serviços de urgência da sua região.
+        </small>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

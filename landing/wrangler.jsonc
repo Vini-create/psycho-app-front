@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Worker de assets puros: a landing é um build estático, então não existe
+  // `main`. Nada de OpenNext aqui — os apps precisam dele porque são Next com
+  // SSR; esta página é HTML, CSS, JS e fontes, e o runtime de assets da
+  // Cloudflare serve isso sozinho, sem código nosso no caminho.
+  "name": "siouve-landing",
+  "compatibility_date": "2026-08-24",
+
+  // Os endereços `workers.dev` não podem responder pela marca — mesma
+  // decisão já tomada para os dois apps. O domínio é configurado no painel.
+  "workers_dev": false,
+
+  "assets": {
+    "directory": "./dist",
+
+    // "none" devolve 404 de verdade para caminho inexistente. A alternativa
+    // ("single-page-application") responderia 200 com o index em QUALQUER
+    // URL, o que faz um erro de digitação virar uma página indexável — ruim
+    // para SEO e enganoso para quem chega por um link quebrado. Esta landing
+    // é uma página só; a navegação interna é por âncora, não por rota.
+    "not_found_handling": "none"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
