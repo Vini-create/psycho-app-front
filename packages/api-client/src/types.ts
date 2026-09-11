@@ -219,6 +219,18 @@ export type ProfessionType =
   | "counselor"
   | "other";
 
+const professionsRequiringRegistration: ReadonlySet<ProfessionType> = new Set([
+  "psychologist",
+  "psychiatrist",
+  "occupational_therapist",
+]);
+
+export function professionRequiresRegistration(
+  professionType: ProfessionType,
+): boolean {
+  return professionsRequiringRegistration.has(professionType);
+}
+
 export type ProfessionalProfileInput = {
   profession_type: ProfessionType;
   registration_country_code: string;

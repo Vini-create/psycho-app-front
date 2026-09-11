@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import {
   hasCode,
+  professionRequiresRegistration,
   type CheckinTemplateInput,
   type ProfessionalProfile,
   type ProfessionalProfileInput,
@@ -33,12 +34,6 @@ export const keys = {
     ["checkin-collections", connectionId] as const,
 };
 
-const professionsRequiringRegistration = new Set([
-  "psychologist",
-  "psychiatrist",
-  "occupational_therapist",
-]);
-
 export function isProfessionalProfileComplete(
   profile: ProfessionalProfile | null | undefined,
 ): boolean {
@@ -46,7 +41,9 @@ export function isProfessionalProfileComplete(
   if (profile.onboarding_complete !== undefined) {
     return profile.onboarding_complete;
   }
-  const registrationRequired = professionsRequiringRegistration.has(profile.profession_type);
+  const registrationRequired = professionRequiresRegistration(
+    profile.profession_type,
+  );
   return (
     (profile.profession_type?.trim().length ?? 0) > 0 &&
     (profile.registration_country_code?.trim().length ?? 0) === 2 &&

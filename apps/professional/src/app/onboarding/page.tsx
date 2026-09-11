@@ -15,6 +15,7 @@ import {
 } from "@sinapsa/ui";
 import {
   describeError,
+  professionRequiresRegistration,
   type ProfessionType,
   type ProfessionalProfile,
 } from "@sinapsa/api-client";
@@ -34,11 +35,6 @@ const PROFESSIONS: { value: ProfessionType; label: string }[] = [
 
 const MAX_BIO = 2_000;
 const MAX_CERTIFICATIONS = 50;
-const PROFESSIONS_REQUIRING_REGISTRATION: ProfessionType[] = [
-  "psychologist",
-  "psychiatrist",
-  "occupational_therapist",
-];
 
 /**
  * O formulário só monta depois que o perfil chega.
@@ -75,7 +71,7 @@ function ProfileForm({ profile }: { profile: ProfessionalProfile | null }) {
   );
   const countryInvalid = country.trim().length !== 2;
   const regionMissing = region.trim() === "";
-  const registrationRequired = PROFESSIONS_REQUIRING_REGISTRATION.includes(professionType);
+  const registrationRequired = professionRequiresRegistration(professionType);
   const numberMissing = number.trim() === "";
   const profileInvalid =
     countryInvalid ||
