@@ -15,9 +15,9 @@ import { Action, Arrow, SectionHead } from "./primitives";
 
 const DOORS = [
   {
-    id: "pessoa",
+    id: "usuario",
     eyebrow: "Para quem escreve",
-    title: "Pessoa",
+    title: "Usuário",
     body: "Seu espaço para registrar o que viveu, conversar com a Si e responder aos check-ins de quem acompanha você. Você decide o que compartilhar.",
     points: ["Conversa e registro", "Check-ins do seu profissional", "Controle do que é compartilhado"],
     cta: "Entrar",
@@ -31,7 +31,7 @@ const DOORS = [
     id: "profissional",
     eyebrow: "Para quem acompanha",
     title: "Profissional",
-    body: "Receba o contexto que a pessoa escolheu compartilhar, crie check-ins e retome a próxima sessão com uma visão mais clara do intervalo.",
+    body: "Receba o contexto que o usuário escolheu compartilhar, crie check-ins e retome a próxima sessão com uma visão mais clara do intervalo.",
     points: ["Relatórios de contexto por período", "Autoria dos check-ins", "Convites, vínculos e acessos"],
     cta: "Sou profissional",
     href: PRO_URL,

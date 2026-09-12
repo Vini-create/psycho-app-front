@@ -77,7 +77,7 @@ export function Hero({ start }: { start: boolean }) {
         <dl className="hairline-t type-meta grid grid-cols-2 gap-x-6 gap-y-4 pt-4 text-tertiary md:grid-cols-4">
           {[
             ["PLATAFORMA", "Contexto longitudinal"],
-            ["PESSOA", "Registro, conversa e check-ins"],
+            ["USUÁRIO", "Registro, conversa e check-ins"],
             ["PROFISSIONAL", "Leitura entre sessões"],
             ["COMPARTILHAMENTO", "Só com autorização"],
           ].map(([term, value]) => (
