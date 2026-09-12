@@ -109,14 +109,14 @@ const TRAIL: Waypoint[] = [
    abaixo é multiplicada no desenho; os pontos controlam a respiração do
    percurso, sem deixá-la voltar ao tamanho de um ícone. */
 const MOBILE_TRAIL: Waypoint[] = [
-  { at: 0.0, x: 0.34, y: -0.18, scale: 0.5, dim: 1 },
-  { at: 0.14, x: -0.34, y: 0.62, scale: 0.34, dim: 1 },
-  { at: 0.3, x: 0.35, y: 0.34, scale: 0.3, dim: 1 },
-  { at: 0.44, x: -0.35, y: -0.46, scale: 0.34, dim: 1 },
-  { at: 0.58, x: 0.35, y: 0.58, scale: 0.28, dim: 1 },
-  { at: 0.72, x: -0.34, y: 0.38, scale: 0.3, dim: 1 },
-  { at: 0.86, x: 0.36, y: -0.4, scale: 0.34, dim: 1 },
-  { at: 1.0, x: 0.3, y: 0.48, scale: 0.46, dim: 1 },
+  { at: 0.0, x: 0.27, y: -0.18, scale: 0.5, dim: 1 },
+  { at: 0.14, x: -0.27, y: 0.48, scale: 0.34, dim: 1 },
+  { at: 0.3, x: 0.28, y: 0.32, scale: 0.3, dim: 1 },
+  { at: 0.44, x: -0.28, y: -0.4, scale: 0.34, dim: 1 },
+  { at: 0.58, x: 0.28, y: 0.46, scale: 0.3, dim: 1 },
+  { at: 0.72, x: -0.27, y: 0.34, scale: 0.32, dim: 1 },
+  { at: 0.86, x: 0.29, y: -0.36, scale: 0.36, dim: 1 },
+  { at: 1.0, x: 0.25, y: 0.42, scale: 0.48, dim: 1 },
 ];
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -173,10 +173,11 @@ export function Stage({ onReady }: { onReady?: () => void }) {
       return;
     }
 
-    /* Teto de 1.75 no DPR: num telefone 3x, renderizar nativo é 3x o custo
-       de preenchimento para um ganho que ninguém enxerga num gradiente. */
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    /* Limitamos o DPR a 1.4 no mobile e 1.75 no desktop. Renderizar um painel
+       3x no telefone custa muito preenchimento para pouco ganho visual. */
+    renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, window.innerWidth >= 1024 ? 1.75 : 1.4),
+    );
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.28;
@@ -249,22 +250,40 @@ export function Stage({ onReady }: { onReady?: () => void }) {
     let local = 0;
     let localTarget = 0;
 
-    let wide = true;
+    let wide = window.innerWidth >= 1024;
+    let layoutWidth = 0;
+    let layoutHeight = 0;
 
-    const layout = () => {
+    const layout = (force = false) => {
       const { innerWidth: w, innerHeight: h } = window;
+
+      /* A barra superior dos navegadores móveis abre e fecha durante a
+         rolagem e emite `resize` mesmo sem a largura mudar. Redimensionar o
+         framebuffer nesse instante interrompe o gesto e altera a câmera.
+         Mantemos o primeiro tamanho estável e só recalculamos quando existe
+         uma mudança real de largura, como rotação do aparelho. */
+      const nextWide = w >= 1024;
+      const widthChanged = Math.abs(w - layoutWidth) > 1;
+      if (!force && !nextWide && !widthChanged) return;
+
+      wide = nextWide;
+      layoutWidth = w;
+      layoutHeight = h;
+      renderer.setPixelRatio(
+        Math.min(window.devicePixelRatio, wide ? 1.75 : 1.4),
+      );
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       field.resize(w / h);
 
-      wide = w >= 1024;
       /* No mobile o canvas fica na frente do conteúdo. O campo opaco segue
          no fallback CSS, atrás da página, e só a peça metálica ocupa esta
          camada superior. */
       field.mesh.visible = wide;
     };
-    layout();
+    const onResize = () => layout();
+    layout(true);
 
     const onPointer = (event: PointerEvent) => {
       target.set(
@@ -274,10 +293,11 @@ export function Stage({ onReady }: { onReady?: () => void }) {
     };
 
     const onScroll = () => {
-      const max = Math.max(1, window.innerHeight);
+      const viewportHeight = wide ? window.innerHeight : layoutHeight;
+      const max = Math.max(1, viewportHeight);
       localTarget = Math.min(window.scrollY / max, 2.2);
 
-      const span = document.documentElement.scrollHeight - window.innerHeight;
+      const span = document.documentElement.scrollHeight - viewportHeight;
       progressTarget = span > 0 ? Math.min(Math.max(window.scrollY / span, 0), 1) : 0;
       resume();
     };
@@ -286,16 +306,22 @@ export function Stage({ onReady }: { onReady?: () => void }) {
     let frame = 0;
     let announced = false;
     const clock = new THREE.Clock();
+    let previousElapsed = 0;
 
     const draw = () => {
       const elapsed = clock.getElapsedTime();
+      const delta = Math.min(Math.max(elapsed - previousElapsed, 0), 0.05);
+      previousElapsed = elapsed;
 
-      pointer.lerp(target, 0.045);
+      pointer.lerp(target, 1 - Math.exp(-2.8 * delta));
       /* A interpolação é o que faz a viagem parecer fluida em vez de colada
          ao dedo: a peça persegue a posição da rolagem, sempre um pouco
-         atrás. */
-      progress += (progressTarget - progress) * 0.055;
-      local += (localTarget - local) * 0.08;
+         atrás. A constante considera o tempo real entre quadros; assim uma
+         queda momentânea de FPS no celular não muda a velocidade aparente. */
+      const progressFollow = 1 - Math.exp(-(wide ? 3.4 : 8.5) * delta);
+      const localFollow = 1 - Math.exp(-5 * delta);
+      progress += (progressTarget - progress) * progressFollow;
+      local += (localTarget - local) * localFollow;
 
       field.update(elapsed, local, pointer);
 
@@ -304,7 +330,7 @@ export function Stage({ onReady }: { onReady?: () => void }) {
 
         symbol.position.x = at.x;
         symbol.position.y = at.y;
-        symbol.scale.setScalar(at.scale * (wide ? 1.5 : 1.1));
+        symbol.scale.setScalar(at.scale * (wide ? 1.5 : 1.3));
         material.opacity = at.dim;
         symbol.visible = material.opacity > 0.015;
 
@@ -340,7 +366,7 @@ export function Stage({ onReady }: { onReady?: () => void }) {
       }
     }
 
-    window.addEventListener("resize", layout);
+    window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
     if (!reduced) window.addEventListener("pointermove", onPointer, { passive: true });
 
@@ -380,7 +406,7 @@ export function Stage({ onReady }: { onReady?: () => void }) {
     return () => {
       pause();
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("resize", layout);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       renderer.domElement.removeEventListener("webglcontextlost", onLost);

@@ -14,7 +14,7 @@ import { Action } from "./primitives";
    de leitura, não porta de entrada.
 
    A hierarquia entre as duas é deliberada e segue o §15: "Entrar" é o fill
-   de contraste máximo, porque o paciente é o volume; "Sou profissional" é o
+   de contraste máximo, porque a pessoa é o volume; "Sou profissional" é o
    contorno, porque é a porta minoritária mas não pode parecer secundária a
    ponto de ser procurada. Contorno e fill têm o mesmo peso tipográfico e a
    mesma altura — a diferença é de superfície, não de importância. */

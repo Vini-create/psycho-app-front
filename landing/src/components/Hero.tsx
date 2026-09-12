@@ -23,7 +23,7 @@ export function Hero({ start }: { start: boolean }) {
   return (
     <section
       id="topo"
-      className="relative flex min-h-dvh flex-col justify-center pt-28 pb-12 sm:pt-32"
+      className="relative flex min-h-svh flex-col justify-center pt-28 pb-12 sm:pt-32 lg:min-h-dvh"
     >
       <div className="frame w-full">
         <div className="grid gap-y-10 lg:grid-cols-12">
@@ -77,7 +77,7 @@ export function Hero({ start }: { start: boolean }) {
         <dl className="hairline-t type-meta grid grid-cols-2 gap-x-6 gap-y-4 pt-4 text-tertiary md:grid-cols-4">
           {[
             ["PLATAFORMA", "Contexto longitudinal"],
-            ["PACIENTE", "Registro, conversa e check-ins"],
+            ["PESSOA", "Registro, conversa e check-ins"],
             ["PROFISSIONAL", "Leitura entre sessões"],
             ["COMPARTILHAMENTO", "Só com autorização"],
           ].map(([term, value]) => (

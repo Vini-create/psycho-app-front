@@ -125,11 +125,20 @@ export function InstallAppButton({
   }, []);
 
   async function install() {
+    /* Samsung Internet também pode expor `beforeinstallprompt`, mas nesse
+       caso quem empacota o site é o instalador do próprio navegador. Em
+       versões que geram um pacote Android antigo, o Play Protect o bloqueia.
+       No Android fora do Chrome, abrimos a mesma origem no Chrome antes de
+       considerar qualquer prompt nativo recebido. */
+    if (chromeRedirectAvailable) {
+      setChromeConfirmationOpen(true);
+      return;
+    }
+
     const prompt = deferredInstallPrompt;
 
     if (!prompt) {
       if (iosInstallAvailable) setIosInstructionsOpen(true);
-      else if (chromeRedirectAvailable) setChromeConfirmationOpen(true);
       else if (androidInstallAvailable) setAndroidInstructionsOpen(true);
       return;
     }
@@ -169,8 +178,8 @@ export function InstallAppButton({
       <Modal
         open={chromeConfirmationOpen}
         onClose={() => setChromeConfirmationOpen(false)}
-        title="Abrir no Chrome?"
-        description="No Android, a instalação da Siouve é feita pelo Chrome. Vamos abrir esta mesma página por lá."
+        title="Instalar pelo Chrome"
+        description="Para usar o instalador compatível com as proteções atuais do Android, vamos abrir esta mesma página no Chrome."
         footer={
           <>
             <Button variant="text" onClick={() => setChromeConfirmationOpen(false)}>

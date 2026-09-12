@@ -16,7 +16,7 @@ import { SectionHead } from "./primitives";
    gesto que a plataforma de fato executa.
 
    Os tons são os quatro do §09 — lavanda, sage, clay e dark —, exatamente os
-   da navegação do aplicativo do paciente, aplicados pela mesma
+   da navegação do aplicativo da pessoa, aplicados pela mesma
    `paperSurface()` que o produto usa. As âncoras são irregulares porque
    arquivo de verdade não é tabulado por planilha. */
 
@@ -27,7 +27,7 @@ const FOLDERS: readonly Folder[] = [
     anchor: 0.02,
     tone: "lavender",
     eyebrow: "Com a Si",
-    audience: "PACIENTE",
+    audience: "PESSOA",
     title: "Comece de onde você está.",
     body: "Conte o que aconteceu do seu jeito, mesmo que pareça confuso ou incompleto. A Si conversa com você e ajuda a manter o fio do que foi dito — sem diagnosticar e sem ocupar o lugar de quem acompanha você.",
     points: [
@@ -42,7 +42,7 @@ const FOLDERS: readonly Folder[] = [
     anchor: 0.26,
     tone: "sage",
     eyebrow: "Perguntas curtas",
-    audience: "PACIENTE · PROFISSIONAL",
+    audience: "PESSOA · PROFISSIONAL",
     title: "Perguntas de quem conhece seu acompanhamento.",
     body: "Os check-ins são preparados pelo seu profissional para acompanhar pontos específicos do período. Você escolhe quando responder, pode rever suas respostas e continua no controle do envio.",
     points: [
@@ -72,7 +72,7 @@ const FOLDERS: readonly Folder[] = [
     anchor: 0.76,
     tone: "dark",
     eyebrow: "O que sai daqui",
-    audience: "PACIENTE",
+    audience: "PESSOA",
     title: "Você escolhe o que atravessa essa porta.",
     body: "O profissional pode solicitar contexto, mas o envio depende de uma ação sua. Cada vínculo tem permissões próprias, que você pode revisar ou revogar quando quiser.",
     points: [
