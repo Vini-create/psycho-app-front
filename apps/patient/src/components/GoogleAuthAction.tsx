@@ -83,8 +83,10 @@ export function GoogleAuthAction({
 
   if (!googleClientId) return null;
 
+  const panelTitle = mode === "signup" ? "Cadastro com Google" : "Acesso com Google";
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {error && (
         <Alert tone="warning" title="Google temporariamente indisponível">
           <span>{error} </span>
@@ -98,28 +100,45 @@ export function GoogleAuthAction({
         </Alert>
       )}
 
-      <div className="flex min-h-11 w-full justify-center">
-        {challenge ? (
-          <GoogleSignInButton
-            clientId={googleClientId}
-            nonce={challenge.nonce}
-            text={mode === "signup" ? "signup_with" : "signin_with"}
-            disabled={disabled || submitting}
-            onCredential={(credential) => void handleCredential(credential)}
-            onError={() => {
-              setError("Não foi possível carregar a entrada com Google.");
-              void refreshChallenge();
-            }}
-          />
-        ) : (
-          <div
-            role="status"
-            className="flex min-h-11 w-full max-w-[400px] items-center justify-center rounded-sm border border-hairline text-ui text-secondary"
-          >
-            {loading ? "Preparando Google…" : "Google indisponível"}
+      <section className="rounded-sm border border-hairline bg-raised p-4 sm:p-5">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="type-ui text-ui font-semibold text-primary">
+              {panelTitle}
+            </h2>
+            <p className="text-ui-sm text-secondary">
+              Use uma conta conectada neste aparelho.
+            </p>
           </div>
-        )}
-      </div>
+
+          <span className="type-meta hidden shrink-0 text-tertiary sm:block">
+            acesso rápido
+          </span>
+        </div>
+
+        <div className="flex min-h-11 w-full justify-center">
+          {challenge ? (
+            <GoogleSignInButton
+              clientId={googleClientId}
+              nonce={challenge.nonce}
+              text={mode === "signup" ? "signup_with" : "signin_with"}
+              disabled={disabled || submitting}
+              onCredential={(credential) => void handleCredential(credential)}
+              onError={() => {
+                setError("Não foi possível carregar a entrada com Google.");
+                void refreshChallenge();
+              }}
+            />
+          ) : (
+            <div
+              role="status"
+              className="flex min-h-11 w-full max-w-[400px] items-center justify-center rounded-sm border border-hairline bg-page text-ui text-secondary"
+            >
+              {loading ? "Preparando Google…" : "Google indisponível"}
+            </div>
+          )}
+        </div>
+      </section>
 
       {mode === "signup" && (
         <p className="type-meta -mt-1 text-center text-tertiary">
@@ -127,9 +146,9 @@ export function GoogleAuthAction({
         </p>
       )}
 
-      <div className="flex items-center gap-3 text-ui text-muted" aria-hidden="true">
+      <div className="flex items-center gap-3 type-meta text-tertiary" aria-hidden="true">
         <span className="h-px flex-1 bg-hairline" />
-        ou use seu e-mail
+        ou continue com seu e-mail
         <span className="h-px flex-1 bg-hairline" />
       </div>
     </div>

@@ -18,7 +18,7 @@ type GoogleIdentityServices = {
         parent: HTMLElement,
         options: {
           type: "standard";
-          theme: "filled_black";
+          theme: "outline";
           size: "large";
           text: GoogleButtonText;
           shape: "rectangular";
@@ -79,7 +79,7 @@ export function GoogleSignInButton({
       });
       window.google.accounts.id.renderButton(container, {
         type: "standard",
-        theme: "filled_black",
+        theme: "outline",
         size: "large",
         text,
         shape: "rectangular",
