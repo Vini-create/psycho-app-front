@@ -110,8 +110,6 @@ export function GoogleAuthAction({
 
   if (!googleClientId) return null;
 
-  const panelTitle = mode === "signup" ? "Cadastro com Google" : "Acesso com Google";
-
   return (
     <div className="flex flex-col gap-5">
       {error && (
@@ -127,45 +125,28 @@ export function GoogleAuthAction({
         </Alert>
       )}
 
-      <section className="rounded-sm border border-hairline bg-raised p-4 sm:p-5">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="type-ui text-ui font-semibold text-primary">
-              {panelTitle}
-            </h2>
-            <p className="text-ui-sm text-secondary">
-              Use uma conta conectada neste aparelho.
-            </p>
+      <div className="flex min-h-11 w-full justify-center">
+        {challenge ? (
+          <GoogleSignInButton
+            clientId={googleClientId}
+            nonce={challenge.nonce}
+            text={mode === "signup" ? "signup_with" : "signin_with"}
+            disabled={disabled || submitting}
+            onCredential={(credential) => void handleCredential(credential)}
+            onError={() => {
+              setError("Não foi possível carregar a entrada com Google.");
+              void refreshChallenge();
+            }}
+          />
+        ) : (
+          <div
+            role="status"
+            className="flex min-h-11 w-full max-w-[400px] items-center justify-center rounded-sm border border-hairline bg-page text-ui text-secondary"
+          >
+            {loading ? "Preparando Google…" : "Google indisponível"}
           </div>
-
-          <span className="type-meta hidden shrink-0 text-tertiary sm:block">
-            acesso rápido
-          </span>
-        </div>
-
-        <div className="flex min-h-11 w-full justify-center">
-          {challenge ? (
-            <GoogleSignInButton
-              clientId={googleClientId}
-              nonce={challenge.nonce}
-              text={mode === "signup" ? "signup_with" : "signin_with"}
-              disabled={disabled || submitting}
-              onCredential={(credential) => void handleCredential(credential)}
-              onError={() => {
-                setError("Não foi possível carregar a entrada com Google.");
-                void refreshChallenge();
-              }}
-            />
-          ) : (
-            <div
-              role="status"
-              className="flex min-h-11 w-full max-w-[400px] items-center justify-center rounded-sm border border-hairline bg-page text-ui text-secondary"
-            >
-              {loading ? "Preparando Google…" : "Google indisponível"}
-            </div>
-          )}
-        </div>
-      </section>
+        )}
+      </div>
 
       {mode === "signup" && (
         <p className="type-meta -mt-1 text-center text-tertiary">
