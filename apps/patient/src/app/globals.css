@@ -6,6 +6,59 @@
 /* O Tailwind precisa enxergar as classes usadas dentro do design system. */
 @source "../../../../packages/ui/src";
 
+/* O chat é, por padrão, a pasta de carvão da Si. Este modo alternativo
+   troca somente essa pasta por um papel off-white aquecido — sem alterar o
+   tema das demais telas nem a bancada externa. A pasta recebe os tokens
+   claros dentro do próprio escopo porque ela declara a paleta escura. */
+.chat-light-mode {
+  --folder-dark: #e0d3ba;
+  --folder-ink-dark: #171615;
+}
+
+.chat-light-mode [data-folder-tone="dark"] {
+  --surface-page: #e0d3ba;
+  --surface-raised: #eadfcd;
+  --surface-sunken: #d2c2a7;
+  --surface-inset: #c7b597;
+  --surface-inverse: #171615;
+
+  --text-primary: #171615;
+  --text-secondary: #5c574e;
+  --text-tertiary: #625b50;
+  --text-inverse: #f5f1e8;
+  --text-inverse-muted: #a8a296;
+  --text-accent: #6f5a8a;
+
+  --border-hairline: #bbaa8e;
+  --border-strong: #857864;
+  --border-control: #776b57;
+  --border-focus: #6f5a8a;
+
+  --action-primary: #171615;
+  --action-primary-hover: #2e2c29;
+  --action-primary-pressed: #3c3a37;
+  --text-on-action: #f5f1e8;
+  --action-selected: #9e88b8;
+
+  --panel-lavender: #e2daeb;
+  --surface-message-user: #c8b9d8;
+  --text-on-panel: #171615;
+  --text-on-panel-muted: #5c574e;
+
+  --scrollbar-thumb: #aa987b;
+  --scrollbar-thumb-hover: #806d51;
+
+  color-scheme: light;
+}
+
+/* A troca é uma mudança de matéria curta, sem transição de layout. */
+.chat-theme-scope,
+.chat-theme-scope [data-folder-surface] {
+  transition-property: background-color, color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-sinapsa);
+}
+
 /* Indicador editorial da Si: três marcas em cadência, como uma frase sendo
    composta. O deslocamento é curto para sugerir atividade sem virar bounce. */
 @keyframes si-thinking-dot {

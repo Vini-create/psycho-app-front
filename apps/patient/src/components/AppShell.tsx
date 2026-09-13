@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import {
   Alert,
   AppFrame,
@@ -57,6 +63,90 @@ const FOLDERS: FolderDefinition[] = [
   },
   { id: "/conta", href: "/conta", label: "Conta", icon: "person", tone: "clay" },
 ];
+
+const CHAT_LIGHT_MODE_KEY = "siouve-patient-chat-light-mode";
+const CHAT_LIGHT_MODE_EVENT = "siouve-chat-light-mode-change";
+let sessionChatLightMode = false;
+
+function readChatLightMode(): boolean {
+  try {
+    const stored = localStorage.getItem(CHAT_LIGHT_MODE_KEY);
+    if (stored !== null) sessionChatLightMode = stored === "true";
+  } catch {
+    // A cópia em memória mantém o controle funcional sem persistência.
+  }
+  return sessionChatLightMode;
+}
+
+function subscribeToChatLightMode(onChange: () => void): () => void {
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === CHAT_LIGHT_MODE_KEY) onChange();
+  };
+  window.addEventListener("storage", onStorage);
+  window.addEventListener(CHAT_LIGHT_MODE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onStorage);
+    window.removeEventListener(CHAT_LIGHT_MODE_EVENT, onChange);
+  };
+}
+
+function ChatThemeButton({
+  light,
+  onToggle,
+}: {
+  light: boolean;
+  onToggle: () => void;
+}) {
+  const nextMode = light ? "escuro" : "claro";
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      role="switch"
+      aria-checked={light}
+      aria-label={`Ativar modo ${nextMode} no chat`}
+      title={`Ativar modo ${nextMode} no chat`}
+      className="touch-target flex h-9 shrink-0 items-center rounded-full text-secondary transition-colors hover:text-primary"
+    >
+      <span
+        aria-hidden="true"
+        className={cx(
+          "relative h-6 w-11 rounded-full border transition-colors duration-200 ease-sinapsa",
+          light
+            ? "border-action-selected bg-action-selected"
+            : "border-border-control bg-sunken",
+        )}
+      >
+        <span
+          className={cx(
+            "absolute top-0.5 left-0.5 grid size-[1.125rem] place-items-center rounded-full bg-primary text-page transition-transform duration-200 ease-sinapsa",
+            light ? "translate-x-5" : "translate-x-0",
+          )}
+        >
+          {light ? (
+            <svg viewBox="0 0 16 16" className="size-3" fill="none">
+              <circle cx="8" cy="8" r="2.25" fill="currentColor" />
+              <path
+                d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M12.95 3.05l-1.4 1.4M4.45 11.55l-1.4 1.4"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 16 16" className="size-3" fill="none">
+              <path
+                d="M12.7 10.35A5.5 5.5 0 0 1 5.65 3.3a5.25 5.25 0 1 0 7.05 7.05Z"
+                fill="currentColor"
+              />
+            </svg>
+          )}
+        </span>
+      </span>
+    </button>
+  );
+}
 
 function activeFolder(pathname: string): string {
   const match = FOLDERS.find((folder) =>
@@ -243,9 +333,15 @@ function ConversationList({
 function ConversationPanel({
   activeId,
   onNavigate,
+  lightMode,
+  onToggleLightMode,
+  showThemeControl = true,
 }: {
   activeId: string | null;
   onNavigate?: () => void;
+  lightMode: boolean;
+  onToggleLightMode: () => void;
+  showThemeControl?: boolean;
 }) {
   const router = useRouter();
   const create = useCreateConversation();
@@ -258,14 +354,20 @@ function ConversationPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
-        <p className="type-eyebrow text-tertiary">Suas conversas</p>
+      <div className="border-b border-hairline px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="type-eyebrow text-tertiary">Suas conversas</p>
+          {showThemeControl && (
+            <ChatThemeButton light={lightMode} onToggle={onToggleLightMode} />
+          )}
+        </div>
         <Button
           size="sm"
           variant="secondary"
           loading={create.isPending}
           startIcon={<Icon name="add" size={16} />}
           onClick={startConversation}
+          className="mt-2 w-full"
         >
           Nova
         </Button>
@@ -282,7 +384,15 @@ function ConversationPanel({
    Shell
    -------------------------------------------------------------------------- */
 
-function ChatShell({ children }: { children: ReactNode }) {
+function ChatShell({
+  children,
+  lightMode,
+  onToggleLightMode,
+}: {
+  children: ReactNode;
+  lightMode: boolean;
+  onToggleLightMode: () => void;
+}) {
   const searchParams = useSearchParams();
   const activeId = searchParams.get("c");
   const [listOpen, setListOpen] = useState(false);
@@ -291,7 +401,11 @@ function ChatShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-0 flex-1">
       {/* sidebar.local — 280–340px do §32. */}
       <aside className="hidden w-(--size-sidebar-local) shrink-0 flex-col border-r border-hairline lg:flex">
-        <ConversationPanel activeId={activeId} />
+        <ConversationPanel
+          activeId={activeId}
+          lightMode={lightMode}
+          onToggleLightMode={onToggleLightMode}
+        />
       </aside>
 
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
@@ -328,7 +442,8 @@ function ChatShell({ children }: { children: ReactNode }) {
             <Icon name="context" size={20} />
             Conversas
           </button>
-          <InstallAppButton className="sm:hidden" />
+          <ChatThemeButton light={lightMode} onToggle={onToggleLightMode} />
+          <InstallAppButton className="sm:hidden" labelClassName="sr-only" />
         </div>
 
         <div className="min-h-0 flex-1">{children}</div>
@@ -341,7 +456,13 @@ function ChatShell({ children }: { children: ReactNode }) {
         className="w-[min(24rem,calc(100vw-2rem))] overflow-hidden"
         contentClassName="max-h-[min(32rem,calc(100dvh-6rem))] gap-0 overflow-hidden p-0"
       >
-        <ConversationPanel activeId={activeId} onNavigate={() => setListOpen(false)} />
+        <ConversationPanel
+          activeId={activeId}
+          onNavigate={() => setListOpen(false)}
+          lightMode={lightMode}
+          onToggleLightMode={onToggleLightMode}
+          showThemeControl={false}
+        />
       </Modal>
     </div>
   );
@@ -351,6 +472,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const active = activeFolder(pathname);
   const isChat = pathname === "/chat";
+  const chatLightMode = useSyncExternalStore(
+    subscribeToChatLightMode,
+    readChatLightMode,
+    () => false,
+  );
+
+  function toggleChatLightMode() {
+    const next = !chatLightMode;
+    sessionChatLightMode = next;
+    try {
+      localStorage.setItem(CHAT_LIGHT_MODE_KEY, String(next));
+    } catch {
+      // O estado em memória ainda é atualizado quando o storage está bloqueado.
+    }
+    window.dispatchEvent(new Event(CHAT_LIGHT_MODE_EVENT));
+  }
 
   return (
     <AppFrame
@@ -359,6 +496,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       motionKey={pathname}
       linkComponent={Link}
       fill={isChat}
+      className={cx(
+        "chat-theme-scope",
+        chatLightMode && "chat-light-mode",
+      )}
       brand={
         <Link
           href="/"
@@ -377,7 +518,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         /* `useSearchParams` lê a conversa aberta dentro do ChatShell; o
            App Router exige a fronteira de Suspense para isso. */
         <Suspense fallback={<div className="min-h-0 flex-1" />}>
-          <ChatShell>{children}</ChatShell>
+          <ChatShell
+            lightMode={chatLightMode}
+            onToggleLightMode={toggleChatLightMode}
+          >
+            {children}
+          </ChatShell>
         </Suspense>
       ) : (
         <main className="mx-auto w-full max-w-(--container-frame) flex-1 px-5 pt-10 pb-16 sm:px-10 sm:pb-20 lg:px-14 xl:px-20">
