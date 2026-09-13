@@ -108,6 +108,8 @@ export type TextFieldProps = Omit<
   error?: ReactNode;
   className?: string;
   inputClassName?: string;
+  /** Controle alinhado ao fim do campo, como mostrar/ocultar senha. */
+  endAdornment?: ReactNode;
 };
 
 export function TextField({
@@ -116,6 +118,7 @@ export function TextField({
   error,
   className,
   inputClassName,
+  endAdornment,
   id: providedId,
   required,
   ...rest
@@ -132,14 +135,25 @@ export function TextField({
       required={required}
       className={className}
     >
-      <input
-        {...rest}
-        id={id}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(help, error, helpId, errorId)}
-        className={cx(CONTROL_BASE, inputClassName)}
-      />
+      <div className="relative">
+        <input
+          {...rest}
+          id={id}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy(help, error, helpId, errorId)}
+          className={cx(
+            CONTROL_BASE,
+            endAdornment ? "pr-14" : undefined,
+            inputClassName,
+          )}
+        />
+        {endAdornment && (
+          <div className="absolute inset-y-0 right-1 flex items-center">
+            {endAdornment}
+          </div>
+        )}
+      </div>
     </FieldShell>
   );
 }

@@ -10,9 +10,9 @@ import {
   CardTitle,
   Checkbox,
   Overline,
+  PageLoader,
   PageTitle,
   Prose,
-  Spinner,
 } from "@sinapsa/ui";
 import { describeError, type ConsentType } from "@sinapsa/api-client";
 import { AuthGate } from "@/components/AuthGate";
@@ -95,9 +95,7 @@ function Consentimentos() {
 
   if (isPending) {
     return (
-      <div role="status" className="flex min-h-dvh items-center justify-center">
-        <Spinner className="text-[1.5rem] text-secondary" />
-      </div>
+      <PageLoader label="Carregando consentimentos…" className="min-h-dvh" />
     );
   }
 

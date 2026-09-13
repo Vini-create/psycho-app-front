@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@sinapsa/ui";
+import { PageLoader } from "@sinapsa/ui";
 import { useSession } from "@/lib/session";
 
 /**
@@ -21,17 +21,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }, [status, router]);
 
   if (status === "loading") {
-    return (
-      <div
-        role="status"
-        className="flex min-h-dvh items-center justify-center gap-3 text-secondary"
-      >
-        <Spinner className="text-[1.5rem]" />
-        <span className="type-ui text-ui font-semibold">
-          Abrindo seu espaço…
-        </span>
-      </div>
-    );
+    return <PageLoader label="Abrindo seu espaço…" className="min-h-dvh" />;
   }
 
   if (status === "unauthenticated") return null;

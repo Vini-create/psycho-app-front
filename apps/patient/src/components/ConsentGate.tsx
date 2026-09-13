@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@sinapsa/ui";
+import { PageLoader } from "@sinapsa/ui";
 import { useConsents } from "@/lib/queries";
 
 /**
@@ -20,9 +20,10 @@ export function ConsentGate({ children }: { children: ReactNode }) {
 
   if (isPending) {
     return (
-      <div role="status" className="flex min-h-64 items-center justify-center">
-        <Spinner className="text-[1.5rem] text-secondary" />
-      </div>
+      <PageLoader
+        label="Verificando seus consentimentos…"
+        className="min-h-64"
+      />
     );
   }
 

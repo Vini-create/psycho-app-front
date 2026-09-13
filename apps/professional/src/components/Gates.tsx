@@ -2,20 +2,12 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@sinapsa/ui";
+import { PageLoader } from "@sinapsa/ui";
 import { useSession } from "@/lib/session";
 import { isProfessionalProfileComplete, useProfile } from "@/lib/queries";
 
 function Loading({ label }: { label: string }) {
-  return (
-    <div
-      role="status"
-      className="flex min-h-dvh items-center justify-center gap-3 text-secondary"
-    >
-      <Spinner className="text-[1.5rem]" />
-      <span className="type-ui text-ui font-semibold">{label}</span>
-    </div>
-  );
+  return <PageLoader label={label} className="min-h-dvh" />;
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {

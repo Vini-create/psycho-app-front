@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Alert, Button, Metadata, TextField } from "@sinapsa/ui";
+import { Alert, Button, TextField } from "@sinapsa/ui";
 import { describeError } from "@sinapsa/api-client";
 import { auth } from "@/lib/api";
 import { AuthCard } from "@/components/AuthCard";
@@ -33,7 +33,7 @@ export default function RecuperarSenhaPage() {
     <AuthCard
       overline="Recuperar acesso"
       title="Vamos recuperar seu acesso."
-      description="Informe seu e-mail e enviaremos um código para criar uma senha nova."
+      description="Informe seu e-mail e enviaremos um link para criar uma senha nova."
       footer={
         <Link href="/entrar" className="touch-target type-ui font-semibold text-accent underline underline-offset-4">
           Voltar para entrar
@@ -50,18 +50,17 @@ export default function RecuperarSenhaPage() {
               Se essa conta existir, as instruções chegarão no e-mail informado.
             </Alert>
             {devToken && (
-              <Alert tone="warning" title="Ambiente de desenvolvimento">
-                <Metadata className="break-all text-warning">{devToken}</Metadata>
-              </Alert>
+              <Button
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={() =>
+                  (window.location.href = `/redefinir-senha?token=${encodeURIComponent(devToken)}`)
+                }
+              >
+                Continuar redefinição
+              </Button>
             )}
-            <Button
-              variant="secondary"
-              size="lg"
-              fullWidth
-              onClick={() => (window.location.href = "/redefinir-senha")}
-            >
-              Já tenho o código
-            </Button>
           </>
         ) : (
           <>

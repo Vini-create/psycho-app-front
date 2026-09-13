@@ -44,10 +44,14 @@ export {
   TextAreaField,
   TextField,
 } from "./components/Field";
+export { PasswordField } from "./components/PasswordField";
+export type { PasswordFieldProps } from "./components/PasswordField";
 export { EmptyState } from "./components/EmptyState";
 export { Modal } from "./components/Modal";
 export { Skeleton } from "./components/Skeleton";
 export { Spinner } from "./components/Spinner";
+export { PageLoader } from "./components/PageLoader";
+export type { PageLoaderProps } from "./components/PageLoader";
 export { TextureLayer } from "./components/TextureLayer";
 export type { TextureVariant } from "./components/TextureLayer";
 export { ThemeToggle } from "./components/ThemeToggle";
