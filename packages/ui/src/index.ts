@@ -52,6 +52,8 @@ export { Skeleton } from "./components/Skeleton";
 export { Spinner } from "./components/Spinner";
 export { PageLoader } from "./components/PageLoader";
 export type { PageLoaderProps } from "./components/PageLoader";
+export { SiouveLoaderMark } from "./components/SiouveLoaderMark";
+export type { SiouveLoaderMarkProps } from "./components/SiouveLoaderMark";
 export { TextureLayer } from "./components/TextureLayer";
 export type { TextureVariant } from "./components/TextureLayer";
 export { ThemeToggle } from "./components/ThemeToggle";

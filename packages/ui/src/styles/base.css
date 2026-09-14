@@ -113,35 +113,32 @@
 }
 
 @layer utilities {
-  /* O símbolo encurta da ponta para o centro, em uma cadência curta entre
-     os raios. `pathLength="1"` mantém a medida independente do desenho. */
-  @keyframes siouve-page-loader-ray {
+  /* O símbolo encurta da ponta para o centro e volta antes de passar ao
+     braço seguinte. `pathLength="1"` independe do tamanho de cada path. */
+  @keyframes siouve-loader-arm-pulse {
     0%,
-    18%,
+    14.285%,
     100% {
       stroke-dasharray: 1 1;
-      opacity: 1;
     }
 
-    48%,
-    58% {
-      stroke-dasharray: 0.42 1;
-      opacity: 0.5;
+    7.142% {
+      stroke-dasharray: 0.34 1;
     }
   }
 
-  .siouve-page-loader__rays path {
-    animation: siouve-page-loader-ray 1.55s var(--ease-sinapsa) infinite;
+  .siouve-loader-mark__arms path {
+    animation: siouve-loader-arm-pulse 2.8s var(--ease-sinapsa) infinite;
     stroke-dasharray: 1 1;
     stroke-dashoffset: 0;
   }
 
-  .siouve-page-loader__rays path:nth-child(2) { animation-delay: 55ms; }
-  .siouve-page-loader__rays path:nth-child(3) { animation-delay: 110ms; }
-  .siouve-page-loader__rays path:nth-child(4) { animation-delay: 165ms; }
-  .siouve-page-loader__rays path:nth-child(5) { animation-delay: 220ms; }
-  .siouve-page-loader__rays path:nth-child(6) { animation-delay: 275ms; }
-  .siouve-page-loader__rays path:nth-child(7) { animation-delay: 330ms; }
+  .siouve-loader-mark__arms path:nth-child(2) { animation-delay: 400ms; }
+  .siouve-loader-mark__arms path:nth-child(3) { animation-delay: 800ms; }
+  .siouve-loader-mark__arms path:nth-child(4) { animation-delay: 1.2s; }
+  .siouve-loader-mark__arms path:nth-child(5) { animation-delay: 1.6s; }
+  .siouve-loader-mark__arms path:nth-child(6) { animation-delay: 2s; }
+  .siouve-loader-mark__arms path:nth-child(7) { animation-delay: 2.4s; }
 
   /* ------------------------------------------------------------------
      Microtipografia. É uma das assinaturas do sistema — brandbook §16.

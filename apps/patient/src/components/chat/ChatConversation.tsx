@@ -9,7 +9,14 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
-import { Alert, Button, Modal, buttonStyles, formatDayMark } from "@sinapsa/ui";
+import {
+  Alert,
+  Button,
+  Modal,
+  SiouveLoaderMark,
+  buttonStyles,
+  formatDayMark,
+} from "@sinapsa/ui";
 import { describeError, hasCode, newIdempotencyKey, type Message } from "@sinapsa/api-client";
 import { useMessages, useRetryMessage, useSendMessage } from "@/lib/queries";
 import { useNow } from "@/lib/useNow";
@@ -48,11 +55,7 @@ function ConversationLoading() {
   );
 }
 
-/**
- * Presença da Si enquanto a resposta está sendo preparada. Os pontos se
- * movem como uma pequena cadência de escrita, mas continuam tipografados
- * diretamente na página — sem criar uma bolha de mensageiro para a IA.
- */
+/** Presença discreta da Si enquanto a resposta está sendo preparada. */
 function AssistantThinkingIndicator() {
   return (
     <li
@@ -60,11 +63,7 @@ function AssistantThinkingIndicator() {
       aria-live="polite"
       className="si-thinking-enter type-meta flex min-h-5 items-center gap-3 text-tertiary"
     >
-      <span aria-hidden="true" className="flex h-4 items-center gap-1.5">
-        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
-        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
-        <span className="si-thinking-dot size-1.5 rounded-full bg-accent-lavender" />
-      </span>
+      <SiouveLoaderMark className="size-10 text-accent-lavender" />
       <span>Si está pensando…</span>
     </li>
   );
