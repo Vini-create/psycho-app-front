@@ -33,6 +33,10 @@ export type ApiErrorCode =
   | "context_processing"
   | "context_request_resolved"
   | "connection_inactive"
+  | "connection_limit_reached"
+  | "monthly_report_limit_reached"
+  | "monthly_checkin_limit_reached"
+  | "daily_message_limit_reached"
   | "subscription_required"
   | "profile_incomplete"
   | "network_error";
@@ -201,6 +205,22 @@ const DESCRIPTIONS: Record<string, ErrorDescription> = {
   connection_inactive: {
     message: "Este vínculo não está mais ativo.",
     action: "refresh_data",
+  },
+  connection_limit_reached: {
+    message: "O plano Free permite até 2 acompanhamentos ativos.",
+    action: "show_message",
+  },
+  monthly_report_limit_reached: {
+    message: "O plano Free permite 1 solicitação de relatório por mês para esta pessoa.",
+    action: "show_message",
+  },
+  monthly_checkin_limit_reached: {
+    message: "O plano Free permite 1 envio de check-in por mês para esta pessoa.",
+    action: "show_message",
+  },
+  daily_message_limit_reached: {
+    message: "Você atingiu o limite diário de mensagens do seu plano.",
+    action: "show_message",
   },
   subscription_required: {
     message: "Uma assinatura profissional vigente é necessária.",

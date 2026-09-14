@@ -23,6 +23,9 @@ describe("describeError", () => {
     expect(describeError(apiError("rate_limited")).action).toBe(
       "wait_and_retry",
     );
+    expect(describeError(apiError("monthly_report_limit_reached")).action).toBe(
+      "show_message",
+    );
   });
 
   it("nunca vaza a mensagem crua do backend para a tela", () => {

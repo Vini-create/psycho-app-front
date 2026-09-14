@@ -136,6 +136,14 @@ export function appEndpoints(client: ApiClient) {
               onDelta(payload.delta);
             }
             if (event?.name === "assistant.error") {
+              const payload = parseStreamJSON<{ code?: unknown; message?: unknown }>(event.data);
+              if (typeof payload.code === "string") {
+                throw new ApiError({
+                  code: payload.code,
+                  message: typeof payload.message === "string" ? payload.message : "A geração foi interrompida antes de terminar.",
+                  status: payload.code === "daily_message_limit_reached" ? 429 : 500,
+                });
+              }
               throw streamError("A geração foi interrompida antes de terminar.");
             }
             if (event?.name === "assistant.completed") {

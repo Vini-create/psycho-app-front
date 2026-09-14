@@ -23,6 +23,7 @@ import {
 } from "@sinapsa/ui";
 import {
   describeError,
+  hasCode,
   type CheckinCollection,
   type ConsentScope,
   type ContextReport,
@@ -82,6 +83,7 @@ function Paciente({ connectionId }: { connectionId: string }) {
   const [selectedReport, setSelectedReport] = useState<ContextReport | null>(null);
   const [selectedCheckin, setSelectedCheckin] = useState<CheckinCollection | null>(null);
   const [requesting, setRequesting] = useState(false);
+  const [reportLimitOpen, setReportLimitOpen] = useState(false);
 
   const today = new Date();
   const weekAgo = new Date(today.getTime() - 7 * DAY_MS);
@@ -115,12 +117,19 @@ function Paciente({ connectionId }: { connectionId: string }) {
   async function handleRequest(event: FormEvent) {
     event.preventDefault();
     if (periodError) return;
-    const response = await request.mutateAsync({
-      period_start: toIsoDay(start),
-      period_end: toIsoDay(end),
-    });
-    setCreatedRequestId(response.id);
-    setRequesting(false);
+    try {
+      const response = await request.mutateAsync({
+        period_start: toIsoDay(start),
+        period_end: toIsoDay(end),
+      });
+      setCreatedRequestId(response.id);
+      setRequesting(false);
+    } catch (error) {
+      if (hasCode(error, "monthly_report_limit_reached")) {
+        setRequesting(false);
+        setReportLimitOpen(true);
+      }
+    }
   }
 
   if (patient.isPending) {
@@ -222,7 +231,7 @@ function Paciente({ connectionId }: { connectionId: string }) {
                 </Alert>
               ) : requesting ? (
                 <form onSubmit={handleRequest} className="flex flex-col gap-4" noValidate>
-                  {request.error && <Alert tone="danger">{describeError(request.error).message}</Alert>}
+                  {request.error && !hasCode(request.error, "monthly_report_limit_reached") && <Alert tone="danger">{describeError(request.error).message}</Alert>}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <TextField
                       label="Início do período"
@@ -478,6 +487,19 @@ function Paciente({ connectionId }: { connectionId: string }) {
           </div>
         )}
       </Modal>
+
+      <Modal
+        open={reportLimitOpen}
+        onClose={() => setReportLimitOpen(false)}
+        title="Relatório mensal já solicitado"
+        description="No plano Free, cada acompanhamento pode receber uma solicitação de relatório por mês. Você poderá solicitar novamente no próximo mês ou escolher um plano com limite maior."
+        footer={
+          <>
+            <Button variant="text" onClick={() => setReportLimitOpen(false)}>Agora não</Button>
+            <Link href="/conta" className={buttonStyles({ variant: "primary" })}>Ver planos</Link>
+          </>
+        }
+      />
 
       <Modal
         open={selectedCheckin !== null}

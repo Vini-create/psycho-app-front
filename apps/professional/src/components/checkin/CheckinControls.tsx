@@ -18,6 +18,7 @@ import {
 } from "@sinapsa/ui";
 import {
   describeError,
+  hasCode,
   type CheckinAssignment,
   type CheckinTemplate,
 } from "@sinapsa/api-client";
@@ -82,6 +83,7 @@ export function CheckinControls({
   const [asking, setAsking] = useState(false);
   const [start, setStart] = useState(daysAgo(13));
   const [end, setEnd] = useState(today());
+  const [checkinLimitOpen, setCheckinLimitOpen] = useState(false);
 
   const items = assignments.data?.assignments ?? [];
   const open = items.filter(
@@ -117,15 +119,27 @@ export function CheckinControls({
     setAsking(false);
   }
 
+  async function assignTemplate(templateId: string): Promise<boolean> {
+    try {
+      await assign.mutateAsync(templateId);
+      return true;
+    } catch (error) {
+      if (hasCode(error, "monthly_checkin_limit_reached")) {
+        setSending(false);
+        setCheckinLimitOpen(true);
+        return false;
+      }
+      throw error;
+    }
+  }
+
   async function send(template: CheckinTemplate) {
-    await assign.mutateAsync(template.id);
-    setSending(false);
+    if (await assignTemplate(template.id)) setSending(false);
   }
 
   async function finishTemplate(templateId: string) {
     if (templateEditor?.sendAfterSave) {
-      await assign.mutateAsync(templateId);
-      setSending(false);
+      if (await assignTemplate(templateId)) setSending(false);
     }
     setTemplateEditor(null);
   }
@@ -144,7 +158,7 @@ export function CheckinControls({
         </p>
       </header>
 
-      {assign.error && <Alert tone="danger">{describeError(assign.error).message}</Alert>}
+      {assign.error && !hasCode(assign.error, "monthly_checkin_limit_reached") && <Alert tone="danger">{describeError(assign.error).message}</Alert>}
       {revoke.error && <Alert tone="danger">{describeError(revoke.error).message}</Alert>}
 
       {!subscription.active ? (
@@ -308,6 +322,19 @@ export function CheckinControls({
           </div>
         </div>
       </Modal>
+
+      <Modal
+        open={checkinLimitOpen}
+        onClose={() => setCheckinLimitOpen(false)}
+        title="Check-in mensal já enviado"
+        description="No plano Free, cada acompanhamento pode receber um check-in por mês. Você poderá enviar outro no próximo mês ou escolher um plano com limite maior."
+        footer={
+          <>
+            <Button variant="text" onClick={() => setCheckinLimitOpen(false)}>Agora não</Button>
+            <Link href="/conta" className={buttonStyles({ variant: "primary" })}>Ver planos</Link>
+          </>
+        }
+      />
 
       <Modal
         open={managing}

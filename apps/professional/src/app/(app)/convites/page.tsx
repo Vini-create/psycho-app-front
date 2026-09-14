@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
   Alert,
   Button,
+  buttonStyles,
   EditorialList,
   EditorialRow,
   Icon,
   Masthead,
   MetaStrip,
+  Modal,
   SectionIndex,
   Skeleton,
   TextField,
@@ -16,7 +19,7 @@ import {
   pluralize,
   useToast,
 } from "@sinapsa/ui";
-import { describeError } from "@sinapsa/api-client";
+import { describeError, hasCode } from "@sinapsa/api-client";
 import {
   useCreateInvitation,
   useInvitations,
@@ -49,13 +52,21 @@ function Convites() {
 
   const [email, setEmail] = useState("");
   const [lastInvitationUrl, setLastInvitationUrl] = useState<string | null>(null);
+  const [connectionLimitOpen, setConnectionLimitOpen] = useState(false);
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
-    const invitation = await create.mutateAsync(email.trim());
-    setEmail("");
-    if (invitation.invitation_url) {
-      setLastInvitationUrl(invitation.invitation_url);
+    try {
+      const invitation = await create.mutateAsync(email.trim());
+      setEmail("");
+      if (invitation.invitation_url) {
+        setLastInvitationUrl(invitation.invitation_url);
+      }
+    } catch (error) {
+      if (hasCode(error, "connection_limit_reached")) {
+        setConnectionLimitOpen(true);
+        return;
+      }
     }
   }
 
@@ -99,7 +110,7 @@ function Convites() {
           className="flex flex-col gap-5 lg:max-w-xl"
           noValidate
         >
-          {create.error && (
+          {create.error && !hasCode(create.error, "connection_limit_reached") && (
             <Alert tone="danger">{describeError(create.error).message}</Alert>
           )}
 
@@ -134,6 +145,19 @@ function Convites() {
           </div>
         )}
       </section>
+
+      <Modal
+        open={connectionLimitOpen}
+        onClose={() => setConnectionLimitOpen(false)}
+        title="Limite de acompanhamentos atingido"
+        description="O plano Free permite até 2 acompanhamentos ativos. Encerre um acompanhamento ou escolha um plano com limite maior antes de criar outro convite."
+        footer={
+          <>
+            <Button variant="text" onClick={() => setConnectionLimitOpen(false)}>Agora não</Button>
+            <Link href="/conta" className={buttonStyles({ variant: "primary" })}>Ver planos</Link>
+          </>
+        }
+      />
 
       <section className="reveal reveal-2 flex flex-col gap-2">
         <SectionIndex index="02" meta="do mais recente ao mais antigo">

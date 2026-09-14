@@ -8,8 +8,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Alert, Button, formatDayMark } from "@sinapsa/ui";
-import { describeError, newIdempotencyKey, type Message } from "@sinapsa/api-client";
+import Link from "next/link";
+import { Alert, Button, Modal, buttonStyles, formatDayMark } from "@sinapsa/ui";
+import { describeError, hasCode, newIdempotencyKey, type Message } from "@sinapsa/api-client";
 import { useMessages, useRetryMessage, useSendMessage } from "@/lib/queries";
 import { useNow } from "@/lib/useNow";
 import { Composer } from "./Composer";
@@ -76,6 +77,7 @@ export function ChatConversation({ conversationId }: { conversationId: string })
   const now = useNow();
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
+  const [messageLimitOpen, setMessageLimitOpen] = useState(false);
   const [composerHeight, setComposerHeight] = useState(96);
   const idempotency = useRef<{ content: string; key: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -173,6 +175,10 @@ export function ChatConversation({ conversationId }: { conversationId: string })
       }
     } catch (caught) {
       setDraft(content);
+      if (hasCode(caught, "daily_message_limit_reached")) {
+        setMessageLimitOpen(true);
+        return;
+      }
       setSendError(describeError(caught).message);
     }
   }
@@ -285,6 +291,19 @@ export function ChatConversation({ conversationId }: { conversationId: string })
         onSubmit={handleSend}
         sending={send.isPending}
         onHeightChange={setComposerHeight}
+      />
+
+      <Modal
+        open={messageLimitOpen}
+        onClose={() => setMessageLimitOpen(false)}
+        title="Limite diário de mensagens atingido"
+        description="Você atingiu o limite diário de mensagens do seu plano. Escolha um plano com limite maior para continuar conversando hoje."
+        footer={
+          <>
+            <Button variant="text" onClick={() => setMessageLimitOpen(false)}>Agora não</Button>
+            <Link href="/conta" className={buttonStyles({ variant: "primary" })}>Ver planos</Link>
+          </>
+        }
       />
     </div>
   );
