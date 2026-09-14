@@ -2,7 +2,7 @@ import { APP_URL, PRO_URL } from "@/lib/links";
 import { useReveal } from "@/motion/useReveal";
 import { Action, Arrow, SectionHead } from "./primitives";
 
-/* 04 — Por onde entrar.
+/* 05 — Por onde entrar.
 
    A razão de a landing existir no domínio raiz. Duas portas, lado a lado,
    com o mesmo peso visual: quem chega em siouve.com pode ser qualquer um dos
@@ -47,7 +47,7 @@ export function Doors() {
 
   return (
     <section id="portas" className="frame scroll-mt-24 py-28 sm:py-36">
-      <SectionHead index="04" eyebrow="Por onde entrar" meta="02 PORTAS">
+      <SectionHead index="05" eyebrow="Por onde entrar" meta="02 PORTAS">
         <div ref={grid} className="grid gap-px bg-hairline lg:grid-cols-2">
           {DOORS.map((door) => (
             <article

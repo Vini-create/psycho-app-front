@@ -7,6 +7,7 @@ import { Interval } from "./components/Interval";
 import { Nav } from "./components/Nav";
 import { Offer } from "./components/Offer";
 import { Preloader } from "./components/Preloader";
+import { Report } from "./components/Report";
 import { Who } from "./components/Who";
 
 /* O WebGL entra por `lazy`, e isso é decisão de conteúdo, não de build.
@@ -45,6 +46,7 @@ export function App() {
         <Interval />
         <Who />
         <Offer />
+        <Report />
         <Doors />
       </main>
 

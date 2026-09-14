@@ -13,5 +13,6 @@ export const SECTIONS = [
   { id: "intervalo", index: "01", label: "O intervalo" },
   { id: "quem-somos", index: "02", label: "Quem somos" },
   { id: "oferecemos", index: "03", label: "O que oferecemos" },
-  { id: "portas", index: "04", label: "Por onde entrar" },
+  { id: "relatorio", index: "04", label: "O relatório" },
+  { id: "portas", index: "05", label: "Por onde entrar" },
 ] as const;
